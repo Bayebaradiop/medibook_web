@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-poppins: 'Poppins', sans-serif;
+
+    /* Primary Green #2E7D32 → hsl(122, 46%, 33%) */
+    --primary: 122 46% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Primary Light #66BB6A → hsl(123, 38%, 57%) */
+    --primary-light: 123 38% 57%;
+
+    /* Primary Dark #1B5E20 → hsl(122, 55%, 24%) */
+    --primary-dark: 122 55% 24%;
+
+    /* Background #F5F5F5 → hsl(0, 0%, 96%) */
+    --background: 0 0% 96%;
+    --foreground: 122 55% 24%;
+
+    /* Card #FFFFFF */
+    --card: 0 0% 100%;
+    --card-foreground: 122 55% 24%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 122 55% 24%;
+
+    /* Secondary */
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 38%;
+
+    /* Muted */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 62%;
+
+    /* Accent */
+    --accent: 122 46% 33%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Destructive #E53935 → hsl(1, 76%, 56%) */
+    --destructive: 1 76% 56%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Status colors */
+    --status-pending: 33 100% 58%;
+    --status-confirmed: 123 38% 57%;
+    --status-completed: 200 10% 55%;
+    --status-cancelled: 1 84% 63%;
+    --status-active: 122 40% 45%;
+    --status-inactive: 0 0% 62%;
+
+    /* Success #43A047 */
+    --success: 122 41% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning #FFA726 */
+    --warning: 33 100% 58%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Info #78909C */
+    --info: 200 10% 55%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 0 0% 88%;
+    --input: 0 0% 88%;
+    --ring: 122 46% 33%;
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 0 0% 38%;
+    --sidebar-primary: 122 46% 33%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 122 46% 33%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 122 46% 33%;
+
+    /* Shadows */
+    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.06);
+    --shadow-sidebar: 2px 0 10px rgba(0, 0, 0, 0.06);
+
+    /* Chart colors for dark mode compat */
+    --chart-1: 122 46% 33%;
+    --chart-2: 123 38% 57%;
+    --chart-3: 33 100% 58%;
+    --chart-4: 200 10% 55%;
+    --chart-5: 1 76% 56%;
+  }
+
+  .dark {
+    --background: 220 15% 10%;
+    --foreground: 0 0% 90%;
+
+    --card: 220 15% 14%;
+    --card-foreground: 0 0% 90%;
+
+    --popover: 220 15% 14%;
+    --popover-foreground: 0 0% 90%;
+
+    --primary: 122 46% 40%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 123 38% 50%;
+    --primary-dark: 122 55% 30%;
+
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 0 0% 70%;
+
+    --muted: 220 15% 18%;
+    --muted-foreground: 0 0% 55%;
+
+    --accent: 122 46% 40%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 1 76% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 122 41% 42%;
+    --success-foreground: 0 0% 100%;
+    --warning: 33 100% 55%;
+    --warning-foreground: 0 0% 100%;
+    --info: 200 10% 50%;
+    --info-foreground: 0 0% 100%;
+
+    --status-pending: 33 100% 55%;
+    --status-confirmed: 123 38% 50%;
+    --status-completed: 200 10% 50%;
+    --status-cancelled: 1 84% 58%;
+    --status-active: 122 40% 42%;
+    --status-inactive: 0 0% 55%;
+
+    --border: 220 15% 22%;
+    --input: 220 15% 22%;
+    --ring: 122 46% 40%;
+
+    --sidebar-background: 220 15% 12%;
+    --sidebar-foreground: 0 0% 70%;
+    --sidebar-primary: 122 46% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 122 46% 40%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 220 15% 22%;
+    --sidebar-ring: 122 46% 40%;
+
+    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
+    --shadow-sidebar: 2px 0 10px rgba(0, 0, 0, 0.3);
+
+    --chart-1: 122 46% 40%;
+    --chart-2: 123 38% 50%;
+    --chart-3: 33 100% 55%;
+    --chart-4: 200 10% 50%;
+    --chart-5: 1 76% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-poppins;
+  }
+  h1 {
+    @apply text-[28px] font-bold text-foreground;
+  }
+  h2 {
+    @apply text-[22px] font-bold text-foreground;
+  }
+  h3 {
+    @apply text-[18px] font-semibold text-foreground;
+  }
+}
+
+@layer components {
+  .medibook-card {
+    @apply bg-card rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)];
+  }
+  .medibook-input {
+    @apply rounded-2xl border border-input bg-card px-4 py-3 text-sm transition-colors duration-200 focus:border-primary focus:border-2 focus:outline-none placeholder:text-muted-foreground;
+  }
+  .medibook-btn {
+    @apply h-12 rounded-2xl bg-primary px-6 font-semibold text-primary-foreground transition-all duration-200 hover:brightness-90 active:scale-[0.98];
+  }
+  .medibook-btn-outline {
+    @apply h-12 rounded-2xl border-2 border-primary bg-transparent px-6 font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-primary-foreground active:scale-[0.98];
+  }
+  .medibook-badge {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+  }
+  .medibook-table-header {
+    @apply bg-background text-muted-foreground text-xs font-semibold uppercase tracking-wider;
+  }
+  .medibook-table-row {
+    @apply border-b border-border transition-colors duration-200 hover:bg-primary/5;
+  }
+  .sidebar-item {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-secondary-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary;
+  }
+  .sidebar-item-active {
+    @apply bg-primary/10 text-primary border-l-[3px] border-primary font-semibold;
+  }
+}
