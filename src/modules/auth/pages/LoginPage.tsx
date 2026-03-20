@@ -1,27 +1,40 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { getRedirectionParRole } from '../logique/auth.regles';
+import { validerEmail, validerMotDePasse } from '../logique/auth.validation';
+import { AUTH_ERREURS } from '../messages/auth.erreurs';
+import { AUTH_SUCCES } from '../messages/auth.succes';
 import AuthLayout from '@/layouts/AuthLayout';
 import { Hospital, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'sonner';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
   const [showPass, setShowPass] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email)) {
-      const e2 = email.toLowerCase();
-      if (e2.includes('superadmin')) navigate('/super-admin');
-      else if (e2.includes('admin')) navigate('/admin');
-      else if (e2.includes('medecin')) navigate('/medecin');
-      else if (e2.includes('secretaire')) navigate('/secretaire');
-    } else {
-      toast.error('Email non reconnu. Essayez : superadmin@, admin@, medecin@ ou secretaire@');
+
+    const erreurEmail = validerEmail(email);
+    if (erreurEmail) { toast.error(erreurEmail); return; }
+    const erreurMdp = validerMotDePasse(motDePasse);
+    if (erreurMdp) { toast.error(erreurMdp); return; }
+
+    setIsLoading(true);
+    try {
+      const user = await login(email, motDePasse);
+      toast.success(AUTH_SUCCES.CONNEXION_REUSSIE);
+      navigate(getRedirectionParRole(user.role));
+    } catch (error: any) {
+      const message = error.response?.data?.message || AUTH_ERREURS.CONNEXION_ECHOUEE;
+      toast.error(message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -49,24 +62,16 @@ const LoginPage = () => {
               <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Mot de passe</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <input type={showPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="medibook-input w-full pl-10 pr-10" required />
+                <input type={showPass ? 'text' : 'password'} value={motDePasse} onChange={e => setMotDePasse(e.target.value)} placeholder="••••••••" className="medibook-input w-full pl-10 pr-10" required />
                 <button type="button" onClick={() => setShowPass(!showPass)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
                   {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </div>
-            <button type="submit" className="medibook-btn w-full mt-2">Se connecter</button>
+            <button type="submit" disabled={isLoading} className="medibook-btn w-full mt-2">
+              {isLoading ? 'Connexion...' : 'Se connecter'}
+            </button>
           </form>
-
-          <div className="mt-6 p-3 rounded-xl bg-muted">
-            <p className="text-xs text-muted-foreground text-center font-medium mb-2">Comptes de test :</p>
-            <div className="grid grid-cols-2 gap-1 text-xs text-muted-foreground">
-              <span>superadmin@medibook.sn</span><span>Super Admin</span>
-              <span>admin@medibook.sn</span><span>Admin</span>
-              <span>medecin@medibook.sn</span><span>Médecin</span>
-              <span>secretaire@medibook.sn</span><span>Secrétaire</span>
-            </div>
-          </div>
         </div>
       </div>
     </AuthLayout>

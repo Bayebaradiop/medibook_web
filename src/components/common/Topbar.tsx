@@ -11,7 +11,8 @@ interface TopbarProps {
 }
 
 const Topbar = ({ title }: TopbarProps) => {
-  const { user, role, logout } = useAuth();
+  const { user, logout } = useAuth();
+  const role = user?.role;
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const { isDark, toggle } = useTheme();

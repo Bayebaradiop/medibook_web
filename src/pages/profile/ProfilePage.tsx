@@ -6,7 +6,8 @@ import { Upload } from 'lucide-react';
 import { toast } from 'sonner';
 
 const ProfilePage = () => {
-  const { user, role } = useAuth();
+  const { user } = useAuth();
+  const role = user?.role;
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({ prenom: user?.prenom || '', nom: user?.nom || '', telephone: user?.telephone || '' });
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));

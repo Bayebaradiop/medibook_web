@@ -1,0 +1,18 @@
+export const UTILISATEUR_ERREURS = {
+  NOM_REQUIS: "Le nom est obligatoire",
+  PRENOM_REQUIS: "Le prénom est obligatoire",
+  EMAIL_REQUIS: "L'email est obligatoire",
+  EMAIL_INVALIDE: "L'adresse email est invalide",
+  TELEPHONE_REQUIS: "Le numéro de téléphone est obligatoire",
+  MDP_REQUIS: "Le mot de passe est obligatoire",
+  MDP_TROP_COURT: "Le mot de passe doit contenir au moins 8 caractères",
+  NUMERO_ORDRE_REQUIS: "Le numéro d'ordre est obligatoire",
+  SPECIALITE_REQUISE: "La spécialité est obligatoire",
+  CREATION_MEDECIN_ECHOUEE: "Erreur lors de la création du médecin",
+  MODIFICATION_MEDECIN_ECHOUEE: "Erreur lors de la modification du médecin",
+  SUPPRESSION_MEDECIN_ECHOUEE: "Erreur lors de la suppression du médecin",
+  CREATION_SECRETAIRE_ECHOUEE: "Erreur lors de la création du secrétaire",
+  MODIFICATION_SECRETAIRE_ECHOUEE: "Erreur lors de la modification du secrétaire",
+  SUPPRESSION_SECRETAIRE_ECHOUEE: "Erreur lors de la suppression du secrétaire",
+  CHARGEMENT_ECHOUE: "Erreur lors du chargement des utilisateurs",
+};

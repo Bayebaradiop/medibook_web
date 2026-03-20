@@ -41,12 +41,13 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
 };
 
 const AppSidebar = () => {
-  const { user, role, logout } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (!role || !user) return null;
+  if (!user) return null;
+  const role = user.role;
   const items = NAV_ITEMS[role];
 
   const isActive = (path: string) => {
