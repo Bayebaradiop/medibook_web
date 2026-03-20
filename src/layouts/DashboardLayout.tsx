@@ -2,13 +2,17 @@ import { ReactNode } from 'react';
 import AppSidebar from '@/components/common/AppSidebar';
 import Topbar from '@/components/common/Topbar';
 import PageTransition from '@/components/common/PageTransition';
+import { useCabinetTheme } from '@/hooks/useCabinetTheme';
 
 interface DashboardLayoutProps {
   children: ReactNode;
   title: string;
 }
 
-const DashboardLayout = ({ children, title }: DashboardLayoutProps) => (
+const DashboardLayout = ({ children, title }: DashboardLayoutProps) => {
+  useCabinetTheme();
+
+  return (
   <div className="flex min-h-screen w-full bg-background">
     <AppSidebar />
     <div className="flex-1 flex flex-col min-w-0">
@@ -18,6 +22,7 @@ const DashboardLayout = ({ children, title }: DashboardLayoutProps) => (
       </main>
     </div>
   </div>
-);
+  );
+};
 
 export default DashboardLayout;
