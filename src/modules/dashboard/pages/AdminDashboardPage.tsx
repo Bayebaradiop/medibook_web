@@ -6,7 +6,7 @@ import { mockRendezVous } from '@/data/mockRendezVous';
 
 const statusData = [
   { name: 'En attente', value: mockRendezVous.filter(r => r.statut === 'EN_ATTENTE').length, fill: 'hsl(33, 100%, 58%)' },
-  { name: 'Confirmés', value: mockRendezVous.filter(r => r.statut === 'CONFIRME').length, fill: 'hsl(123, 38%, 57%)' },
+  { name: 'Confirmés', value: mockRendezVous.filter(r => r.statut === 'CONFIRME').length, fill: 'hsl(var(--status-confirmed))' },
   { name: 'Terminés', value: mockRendezVous.filter(r => r.statut === 'TERMINE').length, fill: 'hsl(200, 10%, 55%)' },
   { name: 'Annulés', value: mockRendezVous.filter(r => r.statut === 'ANNULE').length, fill: 'hsl(1, 84%, 63%)' },
 ];
@@ -37,7 +37,7 @@ const AdminDashboard = () => (
         <div className="medibook-card">
           <h3 className="font-semibold mb-4">RDV par spécialité</h3>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={specData} layout="vertical"><CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" /><XAxis type="number" tick={{ fontSize: 12 }} /><YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} width={120} /><Tooltip /><Bar dataKey="value" fill="hsl(122, 46%, 33%)" radius={[0, 8, 8, 0]} /></BarChart>
+            <BarChart data={specData} layout="vertical"><CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" /><XAxis type="number" tick={{ fontSize: 12 }} /><YAxis dataKey="name" type="category" tick={{ fontSize: 12 }} width={120} /><Tooltip /><Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 8, 8, 0]} /></BarChart>
           </ResponsiveContainer>
         </div>
       </div>

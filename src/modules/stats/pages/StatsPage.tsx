@@ -11,7 +11,7 @@ const weeklyData = [
 const myRdvs = mockRendezVous.filter(r => r.medecinId === 'm1');
 const pieData = [
   { name: 'En attente', value: myRdvs.filter(r => r.statut === 'EN_ATTENTE').length, fill: 'hsl(33, 100%, 58%)' },
-  { name: 'Confirmés', value: myRdvs.filter(r => r.statut === 'CONFIRME').length, fill: 'hsl(123, 38%, 57%)' },
+  { name: 'Confirmés', value: myRdvs.filter(r => r.statut === 'CONFIRME').length, fill: 'hsl(var(--status-confirmed))' },
   { name: 'Terminés', value: myRdvs.filter(r => r.statut === 'TERMINE').length, fill: 'hsl(200, 10%, 55%)' },
   { name: 'Annulés', value: myRdvs.filter(r => r.statut === 'ANNULE').length, fill: 'hsl(1, 84%, 63%)' },
 ];
@@ -35,7 +35,7 @@ const StatsPage = () => (
         <div className="medibook-card">
           <h3 className="font-semibold mb-4">RDV par semaine</h3>
           <ResponsiveContainer width="100%" height={280}>
-            <LineChart data={weeklyData}><CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" /><XAxis dataKey="semaine" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} /><Tooltip /><Line type="monotone" dataKey="rdv" stroke="hsl(122, 46%, 33%)" strokeWidth={2} dot={{ r: 4 }} /></LineChart>
+            <LineChart data={weeklyData}><CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" /><XAxis dataKey="semaine" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} /><Tooltip /><Line type="monotone" dataKey="rdv" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4 }} /></LineChart>
           </ResponsiveContainer>
         </div>
         <div className="medibook-card">
@@ -47,7 +47,7 @@ const StatsPage = () => (
         <div className="medibook-card lg:col-span-2">
           <h3 className="font-semibold mb-4">RDV par jour de la semaine</h3>
           <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={dayData}><CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" /><XAxis dataKey="jour" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} /><Tooltip /><Bar dataKey="rdv" fill="hsl(122, 46%, 33%)" radius={[8, 8, 0, 0]} /></BarChart>
+            <BarChart data={dayData}><CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" /><XAxis dataKey="jour" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} /><Tooltip /><Bar dataKey="rdv" fill="hsl(var(--primary))" radius={[8, 8, 0, 0]} /></BarChart>
           </ResponsiveContainer>
         </div>
       </div>

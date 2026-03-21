@@ -18,7 +18,7 @@ const Topbar = ({ title }: TopbarProps) => {
   const { isDark, toggle } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-card px-4 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b-[3px] border-primary bg-card px-4 lg:px-8">
       <h1 className="text-lg lg:text-xl font-bold text-foreground pl-12 lg:pl-0">{title}</h1>
       <div className="flex items-center gap-2">
         {/* Dark mode toggle */}
@@ -51,7 +51,7 @@ const Topbar = ({ title }: TopbarProps) => {
               {user?.prenom?.[0]}{user?.nom?.[0]}
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-medium">{user?.prenom} {user?.nom}</p>
+              <p className="text-sm font-medium text-foreground">{user?.prenom} {user?.nom}</p>
               <p className="text-xs text-muted-foreground">{role ? ROLE_LABELS[role] : ''}</p>
             </div>
             <ChevronDown size={16} className="text-muted-foreground hidden md:block" />

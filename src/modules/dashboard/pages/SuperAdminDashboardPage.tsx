@@ -6,14 +6,14 @@ import { mockCabinets } from '@/data/mockCabinets';
 
 const statusData = [
   { name: 'En attente', value: 24, fill: 'hsl(33, 100%, 58%)' },
-  { name: 'Confirmés', value: 45, fill: 'hsl(123, 38%, 57%)' },
+  { name: 'Confirmés', value: 45, fill: 'hsl(var(--status-confirmed))' },
   { name: 'Terminés', value: 120, fill: 'hsl(200, 10%, 55%)' },
   { name: 'Annulés', value: 8, fill: 'hsl(1, 84%, 63%)' },
 ];
 
 const cabinetData = [
-  { name: 'Medibook', value: 65, fill: 'hsl(122, 46%, 33%)' },
-  { name: 'Sud', value: 40, fill: 'hsl(123, 38%, 57%)' },
+  { name: 'Medibook', value: 65, fill: 'hsl(var(--primary))' },
+  { name: 'Sud', value: 40, fill: 'hsl(var(--primary-light))' },
   { name: 'Santé Plus', value: 15, fill: 'hsl(200, 10%, 55%)' },
 ];
 

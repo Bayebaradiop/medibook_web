@@ -33,10 +33,14 @@ function adjustLightness(hsl: string, delta: number): string {
 
 const CSS_VARS = [
   "--primary", "--primary-light", "--primary-dark",
-  "--accent", "--ring", "--foreground",
-  "--card-foreground", "--popover-foreground",
-  "--sidebar-primary", "--sidebar-accent", "--sidebar-ring",
+  "--accent", "--accent-foreground",
+  "--ring",
+  "--sidebar-background", "--sidebar-foreground", "--sidebar-border",
+  "--sidebar-primary", "--sidebar-primary-foreground",
+  "--sidebar-accent", "--sidebar-accent-foreground", "--sidebar-ring",
+  "--topbar-background",
   "--chart-1", "--chart-2",
+  "--success",
 ];
 
 function clearThemeVars() {
@@ -61,32 +65,61 @@ export function useCabinetTheme() {
 
     const applyTheme = async () => {
       try {
+        console.log("[CabinetTheme] Chargement des couleurs du cabinet...");
         const res = await apiClient.get<CabinetColors>("/admin/mon-cabinet");
         if (cancelled) return;
 
-        const { couleurPrimaire } = res.data;
-        if (!couleurPrimaire) return;
+        const { couleurPrimaire, couleurSecondaire } = res.data;
+        console.log("[CabinetTheme] Réponse API:", { couleurPrimaire, couleurSecondaire });
+
+        if (!couleurPrimaire) {
+          console.log("[CabinetTheme] Pas de couleur primaire, thème par défaut conservé");
+          return;
+        }
 
         const primary = hexToHsl(couleurPrimaire);
         const primaryLight = adjustLightness(primary, 24);
         const primaryDark = adjustLightness(primary, -9);
 
         const root = document.documentElement.style;
+
+        // Couleur primaire → primary, ring, sidebar background
         root.setProperty("--primary", primary);
         root.setProperty("--primary-light", primaryLight);
         root.setProperty("--primary-dark", primaryDark);
-        root.setProperty("--accent", primary);
         root.setProperty("--ring", primary);
-        root.setProperty("--foreground", primaryDark);
-        root.setProperty("--card-foreground", primaryDark);
-        root.setProperty("--popover-foreground", primaryDark);
-        root.setProperty("--sidebar-primary", primary);
-        root.setProperty("--sidebar-accent", primary);
-        root.setProperty("--sidebar-ring", primary);
         root.setProperty("--chart-1", primary);
-        root.setProperty("--chart-2", primaryLight);
+
+        // Sidebar → fond = couleur primaire, texte = blanc
+        root.setProperty("--sidebar-background", primary);
+        root.setProperty("--sidebar-foreground", "0 0% 100%");
+        root.setProperty("--sidebar-border", primaryLight);
+        root.setProperty("--sidebar-primary", primary);
+        root.setProperty("--sidebar-primary-foreground", "0 0% 100%");
+        root.setProperty("--sidebar-ring", primary);
+
+        // Couleur secondaire → accent, topbar, sidebar-accent, success, chart-2
+        if (couleurSecondaire) {
+          const secondary = hexToHsl(couleurSecondaire);
+          const secondaryLight = adjustLightness(secondary, 15);
+          root.setProperty("--accent", secondary);
+          root.setProperty("--accent-foreground", "0 0% 100%");
+          root.setProperty("--sidebar-accent", secondary);
+          root.setProperty("--sidebar-accent-foreground", "0 0% 100%");
+          root.setProperty("--topbar-background", secondary);
+          root.setProperty("--success", secondary);
+          root.setProperty("--chart-2", secondaryLight);
+          console.log("[CabinetTheme] Secondaire appliquée:", couleurSecondaire, "→", secondary);
+        } else {
+          // Fallback: accent = primary light, topbar = primary dark
+          root.setProperty("--accent", primaryLight);
+          root.setProperty("--sidebar-accent", primaryLight);
+          root.setProperty("--topbar-background", primaryDark);
+          root.setProperty("--chart-2", primaryLight);
+        }
+
         appliedRef.current = true;
-        console.log("[CabinetTheme] Couleurs appliquées:", couleurPrimaire, "→", primary);
+        console.log("[CabinetTheme] Primaire appliquée:", couleurPrimaire, "→", primary);
       } catch (err) {
         console.error("[CabinetTheme] Erreur chargement couleurs:", err);
       }

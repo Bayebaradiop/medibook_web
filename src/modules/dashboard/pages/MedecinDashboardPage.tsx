@@ -48,7 +48,7 @@ const MedecinDashboard = () => {
             <h3 className="font-semibold mb-4">Évolution des RDV (7 jours)</h3>
             <ResponsiveContainer width="100%" height={240}>
               <AreaChart data={weekData}><CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" /><XAxis dataKey="jour" tick={{ fontSize: 12 }} /><YAxis tick={{ fontSize: 12 }} /><Tooltip />
-                <Area type="monotone" dataKey="rdv" stroke="hsl(122, 46%, 33%)" fill="hsl(122, 46%, 33%)" fillOpacity={0.15} strokeWidth={2} />
+                <Area type="monotone" dataKey="rdv" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.15} strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>

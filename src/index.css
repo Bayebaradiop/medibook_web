@@ -70,14 +70,17 @@
     --ring: 122 46% 33%;
     --radius: 1rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 38%;
+    --sidebar-background: 122 46% 33%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 122 46% 33%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 122 46% 33%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 88%;
+    --sidebar-border: 123 38% 57%;
     --sidebar-ring: 122 46% 33%;
+
+    /* Topbar */
+    --topbar-background: 122 41% 45%;
 
     /* Shadows */
     --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.06);
@@ -136,14 +139,17 @@
     --input: 220 15% 22%;
     --ring: 122 46% 40%;
 
-    --sidebar-background: 220 15% 12%;
-    --sidebar-foreground: 0 0% 70%;
+    --sidebar-background: 122 46% 30%;
+    --sidebar-foreground: 0 0% 100%;
     --sidebar-primary: 122 46% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 122 46% 40%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 15% 22%;
+    --sidebar-border: 122 46% 35%;
     --sidebar-ring: 122 46% 40%;
+
+    /* Topbar */
+    --topbar-background: 122 41% 40%;
 
     --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
     --shadow-sidebar: 2px 0 10px rgba(0, 0, 0, 0.3);
@@ -197,9 +203,9 @@
     @apply border-b border-border transition-colors duration-200 hover:bg-primary/5;
   }
   .sidebar-item {
-    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-secondary-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary;
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/80 transition-all duration-200 hover:bg-white/15 hover:text-white;
   }
   .sidebar-item-active {
-    @apply bg-primary/10 text-primary border-l-[3px] border-primary font-semibold;
+    @apply bg-white/20 text-white border-l-[3px] border-white font-semibold;
   }
 }

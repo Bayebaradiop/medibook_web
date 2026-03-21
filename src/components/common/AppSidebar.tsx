@@ -60,9 +60,9 @@ const AppSidebar = () => {
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-border">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-lg">M</div>
-        <span className="text-xl font-bold text-foreground">MediBook</span>
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-white/15">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white font-bold text-lg">M</div>
+        <span className="text-xl font-bold text-white">MediBook</span>
       </div>
 
       {/* Nav */}
@@ -80,15 +80,15 @@ const AppSidebar = () => {
       </nav>
 
       {/* User */}
-      <div className="border-t border-border p-4">
+      <div className="border-t border-white/15 p-4">
         <button onClick={() => { navigate('/profil'); setMobileOpen(false); }} className="sidebar-item w-full mb-1">
           <UserCircle size={20} />
           <div className="text-left min-w-0">
             <p className="text-sm font-medium truncate">{user.prenom} {user.nom}</p>
-            <p className="text-xs text-muted-foreground">{ROLE_LABELS[role]}</p>
+            <p className="text-xs text-white/60">{ROLE_LABELS[role]}</p>
           </div>
         </button>
-        <button onClick={() => { logout(); navigate('/login'); }} className="sidebar-item w-full text-destructive hover:text-destructive hover:bg-destructive/10">
+        <button onClick={() => { logout(); navigate('/login'); }} className="sidebar-item w-full text-red-300 hover:text-red-200 hover:bg-red-500/20">
           <LogOut size={20} />
           <span>Déconnexion</span>
         </button>
@@ -107,7 +107,7 @@ const AppSidebar = () => {
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           <div className="absolute inset-0 bg-foreground/40" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 h-full w-[272px] bg-card shadow-[var(--shadow-sidebar)] animate-in slide-in-from-left">
+          <aside className="absolute left-0 top-0 h-full w-[272px] bg-sidebar shadow-[var(--shadow-sidebar)] animate-in slide-in-from-left">
             <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-muted-foreground"><X size={20} /></button>
             {sidebarContent}
           </aside>
@@ -115,7 +115,7 @@ const AppSidebar = () => {
       )}
 
       {/* Desktop */}
-      <aside className="hidden lg:flex h-screen w-[272px] shrink-0 flex-col bg-card shadow-[var(--shadow-sidebar)] sticky top-0">
+      <aside className="hidden lg:flex h-screen w-[272px] shrink-0 flex-col bg-sidebar shadow-[var(--shadow-sidebar)] sticky top-0">
         {sidebarContent}
       </aside>
     </>
