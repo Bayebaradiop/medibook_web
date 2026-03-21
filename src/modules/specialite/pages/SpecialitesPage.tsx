@@ -60,21 +60,24 @@ const SpecialitesPage = () => {
     try {
       if (editItem) {
         const res = await specialiteService.update(editItem.id, data);
-        setSpecialites(prev => prev.map(s => s.id === editItem.id ? res.data : s));
+        const updated = res.data?.data || res.data;
+        setSpecialites(prev => prev.map(s => s.id === editItem.id ? updated : s));
         toast.success(SPECIALITE_SUCCES.MODIFICATION_REUSSIE);
       } else {
         const res = await specialiteService.create(data);
-        setSpecialites(prev => [...prev, res.data]);
+        const created = res.data?.data || res.data;
+        setSpecialites(prev => [...prev, created]);
         toast.success(SPECIALITE_SUCCES.CREATION_REUSSIE);
       }
       setModalOpen(false);
     } catch (err: any) {
-      const serverErrors = err.response?.data?.errors;
-      if (serverErrors && typeof serverErrors === 'object') {
-        setErreurs(serverErrors);
-        toast.error(Object.values(serverErrors)[0] as string);
+      const resp = err.response?.data;
+      const fieldErrors = resp?.error?.details;
+      if (fieldErrors && typeof fieldErrors === 'object') {
+        setErreurs(fieldErrors);
+        toast.error(resp.message || Object.values(fieldErrors)[0] as string);
       } else {
-        toast.error(err.response?.data?.message
+        toast.error(resp?.message || resp?.error?.description
           || (editItem ? SPECIALITE_ERREURS.MODIFICATION_ECHOUEE : SPECIALITE_ERREURS.CREATION_ECHOUEE));
       }
     } finally {

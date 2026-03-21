@@ -4,11 +4,12 @@ export interface Medecin {
   prenom: string;
   email: string;
   telephone: string;
-  numeroOrdre: string;
   specialiteId: number;
   specialiteNom?: string;
-  statut: "ACTIF" | "INACTIF";
+  status: "ACTIF" | "INACTIF";
   photo?: string;
+  cabinetId?: number;
+  cabinetNom?: string;
 }
 
 export interface MedecinForm {
@@ -17,7 +18,6 @@ export interface MedecinForm {
   email: string;
   telephone: string;
   motDePasse?: string;
-  numeroOrdre: string;
   specialiteId: number;
 }
 
@@ -27,8 +27,10 @@ export interface Secretaire {
   prenom: string;
   email: string;
   telephone: string;
-  statut: "ACTIF" | "INACTIF";
+  status: "ACTIF" | "INACTIF";
   photo?: string;
+  cabinetId?: number;
+  cabinetNom?: string;
 }
 
 export interface SecretaireForm {
