@@ -82,9 +82,10 @@ const MedecinFormPage = () => {
       const fieldErrors = resp?.error?.details;
       if (fieldErrors && typeof fieldErrors === 'object') {
         setErreurs(fieldErrors);
-        toast.error(resp.message || Object.values(fieldErrors)[0] as string);
+        const messages = Object.values(fieldErrors) as string[];
+        toast.error(messages.join(' • '));
       } else {
-        toast.error(resp?.message || resp?.error?.description
+        toast.error(resp?.error?.description || resp?.message
           || (isEdit ? UTILISATEUR_ERREURS.MODIFICATION_MEDECIN_ECHOUEE : UTILISATEUR_ERREURS.CREATION_MEDECIN_ECHOUEE));
       }
     } finally {
