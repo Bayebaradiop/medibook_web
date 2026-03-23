@@ -5,11 +5,15 @@ export interface StatsSuperAdmin {
 }
 
 export interface StatsAdmin {
+  cabinetNom?: string;
   totalMedecins: number;
   totalSecretaires: number;
   totalPatients: number;
   totalRdv: number;
-  rdvAujourdhui: number;
+  rdvEnAttente: number;
+  rdvConfirmes: number;
+  rdvTermines: number;
+  rdvAnnules: number;
 }
 
 export interface StatsMedecin {
