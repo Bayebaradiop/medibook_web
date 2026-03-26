@@ -2,16 +2,16 @@ export interface Planning {
   id: number;
   medecinId: number;
   medecinNom?: string;
-  jour: "LUNDI" | "MARDI" | "MERCREDI" | "JEUDI" | "VENDREDI" | "SAMEDI" | "DIMANCHE";
+  jourSemaine: "LUNDI" | "MARDI" | "MERCREDI" | "JEUDI" | "VENDREDI" | "SAMEDI" | "DIMANCHE";
   heureDebut: string;
   heureFin: string;
-  dureeConsultation: number;
+  dureeCreneau: number;
 }
 
 export interface PlanningForm {
   medecinId: number;
-  jour: string;
+  jourSemaine: string;
   heureDebut: string;
   heureFin: string;
-  dureeConsultation: number;
+  dureeCreneau: number;
 }

@@ -1,28 +1,89 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
-import { mockPlannings } from '@/data/mockPlannings';
-import { mockMedecins } from '@/data/mockUsers';
 import { DAYS_OF_WEEK } from '@/utils/constants';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { planningService } from '@/modules/planning/services/planningService';
+import { secretaireMedecinsService } from '@/modules/utilisateur/services/utilisateurService';
+import type { Planning } from '@/modules/planning/types/planning.types';
+import type { Medecin } from '@/modules/utilisateur/types/utilisateur.types';
 
 const HOURS = Array.from({ length: 12 }, (_, i) => `${(i + 7).toString().padStart(2, '0')}:00`);
 
 const SecretairePlanningPage = () => {
-  const [selectedMedecin, setSelectedMedecin] = useState('m1');
-  const [deleteId, setDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const [medecins, setMedecins] = useState<Medecin[]>([]);
+  const [selectedMedecin, setSelectedMedecin] = useState<number | null>(null);
+  const [plannings, setPlannings] = useState<Planning[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [deleteId, setDeleteId] = useState<number | null>(null);
 
-  const plannings = mockPlannings.filter(p => p.medecinId === selectedMedecin);
+  // Charger les médecins
+  useEffect(() => {
+    const chargerMedecins = async () => {
+      try {
+        const res = await secretaireMedecinsService.list();
+        const data = (res.data as any)?.data || res.data;
+        const liste = Array.isArray(data) ? data : [];
+        setMedecins(liste);
+        if (liste.length > 0) setSelectedMedecin(liste[0].id);
+      } catch {
+        toast.error('Erreur lors du chargement des médecins');
+      } finally {
+        setLoading(false);
+      }
+    };
+    chargerMedecins();
+  }, []);
+
+  // Charger les plannings quand le médecin change
+  useEffect(() => {
+    if (!selectedMedecin) return;
+    const chargerPlannings = async () => {
+      try {
+        const res = await planningService.listParMedecin(selectedMedecin);
+        const data = (res.data as any)?.data || res.data;
+        setPlannings(Array.isArray(data) ? data : []);
+      } catch {
+        toast.error('Erreur lors du chargement des plannings');
+      }
+    };
+    chargerPlannings();
+  }, [selectedMedecin]);
+
+  const handleDelete = async () => {
+    if (!deleteId || !selectedMedecin) return;
+    try {
+      await planningService.delete(deleteId);
+      toast.success('Planning supprimé');
+      setDeleteId(null);
+      // Recharger les plannings
+      const res = await planningService.listParMedecin(selectedMedecin);
+      const data = (res.data as any)?.data || res.data;
+      setPlannings(Array.isArray(data) ? data : []);
+    } catch {
+      toast.error('Erreur lors de la suppression');
+    }
+  };
+
+  if (loading) return (
+    <DashboardLayout title="Plannings">
+      <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div>
+    </DashboardLayout>
+  );
 
   return (
     <DashboardLayout title="Plannings">
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <select value={selectedMedecin} onChange={e => setSelectedMedecin(e.target.value)} className="medibook-input text-sm">
-            {mockMedecins.map(m => <option key={m.id} value={m.id}>Dr. {m.prenom} {m.nom}</option>)}
+          <select
+            value={selectedMedecin ?? ''}
+            onChange={e => setSelectedMedecin(Number(e.target.value))}
+            className="medibook-input text-sm"
+          >
+            {medecins.map(m => <option key={m.id} value={m.id}>Dr. {m.prenom} {m.nom}</option>)}
           </select>
           <button onClick={() => navigate('/secretaire/plannings/nouveau')} className="medibook-btn flex items-center gap-2"><Plus size={18} /> Nouveau Planning</button>
         </div>
@@ -35,7 +96,7 @@ const SecretairePlanningPage = () => {
                 <tr key={hour} className="border-b border-border">
                   <td className="px-2 py-3 text-xs text-muted-foreground">{hour}</td>
                   {DAYS_OF_WEEK.map(day => {
-                    const planning = plannings.find(p => p.jour === day && p.heureDebut <= hour && p.heureFin > hour);
+                    const planning = plannings.find(p => p.jourSemaine === day && p.heureDebut <= hour && p.heureFin > hour);
                     return (
                       <td key={day} className="px-1 py-1">
                         {planning && planning.heureDebut === hour && (
@@ -55,18 +116,22 @@ const SecretairePlanningPage = () => {
 
         <div className="medibook-card">
           <h3 className="font-semibold mb-4">Liste des plannings</h3>
-          <div className="space-y-2">
-            {plannings.map(p => (
-              <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/10">
-                <div><p className="text-sm font-medium">{p.jour}</p><p className="text-xs text-muted-foreground">{p.heureDebut} - {p.heureFin} · {p.dureeCreneau}min</p></div>
-                <button onClick={() => setDeleteId(p.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"><Trash2 size={16} /></button>
-              </div>
-            ))}
-          </div>
+          {plannings.length > 0 ? (
+            <div className="space-y-2">
+              {plannings.map(p => (
+                <div key={p.id} className="flex items-center justify-between p-3 rounded-xl bg-primary/5 border border-primary/10">
+                  <div><p className="text-sm font-medium">{p.jourSemaine}</p><p className="text-xs text-muted-foreground">{p.heureDebut} - {p.heureFin} · {p.dureeCreneau}min</p></div>
+                  <button onClick={() => setDeleteId(p.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-destructive transition-colors"><Trash2 size={16} /></button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground text-center py-4">Aucun planning pour ce médecin</p>
+          )}
         </div>
       </div>
 
-      <ConfirmDialog open={!!deleteId} title="Supprimer le planning" message="Êtes-vous sûr ?" onConfirm={() => { toast.success('Planning supprimé'); setDeleteId(null); }} onCancel={() => setDeleteId(null)} confirmLabel="Supprimer" />
+      <ConfirmDialog open={!!deleteId} title="Supprimer le planning" message="Êtes-vous sûr de vouloir supprimer ce planning ?" onConfirm={handleDelete} onCancel={() => setDeleteId(null)} confirmLabel="Supprimer" />
     </DashboardLayout>
   );
 };

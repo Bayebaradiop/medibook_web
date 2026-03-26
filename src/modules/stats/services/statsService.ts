@@ -1,6 +1,6 @@
 import apiClient from "@/api/apiClient";
 import { STATS_API } from "../constantes/stats.api";
-import type { StatsSuperAdmin, StatsAdmin, StatsMedecin } from "../types/stats.types";
+import type { StatsSuperAdmin, StatsAdmin, StatsMedecin, StatsSecretaire } from "../types/stats.types";
 
 export const statsService = {
   superAdmin: () =>
@@ -11,4 +11,7 @@ export const statsService = {
 
   medecin: () =>
     apiClient.get<StatsMedecin>(STATS_API.MEDECIN),
+
+  secretaire: () =>
+    apiClient.get<StatsSecretaire>(STATS_API.SECRETAIRE),
 };

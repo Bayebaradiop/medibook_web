@@ -11,4 +11,7 @@ export const planningService = {
 
   create: (data: PlanningForm) =>
     apiClient.post<Planning>(PLANNING_API.SECRETAIRE_CREATE, data),
+
+  delete: (id: number) =>
+    apiClient.delete(PLANNING_API.SECRETAIRE_DELETE(id)),
 };

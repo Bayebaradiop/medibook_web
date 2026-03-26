@@ -23,3 +23,14 @@ export interface StatsMedecin {
   rdvConfirmes: number;
   rdvTermines: number;
 }
+
+export interface StatsSecretaire {
+  cabinetNom?: string;
+  totalMedecins: number;
+  totalPatients: number;
+  totalRdv: number;
+  rdvEnAttente: number;
+  rdvConfirmes: number;
+  rdvTermines: number;
+  rdvAnnules: number;
+}
