@@ -18,10 +18,12 @@ export interface StatsAdmin {
 
 export interface StatsMedecin {
   totalRdv: number;
-  rdvAujourdhui: number;
+  totalPatients: number;
   rdvEnAttente: number;
   rdvConfirmes: number;
   rdvTermines: number;
+  rdvAnnules: number;
+  rdvAujourdhui?: number;
 }
 
 export interface StatsSecretaire {

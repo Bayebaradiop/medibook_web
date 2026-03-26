@@ -2,15 +2,17 @@ export interface ExceptionPlanning {
   id: number;
   medecinId: number;
   medecinNom?: string;
-  dateDebut: string;
-  dateFin: string;
-  motif: string;
-  type: "ABSENT";
+  date: string;
+  type: "ABSENT" | "FERME" | "VACANCES";
+  heureDebut?: string | null;
+  heureFin?: string | null;
+  motif?: string;
 }
 
 export interface ExceptionForm {
-  medecinId?: number;
-  dateDebut: string;
-  dateFin: string;
+  date: string;
+  type: "ABSENT" | "FERME" | "VACANCES";
+  heureDebut?: string;
+  heureFin?: string;
   motif: string;
 }
