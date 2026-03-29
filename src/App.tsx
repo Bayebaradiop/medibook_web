@@ -11,6 +11,7 @@ import ProfilePage from "@/pages/profile/ProfilePage";
 
 // Auth
 import LoginPage from "@/modules/auth/pages/LoginPage";
+import ForgotPasswordPage from "@/modules/auth/pages/ForgotPasswordPage";
 
 // Dashboard
 import SuperAdminDashboard from "@/modules/dashboard/pages/SuperAdminDashboardPage";
@@ -68,6 +69,7 @@ const App = () => (
             {/* Pages publiques */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
             {/* Profil — tous les connectés */}
             <Route path="/profil" element={<RouteProtegee rolesAutorises={["SUPER_ADMIN", "ADMIN", "MEDECIN", "SECRETAIRE"]}><ProfilePage /></RouteProtegee>} />

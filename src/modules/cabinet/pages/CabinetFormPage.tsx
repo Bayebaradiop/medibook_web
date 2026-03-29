@@ -9,8 +9,70 @@ import { validerCabinetForm } from '../logique/cabinet.validation';
 import type { CabinetCreateDTO } from '../types/cabinet.types';
 import { toast } from 'sonner';
 
-const ErreurChamp = ({ message }: { message?: string }) =>
-  message ? <p className="text-xs text-destructive mt-1">{message}</p> : null;
+type ErreursChamp = Record<string, string>;
+
+interface BackendErrorPayload {
+  message?: string;
+  errors?: unknown;
+  error?: {
+    code?: string;
+    description?: string;
+    details?: unknown;
+  };
+}
+
+const ErreurChamp = ({ id, message }: { id: string; message?: string }) =>
+  message ? <p id={id} className="mt-1 text-xs text-destructive">{message}</p> : null;
+
+const estObjet = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const extraireErreursChamp = (payload?: BackendErrorPayload): ErreursChamp => {
+  const sources = [payload?.errors, payload?.error?.details];
+
+  for (const source of sources) {
+    if (!estObjet(source)) continue;
+
+    const erreurs = Object.entries(source).reduce<ErreursChamp>((acc, [champ, message]) => {
+      if (typeof message === 'string' && message.trim()) {
+        acc[champ] = message;
+      }
+      return acc;
+    }, {});
+
+    if (Object.keys(erreurs).length > 0) {
+      return erreurs;
+    }
+  }
+
+  return {};
+};
+
+const mapperMessageVersErreursChamp = (message?: string): ErreursChamp => {
+  if (!message) return {};
+
+  if (message === CABINET_ERREURS.NOM_DEJA_EXISTANT) {
+    return { nom: message };
+  }
+
+  if (message === CABINET_ERREURS.EMAIL_DEJA_UTILISE) {
+    return { email: message };
+  }
+
+  if (message === CABINET_ERREURS.ADMIN_EMAIL_DEJA_UTILISE) {
+    return { adminEmail: message };
+  }
+
+  if (message === CABINET_ERREURS.ADMIN_TELEPHONE_DEJA_UTILISE) {
+    return { adminTelephone: message };
+  }
+
+  if (message.includes("téléphone") && !message.includes("administrateur")) {
+    return { telephone: message };
+  }
+
+  return {};
+};
 
 const CabinetFormPage = () => {
   const { id } = useParams();
@@ -55,6 +117,18 @@ const CabinetFormPage = () => {
     charger();
   }, [id, navigate]);
 
+  const afficherErreursChamps = (nouvellesErreurs: ErreursChamp) => {
+    setErreurs(nouvellesErreurs);
+
+    const premierChamp = Object.keys(nouvellesErreurs)[0];
+    if (!premierChamp) return;
+
+    requestAnimationFrame(() => {
+      const champ = document.querySelector<HTMLElement>(`[name="${premierChamp}"]`);
+      champ?.focus();
+    });
+  };
+
   const update = (key: string, val: string) => {
     setForm(f => ({ ...f, [key]: val }));
     if (erreurs[key]) setErreurs(e => { const copy = { ...e }; delete copy[key]; return copy; });
@@ -82,9 +156,7 @@ const CabinetFormPage = () => {
     // Validation côté client
     const validation = validerCabinetForm(dto, isEdit);
     if (Object.keys(validation).length > 0) {
-      setErreurs(validation);
-      const premiere = Object.values(validation)[0];
-      toast.error(premiere);
+      afficherErreursChamps(validation);
       return;
     }
 
@@ -99,18 +171,27 @@ const CabinetFormPage = () => {
         toast.success(CABINET_SUCCES.CREATION_REUSSIE);
       }
       navigate('/super-admin/cabinets');
-    } catch (err: any) {
-      const data = err.response?.data;
-      // Le backend peut renvoyer des erreurs de validation par champ
-      if (data?.errors && typeof data.errors === 'object') {
-        setErreurs(data.errors);
-        const premiere = Object.values(data.errors)[0] as string;
-        toast.error(premiere);
-      } else {
-        const msg = data?.message
-          || (isEdit ? CABINET_ERREURS.MODIFICATION_ECHOUEE : CABINET_ERREURS.CREATION_ECHOUEE);
-        toast.error(msg);
+    } catch (error: unknown) {
+      const data = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response
+        ? error.response.data as BackendErrorPayload
+        : undefined;
+
+      const erreursChamps = extraireErreursChamp(data);
+      if (Object.keys(erreursChamps).length > 0) {
+        afficherErreursChamps(erreursChamps);
+        return;
       }
+
+      const messageErreur = data?.message || data?.error?.description;
+      const erreursMetier = mapperMessageVersErreursChamp(messageErreur);
+      if (Object.keys(erreursMetier).length > 0) {
+        afficherErreursChamps(erreursMetier);
+        return;
+      }
+
+      const msg = messageErreur
+        || (isEdit ? CABINET_ERREURS.MODIFICATION_ECHOUEE : CABINET_ERREURS.CREATION_ECHOUEE);
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -118,6 +199,13 @@ const CabinetFormPage = () => {
 
   const inputClass = (champ: string) =>
     `medibook-input w-full ${erreurs[champ] ? 'border-destructive ring-1 ring-destructive' : ''}`;
+
+  const inputProps = (champ: string) => ({
+    name: champ,
+    className: inputClass(champ),
+    'aria-invalid': Boolean(erreurs[champ]),
+    'aria-describedby': erreurs[champ] ? `${champ}-error` : undefined,
+  });
 
   if (loading) return (
     <DashboardLayout title={isEdit ? 'Modifier le cabinet' : 'Nouveau cabinet'}>
@@ -134,39 +222,39 @@ const CabinetFormPage = () => {
           <ArrowLeft size={18} /> Retour
         </button>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div className="medibook-card">
             <h3 className="font-semibold mb-4">Informations du cabinet</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Nom</label>
-                <input value={form.nom} onChange={e => update('nom', e.target.value)} className={inputClass('nom')} />
-                <ErreurChamp message={erreurs.nom} />
+                <input value={form.nom} onChange={e => update('nom', e.target.value)} {...inputProps('nom')} />
+                <ErreurChamp id="nom-error" message={erreurs.nom} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Adresse</label>
-                <input value={form.adresse} onChange={e => update('adresse', e.target.value)} className={inputClass('adresse')} />
-                <ErreurChamp message={erreurs.adresse} />
+                <input value={form.adresse} onChange={e => update('adresse', e.target.value)} {...inputProps('adresse')} />
+                <ErreurChamp id="adresse-error" message={erreurs.adresse} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Téléphone</label>
-                <input value={form.telephone} onChange={e => update('telephone', e.target.value)} className={inputClass('telephone')} placeholder="+221 33 123 45 67" />
-                <ErreurChamp message={erreurs.telephone} />
+                <input value={form.telephone} onChange={e => update('telephone', e.target.value)} placeholder="+221 33 123 45 67" {...inputProps('telephone')} />
+                <ErreurChamp id="telephone-error" message={erreurs.telephone} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Email</label>
-                <input type="email" value={form.email} onChange={e => update('email', e.target.value)} className={inputClass('email')} />
-                <ErreurChamp message={erreurs.email} />
+                <input type="email" value={form.email} onChange={e => update('email', e.target.value)} {...inputProps('email')} />
+                <ErreurChamp id="email-error" message={erreurs.email} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Couleur primaire</label>
-                <div className="flex items-center gap-2"><input type="color" value={form.couleurPrimaire} onChange={e => update('couleurPrimaire', e.target.value)} className="h-10 w-14 rounded-lg border cursor-pointer" /><span className="text-sm text-muted-foreground">{form.couleurPrimaire}</span></div>
-                <ErreurChamp message={erreurs.couleurPrimaire} />
+                <div className="flex items-center gap-2"><input type="color" value={form.couleurPrimaire} onChange={e => update('couleurPrimaire', e.target.value)} className="h-10 w-14 rounded-lg border cursor-pointer" name="couleurPrimaire" aria-invalid={Boolean(erreurs.couleurPrimaire)} aria-describedby={erreurs.couleurPrimaire ? 'couleurPrimaire-error' : undefined} /><span className="text-sm text-muted-foreground">{form.couleurPrimaire}</span></div>
+                <ErreurChamp id="couleurPrimaire-error" message={erreurs.couleurPrimaire} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Couleur secondaire</label>
-                <div className="flex items-center gap-2"><input type="color" value={form.couleurSecondaire} onChange={e => update('couleurSecondaire', e.target.value)} className="h-10 w-14 rounded-lg border cursor-pointer" /><span className="text-sm text-muted-foreground">{form.couleurSecondaire}</span></div>
-                <ErreurChamp message={erreurs.couleurSecondaire} />
+                <div className="flex items-center gap-2"><input type="color" value={form.couleurSecondaire} onChange={e => update('couleurSecondaire', e.target.value)} className="h-10 w-14 rounded-lg border cursor-pointer" name="couleurSecondaire" aria-invalid={Boolean(erreurs.couleurSecondaire)} aria-describedby={erreurs.couleurSecondaire ? 'couleurSecondaire-error' : undefined} /><span className="text-sm text-muted-foreground">{form.couleurSecondaire}</span></div>
+                <ErreurChamp id="couleurSecondaire-error" message={erreurs.couleurSecondaire} />
               </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Logo</label>
@@ -190,29 +278,29 @@ const CabinetFormPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Prénom</label>
-                <input value={form.adminPrenom} onChange={e => update('adminPrenom', e.target.value)} className={inputClass('adminPrenom')} />
-                <ErreurChamp message={erreurs.adminPrenom} />
+                <input value={form.adminPrenom} onChange={e => update('adminPrenom', e.target.value)} {...inputProps('adminPrenom')} />
+                <ErreurChamp id="adminPrenom-error" message={erreurs.adminPrenom} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Nom</label>
-                <input value={form.adminNom} onChange={e => update('adminNom', e.target.value)} className={inputClass('adminNom')} />
-                <ErreurChamp message={erreurs.adminNom} />
+                <input value={form.adminNom} onChange={e => update('adminNom', e.target.value)} {...inputProps('adminNom')} />
+                <ErreurChamp id="adminNom-error" message={erreurs.adminNom} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Email</label>
-                <input type="email" value={form.adminEmail} onChange={e => update('adminEmail', e.target.value)} className={inputClass('adminEmail')} />
-                <ErreurChamp message={erreurs.adminEmail} />
+                <input type="email" value={form.adminEmail} onChange={e => update('adminEmail', e.target.value)} {...inputProps('adminEmail')} />
+                <ErreurChamp id="adminEmail-error" message={erreurs.adminEmail} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Téléphone</label>
-                <input value={form.adminTelephone} onChange={e => update('adminTelephone', e.target.value)} className={inputClass('adminTelephone')} placeholder="+221 77 123 45 67" />
-                <ErreurChamp message={erreurs.adminTelephone} />
+                <input value={form.adminTelephone} onChange={e => update('adminTelephone', e.target.value)} placeholder="+221 77 123 45 67" {...inputProps('adminTelephone')} />
+                <ErreurChamp id="adminTelephone-error" message={erreurs.adminTelephone} />
               </div>
               {!isEdit && (
                 <div>
                   <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Mot de passe</label>
-                  <input type="password" value={form.adminPassword} onChange={e => update('adminPassword', e.target.value)} className={inputClass('adminPassword')} />
-                  <ErreurChamp message={erreurs.adminPassword} />
+                  <input type="password" value={form.adminPassword} onChange={e => update('adminPassword', e.target.value)} {...inputProps('adminPassword')} />
+                  <ErreurChamp id="adminPassword-error" message={erreurs.adminPassword} />
                 </div>
               )}
             </div>

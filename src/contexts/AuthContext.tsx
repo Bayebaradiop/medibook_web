@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { authService } from "@/modules/auth/services/authService";
-import type { Utilisateur } from "@/modules/auth/types/auth.types";
+import type { UpdateProfileRequest, Utilisateur } from "@/modules/auth/types/auth.types";
 
 interface AuthContextType {
   user: Utilisateur | null;
   loading: boolean;
   login: (email: string, motDePasse: string) => Promise<Utilisateur>;
+  updateProfile: (data: UpdateProfileRequest) => Promise<Utilisateur>;
+  refreshProfile: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
@@ -13,6 +15,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   login: async () => { throw new Error("AuthContext non initialisé"); },
+  updateProfile: async () => { throw new Error("AuthContext non initialisé"); },
+  refreshProfile: async () => {},
   logout: async () => {},
 });
 
@@ -22,24 +26,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<Utilisateur | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Au montage : le cookie est envoyé automatiquement → on vérifie si l'utilisateur est connecté
+  const refreshProfile = async () => {
+    try {
+      const res = await authService.getProfile();
+      setUser(res.data);
+    } catch {
+      setUser(null);
+    }
+  };
+
   useEffect(() => {
     const init = async () => {
-      try {
-        const res = await authService.getProfile();
-        setUser(res.data);
-      } catch {
-        setUser(null);
-      }
+      await refreshProfile();
       setLoading(false);
     };
-    init();
+    void init();
   }, []);
 
   const login = async (email: string, motDePasse: string): Promise<Utilisateur> => {
     const res = await authService.login({ email, motDePasse });
     setUser(res.data.user);
     return res.data.user;
+  };
+
+  const updateProfile = async (data: UpdateProfileRequest): Promise<Utilisateur> => {
+    const res = await authService.updateProfile(data);
+    setUser(res.data);
+    return res.data;
   };
 
   const logout = async () => {
@@ -51,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, updateProfile, refreshProfile, logout }}>
       {children}
     </AuthContext.Provider>
   );

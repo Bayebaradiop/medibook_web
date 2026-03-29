@@ -1,7 +1,13 @@
 export interface StatsSuperAdmin {
   totalCabinets: number;
-  cabinetsActifs: number;
-  cabinetsInactifs: number;
+  totalMedecins: number;
+  totalSecretaires: number;
+  totalPatients: number;
+  totalRdv: number;
+  rdvEnAttente: number;
+  rdvConfirmes: number;
+  rdvTermines: number;
+  rdvAnnules: number;
 }
 
 export interface StatsAdmin {

@@ -3,12 +3,66 @@ import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { medecinService } from '../services/utilisateurService';
 import { specialiteService } from '@/modules/specialite/services/specialiteService';
+import { validerMedecinForm } from '../logique/utilisateur.validation';
 import { UTILISATEUR_ERREURS } from '../messages/utilisateur.erreurs';
 import { UTILISATEUR_SUCCES } from '../messages/utilisateur.succes';
 import type { Medecin } from '../types/utilisateur.types';
 import type { Specialite } from '@/modules/specialite/types/specialite.types';
 import { ArrowLeft, Upload, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+
+type ErreursChamp = Record<string, string>;
+
+interface BackendErrorPayload {
+  message?: string;
+  error?: {
+    description?: string;
+    details?: unknown;
+  };
+}
+
+const ErreurChamp = ({ id, message }: { id: string; message?: string }) =>
+  message ? <p id={id} className="mt-1 text-xs text-destructive">{message}</p> : null;
+
+const estObjet = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const extraireErreursChamp = (payload?: BackendErrorPayload): ErreursChamp => {
+  const details = payload?.error?.details;
+  if (!estObjet(details)) return {};
+
+  return Object.entries(details).reduce<ErreursChamp>((acc, [champ, message]) => {
+    if (typeof message === 'string' && message.trim()) {
+      acc[champ] = message;
+    }
+    return acc;
+  }, {});
+};
+
+const mapperMessageVersErreursChamp = (message?: string): ErreursChamp => {
+  if (!message) return {};
+
+  const normalise = message.toLowerCase();
+  const erreurs: ErreursChamp = {};
+
+  if (normalise.includes('email')) {
+    erreurs.email = message;
+  }
+
+  if (normalise.includes('téléphone') || normalise.includes('telephone')) {
+    erreurs.telephone = message;
+  }
+
+  if (normalise.includes('spécialité') || normalise.includes('specialite')) {
+    erreurs.specialiteId = message;
+  }
+
+  if (normalise.includes('mot de passe') || normalise.includes('passe')) {
+    erreurs.motDePasse = message;
+  }
+
+  return erreurs;
+};
 
 const MedecinFormPage = () => {
   const { id } = useParams();
@@ -25,7 +79,29 @@ const MedecinFormPage = () => {
   const [form, setForm] = useState({
     prenom: '', nom: '', email: '', telephone: '', specialiteId: '', motDePasse: '',
   });
-  const update = (k: string, v: string) => { setForm(f => ({ ...f, [k]: v })); setErreurs(prev => ({ ...prev, [k]: '' })); };
+
+  const afficherErreursChamps = (nouvellesErreurs: ErreursChamp) => {
+    setErreurs(nouvellesErreurs);
+
+    const premierChamp = Object.keys(nouvellesErreurs)[0];
+    if (!premierChamp) return;
+
+    requestAnimationFrame(() => {
+      const champ = document.querySelector<HTMLElement>(`[name="${premierChamp}"]`);
+      champ?.focus();
+    });
+  };
+
+  const update = (k: string, v: string) => {
+    setForm(f => ({ ...f, [k]: v }));
+    if (erreurs[k]) {
+      setErreurs(prev => {
+        const copy = { ...prev };
+        delete copy[k];
+        return copy;
+      });
+    }
+  };
 
   const charger = useCallback(async () => {
     try {
@@ -41,8 +117,13 @@ const MedecinFormPage = () => {
         });
         if (m.photo) setPhotoPreview(m.photo);
       }
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || "Erreur de chargement");
+    } catch (error: unknown) {
+      const data = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response && estObjet(error.response.data)
+        ? error.response.data
+        : undefined;
+
+      const message = typeof data?.message === 'string' ? data.message : undefined;
+      toast.error(message || "Erreur de chargement");
       navigate('/admin/medecins');
     } finally {
       setLoadingInit(false);
@@ -67,6 +148,13 @@ const MedecinFormPage = () => {
       ...(form.motDePasse ? { motDePasse: form.motDePasse } : {}),
     };
 
+    const validation = validerMedecinForm(data, !isEdit);
+    if (Object.keys(validation).length > 0) {
+      afficherErreursChamps(validation);
+      return;
+    }
+
+    setErreurs({});
     setSaving(true);
     try {
       if (isEdit) {
@@ -77,21 +165,40 @@ const MedecinFormPage = () => {
         toast.success(UTILISATEUR_SUCCES.MEDECIN_CREE);
       }
       navigate('/admin/medecins');
-    } catch (err: any) {
-      const resp = err.response?.data;
-      const fieldErrors = resp?.error?.details;
-      if (fieldErrors && typeof fieldErrors === 'object') {
-        setErreurs(fieldErrors);
-        const messages = Object.values(fieldErrors) as string[];
-        toast.error(messages.join(' • '));
-      } else {
-        toast.error(resp?.error?.description || resp?.message
-          || (isEdit ? UTILISATEUR_ERREURS.MODIFICATION_MEDECIN_ECHOUEE : UTILISATEUR_ERREURS.CREATION_MEDECIN_ECHOUEE));
+    } catch (error: unknown) {
+      const resp = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response
+        ? error.response.data as BackendErrorPayload
+        : undefined;
+
+      const fieldErrors = extraireErreursChamp(resp);
+      if (Object.keys(fieldErrors).length > 0) {
+        afficherErreursChamps(fieldErrors);
+        return;
       }
+
+      const messageErreur = resp?.error?.description || resp?.message;
+      const mappedErrors = mapperMessageVersErreursChamp(messageErreur);
+      if (Object.keys(mappedErrors).length > 0) {
+        afficherErreursChamps(mappedErrors);
+        return;
+      }
+
+      toast.error(messageErreur
+        || (isEdit ? UTILISATEUR_ERREURS.MODIFICATION_MEDECIN_ECHOUEE : UTILISATEUR_ERREURS.CREATION_MEDECIN_ECHOUEE));
     } finally {
       setSaving(false);
     }
   };
+
+  const inputClass = (champ: string) =>
+    `medibook-input w-full ${erreurs[champ] ? 'border-destructive ring-1 ring-destructive' : ''}`;
+
+  const inputProps = (champ: string) => ({
+    name: champ,
+    className: inputClass(champ),
+    'aria-invalid': Boolean(erreurs[champ]),
+    'aria-describedby': erreurs[champ] ? `${champ}-error` : undefined,
+  });
 
   if (loadingInit) return <DashboardLayout title="Médecin"><div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div></DashboardLayout>;
 
@@ -99,7 +206,7 @@ const MedecinFormPage = () => {
     <DashboardLayout title={isEdit ? 'Modifier le médecin' : 'Nouveau médecin'}>
       <div className="space-y-6 max-w-3xl">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft size={18} /> Retour</button>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
           <div className="medibook-card flex flex-col items-center">
             <label className="w-24 h-24 rounded-full border-2 border-dashed border-input flex items-center justify-center hover:border-primary transition-colors cursor-pointer overflow-hidden">
               {photoPreview ? <img src={photoPreview} alt="Photo" className="w-full h-full object-cover" /> : <Upload size={28} className="text-muted-foreground" />}
@@ -111,36 +218,36 @@ const MedecinFormPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Prénom</label>
-                <input value={form.prenom} onChange={e => update('prenom', e.target.value)} className={`medibook-input w-full ${erreurs.prenom ? 'border-destructive' : ''}`} required />
-                {erreurs.prenom && <p className="text-xs text-destructive mt-1">{erreurs.prenom}</p>}
+                <input value={form.prenom} onChange={e => update('prenom', e.target.value)} {...inputProps('prenom')} />
+                <ErreurChamp id="prenom-error" message={erreurs.prenom} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Nom</label>
-                <input value={form.nom} onChange={e => update('nom', e.target.value)} className={`medibook-input w-full ${erreurs.nom ? 'border-destructive' : ''}`} required />
-                {erreurs.nom && <p className="text-xs text-destructive mt-1">{erreurs.nom}</p>}
+                <input value={form.nom} onChange={e => update('nom', e.target.value)} {...inputProps('nom')} />
+                <ErreurChamp id="nom-error" message={erreurs.nom} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Email</label>
-                <input type="email" value={form.email} onChange={e => update('email', e.target.value)} className={`medibook-input w-full ${erreurs.email ? 'border-destructive' : ''}`} required />
-                {erreurs.email && <p className="text-xs text-destructive mt-1">{erreurs.email}</p>}
+                <input type="email" value={form.email} onChange={e => update('email', e.target.value)} {...inputProps('email')} />
+                <ErreurChamp id="email-error" message={erreurs.email} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Téléphone</label>
-                <input value={form.telephone} onChange={e => update('telephone', e.target.value)} className={`medibook-input w-full ${erreurs.telephone ? 'border-destructive' : ''}`} required />
-                {erreurs.telephone && <p className="text-xs text-destructive mt-1">{erreurs.telephone}</p>}
+                <input value={form.telephone} onChange={e => update('telephone', e.target.value)} {...inputProps('telephone')} />
+                <ErreurChamp id="telephone-error" message={erreurs.telephone} />
               </div>
               <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Spécialité</label>
-                <select value={form.specialiteId} onChange={e => update('specialiteId', e.target.value)} className={`medibook-input w-full ${erreurs.specialiteId ? 'border-destructive' : ''}`} required>
+                <select value={form.specialiteId} onChange={e => update('specialiteId', e.target.value)} {...inputProps('specialiteId')}>
                   <option value="">Sélectionner</option>
                   {specialites.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
                 </select>
-                {erreurs.specialiteId && <p className="text-xs text-destructive mt-1">{erreurs.specialiteId}</p>}
+                <ErreurChamp id="specialiteId-error" message={erreurs.specialiteId} />
               </div>
               {!isEdit && <div>
                 <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Mot de passe</label>
-                <input type="password" value={form.motDePasse} onChange={e => update('motDePasse', e.target.value)} className={`medibook-input w-full ${erreurs.motDePasse ? 'border-destructive' : ''}`} required />
-                {erreurs.motDePasse && <p className="text-xs text-destructive mt-1">{erreurs.motDePasse}</p>}
+                <input type="password" value={form.motDePasse} onChange={e => update('motDePasse', e.target.value)} {...inputProps('motDePasse')} />
+                <ErreurChamp id="motDePasse-error" message={erreurs.motDePasse} />
               </div>}
             </div>
           </div>

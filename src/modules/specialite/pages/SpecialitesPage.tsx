@@ -10,6 +10,47 @@ import type { Specialite } from '../types/specialite.types';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
+type ErreursChamp = Record<string, string>;
+
+interface BackendErrorPayload {
+  message?: string;
+  error?: {
+    description?: string;
+    details?: unknown;
+  };
+}
+
+const estObjet = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const extraireErreursChamp = (payload?: BackendErrorPayload): ErreursChamp => {
+  const details = payload?.error?.details;
+  if (!estObjet(details)) return {};
+
+  return Object.entries(details).reduce<ErreursChamp>((acc, [champ, message]) => {
+    if (typeof message === 'string' && message.trim()) {
+      acc[champ] = message;
+    }
+    return acc;
+  }, {});
+};
+
+const mapperMessageVersErreursChamp = (message?: string): ErreursChamp => {
+  if (!message) return {};
+
+  const normalise = message.toLowerCase();
+
+  if (normalise.includes('description')) {
+    return { description: message };
+  }
+
+  if (normalise.includes('spécialité') || normalise.includes('specialite') || normalise.includes('nom')) {
+    return { nom: message };
+  }
+
+  return {};
+};
+
 const SpecialitesPage = () => {
   const [specialites, setSpecialites] = useState<Specialite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,8 +69,12 @@ const SpecialitesPage = () => {
       setLoading(true);
       const res = await specialiteService.list();
       setSpecialites(res.data);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || SPECIALITE_ERREURS.CHARGEMENT_ECHOUE);
+    } catch (error: unknown) {
+      const data = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response && estObjet(error.response.data)
+        ? error.response.data
+        : undefined;
+      const message = typeof data?.message === 'string' ? data.message : undefined;
+      toast.error(message || SPECIALITE_ERREURS.CHARGEMENT_ECHOUE);
     } finally {
       setLoading(false);
     }
@@ -52,10 +97,10 @@ const SpecialitesPage = () => {
     const validation = validerSpecialiteForm(data);
     if (Object.keys(validation).length > 0) {
       setErreurs(validation);
-      toast.error(Object.values(validation)[0]);
       return;
     }
 
+    setErreurs({});
     setSaving(true);
     try {
       if (editItem) {
@@ -70,16 +115,26 @@ const SpecialitesPage = () => {
         toast.success(SPECIALITE_SUCCES.CREATION_REUSSIE);
       }
       setModalOpen(false);
-    } catch (err: any) {
-      const resp = err.response?.data;
-      const fieldErrors = resp?.error?.details;
-      if (fieldErrors && typeof fieldErrors === 'object') {
+    } catch (error: unknown) {
+      const resp = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response
+        ? error.response.data as BackendErrorPayload
+        : undefined;
+      const fieldErrors = extraireErreursChamp(resp);
+
+      if (Object.keys(fieldErrors).length > 0) {
         setErreurs(fieldErrors);
-        toast.error(resp.message || Object.values(fieldErrors)[0] as string);
-      } else {
-        toast.error(resp?.message || resp?.error?.description
-          || (editItem ? SPECIALITE_ERREURS.MODIFICATION_ECHOUEE : SPECIALITE_ERREURS.CREATION_ECHOUEE));
+        return;
       }
+
+      const messageErreur = resp?.message || resp?.error?.description;
+      const mappedErrors = mapperMessageVersErreursChamp(messageErreur);
+      if (Object.keys(mappedErrors).length > 0) {
+        setErreurs(mappedErrors);
+        return;
+      }
+
+      toast.error(messageErreur
+        || (editItem ? SPECIALITE_ERREURS.MODIFICATION_ECHOUEE : SPECIALITE_ERREURS.CREATION_ECHOUEE));
     } finally {
       setSaving(false);
     }
@@ -92,8 +147,12 @@ const SpecialitesPage = () => {
       await specialiteService.delete(deleteId);
       setSpecialites(prev => prev.filter(s => s.id !== deleteId));
       toast.success(SPECIALITE_SUCCES.SUPPRESSION_REUSSIE);
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || SPECIALITE_ERREURS.SUPPRESSION_ECHOUEE);
+    } catch (error: unknown) {
+      const data = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response && estObjet(error.response.data)
+        ? error.response.data
+        : undefined;
+      const message = typeof data?.message === 'string' ? data.message : undefined;
+      toast.error(message || SPECIALITE_ERREURS.SUPPRESSION_ECHOUEE);
     } finally {
       setDeleteId(null);
     }
@@ -155,12 +214,13 @@ const SpecialitesPage = () => {
         <div className="space-y-4">
           <div>
             <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Nom</label>
-            <input value={nom} onChange={e => { setNom(e.target.value); setErreurs(prev => ({ ...prev, nom: '' })); }} className={`medibook-input w-full ${erreurs.nom ? 'border-destructive' : ''}`} />
+            <input value={nom} onChange={e => { setNom(e.target.value); setErreurs(prev => ({ ...prev, nom: '' })); }} className={`medibook-input w-full ${erreurs.nom ? 'border-destructive ring-1 ring-destructive' : ''}`} />
             {erreurs.nom && <p className="text-xs text-destructive mt-1">{erreurs.nom}</p>}
           </div>
           <div>
             <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Description</label>
-            <textarea value={desc} onChange={e => setDesc(e.target.value)} className="medibook-input w-full min-h-[80px] resize-none" />
+            <textarea value={desc} onChange={e => { setDesc(e.target.value); setErreurs(prev => ({ ...prev, description: '' })); }} className={`medibook-input w-full min-h-[80px] resize-none ${erreurs.description ? 'border-destructive ring-1 ring-destructive' : ''}`} />
+            {erreurs.description && <p className="text-xs text-destructive mt-1">{erreurs.description}</p>}
           </div>
           <div className="flex justify-end gap-3">
             <button onClick={() => setModalOpen(false)} className="medibook-btn-outline h-10 px-4 text-sm">Annuler</button>

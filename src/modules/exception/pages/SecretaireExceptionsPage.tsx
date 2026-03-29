@@ -28,6 +28,32 @@ const extraireListe = <T,>(value: unknown): T[] => {
   return [];
 };
 
+const extraireErreursChamp = (value: unknown): Record<string, string> => {
+  if (!hasDataProperty(value) || typeof value.data !== "object" || value.data === null) {
+    return {};
+  }
+
+  const payload = value.data as { error?: { details?: unknown } };
+  if (typeof payload.error !== "object" || payload.error === null || typeof payload.error.details !== "object" || payload.error.details === null) {
+    return {};
+  }
+
+  return Object.entries(payload.error.details as Record<string, unknown>).reduce<Record<string, string>>((acc, [champ, message]) => {
+    if (typeof message === "string" && message.trim()) {
+      acc[champ] = message;
+    }
+    return acc;
+  }, {});
+};
+
+const mapperMessageVersErreursChamp = (message?: string): Record<string, string> => {
+  if (message === EXCEPTION_ERREURS.HEURE_FIN_AVANT_DEBUT) {
+    return { heureFin: message };
+  }
+
+  return {};
+};
+
 const initialForm: ExceptionForm = {
   date: "",
   type: "ABSENT",
@@ -88,7 +114,11 @@ const SecretaireExceptionsPage = () => {
 
   const updateForm = <K extends keyof ExceptionForm>(champ: K, valeur: ExceptionForm[K]) => {
     setForm((prev) => ({ ...prev, [champ]: valeur }));
-    setErreurs((prev) => ({ ...prev, [champ]: "" }));
+    setErreurs((prev) => {
+      const copy = { ...prev };
+      delete copy[champ];
+      return copy;
+    });
   };
 
   const handleCreate = async () => {
@@ -105,8 +135,6 @@ const SecretaireExceptionsPage = () => {
     const fieldErrors = validerExceptionForm(payload);
     setErreurs(fieldErrors);
     if (Object.keys(fieldErrors).length > 0) {
-      const firstError = Object.values(fieldErrors)[0];
-      toast.error(firstError);
       return;
     }
 
@@ -119,6 +147,20 @@ const SecretaireExceptionsPage = () => {
       setErreurs({});
       await chargerExceptions(selectedMedecin);
     } catch (error) {
+      if (isAxiosError(error)) {
+        const fieldErrorsFromApi = extraireErreursChamp(error.response);
+        if (Object.keys(fieldErrorsFromApi).length > 0) {
+          setErreurs(fieldErrorsFromApi);
+          return;
+        }
+
+        const mappedErrors = mapperMessageVersErreursChamp(hasMessageProperty(error.response?.data) ? error.response.data.message : undefined);
+        if (Object.keys(mappedErrors).length > 0) {
+          setErreurs(mappedErrors);
+          return;
+        }
+      }
+
       if (isAxiosError(error) && hasMessageProperty(error.response?.data)) {
         toast.error(error.response.data.message);
       } else {

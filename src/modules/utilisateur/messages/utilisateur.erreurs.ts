@@ -4,6 +4,7 @@ export const UTILISATEUR_ERREURS = {
   EMAIL_REQUIS: "L'email est obligatoire",
   EMAIL_INVALIDE: "L'adresse email est invalide",
   TELEPHONE_REQUIS: "Le numéro de téléphone est obligatoire",
+  TELEPHONE_INVALIDE: "Le numéro de téléphone est invalide",
   MDP_REQUIS: "Le mot de passe est obligatoire",
   MDP_TROP_COURT: "Le mot de passe doit contenir au moins 8 caractères",
   NUMERO_ORDRE_REQUIS: "Le numéro d'ordre est obligatoire",

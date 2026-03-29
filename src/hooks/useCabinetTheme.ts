@@ -53,8 +53,13 @@ export function useCabinetTheme() {
   const appliedRef = useRef(false);
 
   useEffect(() => {
-    const supportedRoles = ["ADMIN", "SECRETAIRE"];
-    if (!user?.role || !supportedRoles.includes(user.role)) {
+    const endpointByRole = {
+      ADMIN: "/admin/mon-cabinet",
+      MEDECIN: "/medecin/mon-cabinet",
+      SECRETAIRE: "/secretaire/mon-cabinet",
+    } as const;
+
+    if (!user?.role || !(user.role in endpointByRole)) {
       if (appliedRef.current) {
         clearThemeVars();
         appliedRef.current = false;
@@ -66,7 +71,7 @@ export function useCabinetTheme() {
 
     const applyTheme = async () => {
       try {
-        const endpoint = user.role === "ADMIN" ? "/admin/mon-cabinet" : "/secretaire/mon-cabinet";
+        const endpoint = endpointByRole[user.role];
         console.log("[CabinetTheme] Chargement des couleurs du cabinet...");
         const res = await apiClient.get<CabinetColors>(endpoint);
         if (cancelled) return;
