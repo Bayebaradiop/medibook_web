@@ -7,7 +7,7 @@ pipeline {
 
   environment {
     VERCEL_ORG_ID = credentials('VERCEL_ORG_ID')
-    VERCEL_PROJECT_ID = credentials('VERCEL_PROJECT_ID')
+    VERCEL_PROJECT_ID = credentials('ERCEL_PROJECT_ID')
     SONAR_TOKEN = credentials('SONAR_TOKEN')
     VERCEL_TOKEN = credentials('VERCEL_TOKEN')
   }
