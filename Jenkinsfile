@@ -36,7 +36,7 @@ pipeline {
         sh '''
           npx sonar-scanner \
             -Dsonar.projectKey=medibook_web \
-            -Dsonar.organization=Bayebaradiop \
+            -Dsonar.organization=bayebaradiop \
             -Dsonar.sources=src \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=$SONAR_TOKEN
