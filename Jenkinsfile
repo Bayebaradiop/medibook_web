@@ -6,10 +6,7 @@ pipeline {
   }
 
   environment {
-    VERCEL_ORG_ID = credentials('VERCEL_ORG_ID')
-    VERCEL_PROJECT_ID = credentials('ERCEL_PROJECT_ID')
     SONAR_TOKEN = credentials('SONAR_TOKEN')
-    VERCEL_TOKEN = credentials('VERCEL_TOKEN')
   }
 
   stages {
@@ -41,20 +38,6 @@ pipeline {
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.token=$SONAR_TOKEN
         '''
-      }
-    }
-
-    stage('Install Vercel CLI') {
-      steps {
-        sh 'npm install --global vercel@latest'
-      }
-    }
-
-    stage('Deploy to Vercel') {
-      steps {
-        sh 'vercel pull --yes --environment=production --token=$VERCEL_TOKEN'
-        sh 'vercel build --prod --token=$VERCEL_TOKEN'
-        sh 'vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN'
       }
     }
   }
