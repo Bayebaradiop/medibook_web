@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'NodeJS-18'
+    }
+
     environment {
         DOCKER_IMAGE = 'bayebara01012000/medibook-web'
         DOCKER_TAG = "${BUILD_NUMBER}"
