@@ -1,12 +1,15 @@
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build: ./jenkins
     container_name: jenkins
+    user: root
     ports:
       - "8087:8080"
     volumes:
-      - jenkins_data:/var/jenkins_home
+      - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
 
 volumes:
-  jenkins_data:
+  jenkins_home:
+    external: true
+    name: medibook_web_jenkins_home
