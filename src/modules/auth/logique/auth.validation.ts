@@ -8,6 +8,6 @@ export const validerEmail = (email: string): string | null => {
 
 export const validerMotDePasse = (motDePasse: string): string | null => {
   if (!motDePasse) return AUTH_ERREURS.MDP_REQUIS;
-  if (motDePasse.length < 8) return AUTH_ERREURS.MDP_TROP_COURT;
+  if (motDePasse.length < 6) return AUTH_ERREURS.MDP_TROP_COURT;
   return null;
 };

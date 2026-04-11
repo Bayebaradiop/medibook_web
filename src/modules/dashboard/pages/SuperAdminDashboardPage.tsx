@@ -14,7 +14,11 @@ const hasDataProperty = (value: unknown): value is { data: unknown } =>
 
 const extraireListe = <T,>(value: unknown): T[] => {
   if (Array.isArray(value)) return value as T[];
-  if (hasDataProperty(value) && Array.isArray(value.data)) return value.data as T[];
+  if (hasDataProperty(value)) {
+    if (Array.isArray(value.data)) return value.data as T[];
+    const inner = value.data as Record<string, unknown>;
+    if (inner && typeof inner === 'object' && Array.isArray(inner.content)) return inner.content as T[];
+  }
   return [];
 };
 

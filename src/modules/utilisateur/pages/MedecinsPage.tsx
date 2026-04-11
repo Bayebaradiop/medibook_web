@@ -39,8 +39,10 @@ const MedecinsPage = () => {
         medecinService.list(),
         specialiteService.list(),
       ]);
-      setMedecins(medsRes.data);
-      setSpecialites(specsRes.data);
+      const rawMeds = (medsRes.data as any)?.data;
+      setMedecins(Array.isArray(rawMeds) ? rawMeds : Array.isArray(rawMeds?.content) ? rawMeds.content : []);
+      const rawSpecs = (specsRes.data as any)?.data;
+      setSpecialites(Array.isArray(rawSpecs) ? rawSpecs : Array.isArray(rawSpecs?.content) ? rawSpecs.content : []);
     } catch (err: any) {
       toast.error(err.response?.data?.message || UTILISATEUR_ERREURS.CHARGEMENT_ECHOUE);
     } finally {

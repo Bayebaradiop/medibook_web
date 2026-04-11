@@ -13,7 +13,7 @@ export const validerMedecinForm = (data: MedecinForm, isCreation: boolean): Reco
   if (!data.telephone.trim()) erreurs.telephone = UTILISATEUR_ERREURS.TELEPHONE_REQUIS;
   else if (!TEL_REGEX.test(data.telephone)) erreurs.telephone = UTILISATEUR_ERREURS.TELEPHONE_INVALIDE;
   if (!data.specialiteId) erreurs.specialiteId = UTILISATEUR_ERREURS.SPECIALITE_REQUISE;
-  if (isCreation && (!data.motDePasse || data.motDePasse.length < 8)) {
+  if (isCreation && (!data.motDePasse || data.motDePasse.length < 6)) {
     erreurs.motDePasse = UTILISATEUR_ERREURS.MDP_TROP_COURT;
   }
 
@@ -29,7 +29,7 @@ export const validerSecretaireForm = (data: SecretaireForm, isCreation: boolean)
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) erreurs.email = UTILISATEUR_ERREURS.EMAIL_INVALIDE;
   if (!data.telephone.trim()) erreurs.telephone = UTILISATEUR_ERREURS.TELEPHONE_REQUIS;
   else if (!TEL_REGEX.test(data.telephone)) erreurs.telephone = UTILISATEUR_ERREURS.TELEPHONE_INVALIDE;
-  if (isCreation && (!data.motDePasse || data.motDePasse.length < 8)) {
+  if (isCreation && (!data.motDePasse || data.motDePasse.length < 6)) {
     erreurs.motDePasse = UTILISATEUR_ERREURS.MDP_TROP_COURT;
   }
 

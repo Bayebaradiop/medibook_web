@@ -13,8 +13,9 @@ const SecretaireMedecinsPage = () => {
   useEffect(() => {
     secretaireMedecinsService.list()
       .then(res => {
-        const data = (res.data as any)?.data || res.data;
-        setMedecins(Array.isArray(data) ? data : []);
+        const raw = (res.data as any)?.data;
+        const data = Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : [];
+        setMedecins(data);
       })
       .catch(() => toast.error('Erreur lors du chargement des médecins'))
       .finally(() => setLoading(false));

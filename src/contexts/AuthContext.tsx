@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { authService } from "@/modules/auth/services/authService";
+import { setAccessToken } from "@/api/apiClient";
 import type { UpdateProfileRequest, Utilisateur } from "@/modules/auth/types/auth.types";
 
 interface AuthContextType {
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(res.data);
     } catch {
       setUser(null);
+      setAccessToken(null);
     }
   };
 
@@ -45,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, motDePasse: string): Promise<Utilisateur> => {
     const res = await authService.login({ email, motDePasse });
+    setAccessToken(res.data.token);
     setUser(res.data.user);
     return res.data.user;
   };
@@ -59,6 +62,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       await authService.logout();
     } finally {
+      setAccessToken(null);
       setUser(null);
     }
   };

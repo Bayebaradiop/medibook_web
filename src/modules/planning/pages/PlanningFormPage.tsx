@@ -77,8 +77,8 @@ const PlanningFormPage = () => {
     const charger = async () => {
       try {
         const res = await secretaireMedecinsService.list();
-        const data = estObjet(res.data) && 'data' in res.data ? res.data.data : res.data;
-        const liste = Array.isArray(data) ? data : [];
+        const raw = estObjet(res.data) && 'data' in res.data ? (res.data as any).data : res.data;
+        const liste = Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : [];
         setMedecins(liste);
         if (liste.length > 0) setMedecinId(liste[0].id);
       } catch {

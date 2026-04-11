@@ -2,7 +2,7 @@ export const AUTH_ERREURS = {
   EMAIL_INVALIDE: "L'adresse email est invalide",
   EMAIL_REQUIS: "L'adresse email est obligatoire",
   MDP_REQUIS: "Le mot de passe est obligatoire",
-  MDP_TROP_COURT: "Le mot de passe doit contenir au moins 8 caractères",
+  MDP_TROP_COURT: "Le mot de passe doit contenir au moins 6 caractères",
   PRENOM_REQUIS: "Le prénom est obligatoire",
   NOM_REQUIS: "Le nom est obligatoire",
   CODE_REQUIS: "Le code de réinitialisation est obligatoire",

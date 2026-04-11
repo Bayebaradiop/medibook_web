@@ -36,7 +36,7 @@ export const validerCabinetForm = (data: CabinetCreateDTO, isEdit: boolean): Rec
 
   if (!isEdit) {
     if (!data.adminPassword.trim()) e.adminPassword = CABINET_ERREURS.ADMIN_PASSWORD_REQUIS;
-    else if (data.adminPassword.length < 8) e.adminPassword = CABINET_ERREURS.ADMIN_PASSWORD_TROP_COURT;
+    else if (data.adminPassword.length < 6) e.adminPassword = CABINET_ERREURS.ADMIN_PASSWORD_TROP_COURT;
   }
 
   return e;

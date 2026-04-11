@@ -6,7 +6,7 @@ export const UTILISATEUR_ERREURS = {
   TELEPHONE_REQUIS: "Le numéro de téléphone est obligatoire",
   TELEPHONE_INVALIDE: "Le numéro de téléphone est invalide",
   MDP_REQUIS: "Le mot de passe est obligatoire",
-  MDP_TROP_COURT: "Le mot de passe doit contenir au moins 8 caractères",
+  MDP_TROP_COURT: "Le mot de passe doit contenir au moins 6 caractères",
   NUMERO_ORDRE_REQUIS: "Le numéro d'ordre est obligatoire",
   SPECIALITE_REQUISE: "La spécialité est obligatoire",
   CREATION_MEDECIN_ECHOUEE: "Erreur lors de la création du médecin",

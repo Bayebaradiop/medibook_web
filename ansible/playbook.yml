@@ -1,0 +1,18 @@
+---
+- name: Déployer medibook-web sur Azure App Service
+  hosts: localhost
+  connection: local
+
+  tasks:
+    - name: Login Azure
+      shell: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+
+    - name: Redémarrer l'App Service pour tirer la dernière image
+      shell: az webapp restart --name medibook-web --resource-group rg-medibook
+
+    - name: Vérifier que l'app répond
+      uri:
+        url: "https://medibook-web.azurewebsites.net"
+        status_code: 200
+      retries: 5
+      delay: 10

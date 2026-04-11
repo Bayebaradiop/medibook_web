@@ -31,7 +31,8 @@ const SecretairesPage = () => {
     try {
       setLoading(true);
       const res = await secretaireService.list();
-      setSecretaires(res.data);
+      const raw = (res.data as any)?.data;
+      setSecretaires(Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : []);
     } catch (err: any) {
       toast.error(err.response?.data?.message || UTILISATEUR_ERREURS.CHARGEMENT_ECHOUE);
     } finally {

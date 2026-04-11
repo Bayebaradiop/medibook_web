@@ -21,7 +21,8 @@ const CabinetsPage = () => {
   const chargerCabinets = useCallback(async () => {
     try {
       const res = await cabinetService.list();
-      setCabinets(res.data);
+      const raw = (res.data as any)?.data;
+      setCabinets(Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : []);
     } catch {
       toast.error(CABINET_ERREURS.CHARGEMENT_ECHOUE);
     } finally {

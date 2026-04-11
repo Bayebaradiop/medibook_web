@@ -30,10 +30,10 @@ const CreneauxPage = () => {
   useEffect(() => {
     secretaireMedecinsService.list()
       .then(res => {
-        const data = (res.data as any)?.data || res.data;
-        const list = Array.isArray(data) ? data : [];
-        setMedecins(list);
-        if (list.length > 0) setSelectedMedecin(list[0].id);
+        const raw = (res.data as any)?.data;
+        const data = Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : [];
+        setMedecins(data);
+        if (data.length > 0) setSelectedMedecin(data[0].id);
       })
       .catch(() => toast.error('Erreur chargement des médecins'))
       .finally(() => setLoading(false));

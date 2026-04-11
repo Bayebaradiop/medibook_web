@@ -23,8 +23,9 @@ const SecretaireRendezVousPage = () => {
   const fetchRdvs = useCallback(() => {
     rdvSecretaireService.list()
       .then(res => {
-        const data = (res.data as any)?.data || res.data;
-        setRdvs(Array.isArray(data) ? data : []);
+        const raw = (res.data as any)?.data;
+        const data = Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : [];
+        setRdvs(data);
       })
       .catch(() => toast.error(RDV_ERREURS.CHARGEMENT_ECHOUE))
       .finally(() => setLoading(false));
@@ -34,8 +35,9 @@ const SecretaireRendezVousPage = () => {
     fetchRdvs();
     secretaireMedecinsService.list()
       .then(res => {
-        const data = (res.data as any)?.data || res.data;
-        setMedecins(Array.isArray(data) ? data : []);
+        const raw = (res.data as any)?.data;
+        const data = Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : [];
+        setMedecins(data);
       })
       .catch(() => {});
   }, [fetchRdvs]);

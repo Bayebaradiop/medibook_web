@@ -25,8 +25,9 @@ const SecretaireDashboard = () => {
           rdvSecretaireService.enAttente(),
         ]);
         setStats((statsRes.data as any)?.data || statsRes.data);
-        const rdvData = (rdvRes.data as any)?.data || rdvRes.data;
-        setRecentRdvs(Array.isArray(rdvData) ? rdvData.slice(0, 5) : []);
+        const rdvRaw = (rdvRes.data as any)?.data;
+        const rdvData = Array.isArray(rdvRaw) ? rdvRaw : Array.isArray(rdvRaw?.content) ? rdvRaw.content : [];
+        setRecentRdvs(rdvData.slice(0, 5));
       } catch {
         toast.error('Erreur lors du chargement des statistiques');
       } finally {

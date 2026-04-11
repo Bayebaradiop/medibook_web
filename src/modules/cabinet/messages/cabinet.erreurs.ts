@@ -22,7 +22,7 @@ export const CABINET_ERREURS = {
   ADMIN_TELEPHONE_REQUIS: "Le téléphone de l'administrateur est obligatoire",
   ADMIN_TELEPHONE_FORMAT_INVALIDE: "Format de téléphone invalide pour l'administrateur. Ex: +221 77 123 45 67",
   ADMIN_PASSWORD_REQUIS: "Le mot de passe de l'administrateur est obligatoire",
-  ADMIN_PASSWORD_TROP_COURT: "Le mot de passe doit contenir au moins 8 caractères",
+  ADMIN_PASSWORD_TROP_COURT: "Le mot de passe doit contenir au moins 6 caractères",
 
   // Admin - doublons
   ADMIN_EMAIL_DEJA_UTILISE: "L'email de l'administrateur est déjà utilisé",

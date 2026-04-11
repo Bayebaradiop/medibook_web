@@ -25,8 +25,8 @@ const SecretairePlanningPage = () => {
     const chargerMedecins = async () => {
       try {
         const res = await secretaireMedecinsService.list();
-        const data = (res.data as any)?.data || res.data;
-        const liste = Array.isArray(data) ? data : [];
+        const raw = (res.data as any)?.data;
+        const liste = Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : [];
         setMedecins(liste);
         if (liste.length > 0) setSelectedMedecin(liste[0].id);
       } catch {
