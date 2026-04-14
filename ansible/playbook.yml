@@ -4,15 +4,30 @@
   connection: local
 
   tasks:
-    - name: Login Azure
-      shell: az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+    - name: Mettre à jour l'image Docker sur Azure App Service
+      shell: >
+        az webapp config container set
+        --name medibook-web
+        --resource-group rg-medibook
+        --docker-custom-image-name bayebara01012000/medibook-web:latest
 
     - name: Redémarrer l'App Service pour tirer la dernière image
       shell: az webapp restart --name medibook-web --resource-group rg-medibook
+
+    - name: Attendre le redémarrage
+      pause:
+        seconds: 30
 
     - name: Vérifier que l'app répond
       uri:
         url: "https://medibook-web.azurewebsites.net"
         status_code: 200
+        validate_certs: yes
+      register: result
       retries: 5
-      delay: 10
+      delay: 15
+      until: result.status == 200
+
+    - name: Afficher le résultat
+      debug:
+        msg: "L'application est accessible sur https://medibook-web.azurewebsites.net (HTTP {{ result.status }})"

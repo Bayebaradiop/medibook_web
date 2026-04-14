@@ -9,13 +9,14 @@ terraform {
 
 provider "azurerm" {
   features {}
-  subscription_id = var.subscription_id
+  subscription_id            = var.subscription_id
+  skip_provider_registration = true
 }
 
 # 1. Resource Group
 resource "azurerm_resource_group" "rg" {
   name     = "rg-medibook"
-  location = "France Central"
+  location = "Germany West Central"
 }
 
 # 2. App Service Plan (gratuit F1)
@@ -35,6 +36,7 @@ resource "azurerm_linux_web_app" "app" {
   service_plan_id     = azurerm_service_plan.plan.id
 
   site_config {
+    always_on = false
     application_stack {
       docker_image_name = "bayebara01012000/medibook-web:latest"
     }

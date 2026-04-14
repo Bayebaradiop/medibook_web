@@ -2,6 +2,16 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'medibook-web'
+  # Métriques du backend Spring Boot (Actuator + Prometheus)
+  - job_name: 'medibook-backend'
+    metrics_path: /actuator/prometheus
+    scheme: https
     static_configs:
-      - targets: ['medibook-web:80']
+      - targets: ['medibook-app.ashyforest-850fd289.spaincentral.azurecontainerapps.io']
+        labels:
+          app: 'medibook-api'
+
+  # Prometheus se scrape lui-même
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
