@@ -7,12 +7,12 @@
     - name: Mettre à jour l'image Docker sur Azure App Service
       shell: >
         az webapp config container set
-        --name medibook-web
+        --name medibook-web-odc
         --resource-group rg-medibook
         --docker-custom-image-name bayebara01012000/medibook-web:latest
 
     - name: Redémarrer l'App Service pour tirer la dernière image
-      shell: az webapp restart --name medibook-web --resource-group rg-medibook
+      shell: az webapp restart --name medibook-web-odc --resource-group rg-medibook
 
     - name: Attendre le redémarrage
       pause:
@@ -20,7 +20,7 @@
 
     - name: Vérifier que l'app répond
       uri:
-        url: "https://medibook-web.azurewebsites.net"
+        url: "https://medibook-web-odc.azurewebsites.net"
         status_code: 200
         validate_certs: yes
       register: result
@@ -30,4 +30,4 @@
 
     - name: Afficher le résultat
       debug:
-        msg: "L'application est accessible sur https://medibook-web.azurewebsites.net (HTTP {{ result.status }})"
+        msg: "L'application est accessible sur https://medibook-web-odc.azurewebsites.net (HTTP {{ result.status }})"
