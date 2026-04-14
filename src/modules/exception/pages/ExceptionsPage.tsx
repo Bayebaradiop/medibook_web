@@ -52,12 +52,16 @@ const mapperMessageVersErreursChamp = (message?: string): Record<string, string>
   if (message === EXCEPTION_ERREURS.HEURE_FIN_AVANT_DEBUT) {
     return { heureFin: message };
   }
+  if (message?.includes("dateFin")) {
+    return { dateFin: message };
+  }
 
   return {};
 };
 
 const initialForm: ExceptionForm = {
-  date: "",
+  dateDebut: "",
+  dateFin: "",
   type: "ABSENT",
   heureDebut: "",
   heureFin: "",
@@ -101,7 +105,8 @@ const ExceptionsPage = () => {
 
   const handleCreate = async () => {
     const payload: ExceptionForm = {
-      date: form.date,
+      dateDebut: form.dateDebut,
+      dateFin: form.dateFin,
       type: form.type,
       heureDebut: form.heureDebut?.trim() || undefined,
       heureFin: form.heureFin?.trim() || undefined,
@@ -208,11 +213,28 @@ const ExceptionsPage = () => {
                   <div>
                     <div className="flex items-center gap-2">
                       <CalendarX size={16} className="text-destructive" />
-                      <p className="text-sm font-medium">{ex.date}</p>
+                      <p className="text-sm font-medium">
+                        {ex.dateDebut === ex.dateFin
+                          ? ex.dateDebut
+                          : `${ex.dateDebut} → ${ex.dateFin}`}
+                      </p>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded ${
+                          ex.type === "ABSENT"
+                            ? "bg-red-100 text-red-700"
+                            : ex.type === "VACANCES"
+                            ? "bg-blue-100 text-blue-700"
+                            : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {ex.type}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
                       {ex.heureDebut && ex.heureFin
                         ? `${ex.heureDebut.slice(0, 5)} - ${ex.heureFin.slice(0, 5)}`
+                        : ex.dateDebut !== ex.dateFin
+                        ? "Jours complets"
                         : "Journée complète"}
                       {ex.motif ? ` · ${ex.motif}` : ""}
                     </p>
@@ -233,17 +255,31 @@ const ExceptionsPage = () => {
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Nouvelle exception">
         <div className="space-y-4">
-          <div>
-            <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
-              Date
-            </label>
-            <input
-              type="date"
-              className={`medibook-input w-full ${erreurs.date ? "border-destructive" : ""}`}
-              value={form.date}
-              onChange={(e) => updateForm("date", e.target.value)}
-            />
-            {erreurs.date && <p className="text-xs text-destructive mt-1">{erreurs.date}</p>}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
+                Date début
+              </label>
+              <input
+                type="date"
+                className={`medibook-input w-full ${erreurs.dateDebut ? "border-destructive" : ""}`}
+                value={form.dateDebut}
+                onChange={(e) => updateForm("dateDebut", e.target.value)}
+              />
+              {erreurs.dateDebut && <p className="text-xs text-destructive mt-1">{erreurs.dateDebut}</p>}
+            </div>
+            <div>
+              <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
+                Date fin
+              </label>
+              <input
+                type="date"
+                className={`medibook-input w-full ${erreurs.dateFin ? "border-destructive" : ""}`}
+                value={form.dateFin}
+                onChange={(e) => updateForm("dateFin", e.target.value)}
+              />
+              {erreurs.dateFin && <p className="text-xs text-destructive mt-1">{erreurs.dateFin}</p>}
+            </div>
           </div>
           <div>
             <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
@@ -255,23 +291,26 @@ const ExceptionsPage = () => {
               onChange={(e) => updateForm("type", e.target.value as ExceptionForm["type"])}
             >
               <option value="ABSENT">Absent</option>
+              <option value="FERME">Fermé (Jour férié)</option>
+              <option value="VACANCES">Vacances</option>
             </select>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
-                Heure début (optionnel)
+                Heure début
               </label>
               <input
                 type="time"
-                className="medibook-input w-full"
+                className={`medibook-input w-full ${erreurs.heureDebut ? "border-destructive" : ""}`}
                 value={form.heureDebut ?? ""}
                 onChange={(e) => updateForm("heureDebut", e.target.value)}
               />
+              {erreurs.heureDebut && <p className="text-xs text-destructive mt-1">{erreurs.heureDebut}</p>}
             </div>
             <div>
               <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
-                Heure fin (optionnel)
+                Heure fin
               </label>
               <input
                 type="time"
@@ -282,6 +321,9 @@ const ExceptionsPage = () => {
               {erreurs.heureFin && <p className="text-xs text-destructive mt-1">{erreurs.heureFin}</p>}
             </div>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Laissez les heures vides pour une journée entière ou des vacances sur plusieurs jours.
+          </p>
           <div>
             <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
               Motif
