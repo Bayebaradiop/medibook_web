@@ -1,0 +1,69 @@
+{
+  "version": 4,
+  "terraform_version": "1.9.8",
+  "serial": 18,
+  "lineage": "f3c9e3ca-17df-3b4a-ab3d-3ad169b5bc08",
+  "outputs": {
+    "app_url": {
+      "value": "https://medibook-web.azurewebsites.net",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "rg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/d9970c1f-28d7-49c6-acd2-aa1d9c0e9881/resourceGroups/rg-medibook",
+            "location": "germanywestcentral",
+            "managed_by": "",
+            "name": "rg-medibook",
+            "tags": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo1NDAwMDAwMDAwMDAwLCJkZWxldGUiOjU0MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjo1NDAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_service_plan",
+      "name": "plan",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "app_service_environment_id": "",
+            "id": "/subscriptions/d9970c1f-28d7-49c6-acd2-aa1d9c0e9881/resourceGroups/rg-medibook/providers/Microsoft.Web/serverFarms/plan-medibook",
+            "kind": "linux",
+            "location": "germanywestcentral",
+            "maximum_elastic_worker_count": 1,
+            "name": "plan-medibook",
+            "os_type": "Linux",
+            "per_site_scaling_enabled": false,
+            "reserved": true,
+            "resource_group_name": "rg-medibook",
+            "sku_name": "F1",
+            "tags": {},
+            "timeouts": null,
+            "worker_count": 1,
+            "zone_balancing_enabled": false
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJkZWxldGUiOjM2MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjozNjAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "azurerm_resource_group.rg"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

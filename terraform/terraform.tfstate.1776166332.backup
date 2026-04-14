@@ -1,0 +1,283 @@
+{
+  "version": 4,
+  "terraform_version": "1.9.8",
+  "serial": 17,
+  "lineage": "f3c9e3ca-17df-3b4a-ab3d-3ad169b5bc08",
+  "outputs": {
+    "app_url": {
+      "value": "https://medibook-web.azurewebsites.net",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "azurerm_linux_web_app",
+      "name": "app",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "app_settings": null,
+            "auth_settings": [],
+            "auth_settings_v2": [],
+            "backup": [],
+            "client_affinity_enabled": false,
+            "client_certificate_enabled": false,
+            "client_certificate_exclusion_paths": "",
+            "client_certificate_mode": "Required",
+            "connection_string": [],
+            "custom_domain_verification_id": "FF0E2C7B0B241D9CC97BCDCC8C7D3C88BF05D071DC989AC0047FADFD4BC327C3",
+            "default_hostname": "medibook-web.azurewebsites.net",
+            "enabled": true,
+            "ftp_publish_basic_authentication_enabled": true,
+            "hosting_environment_id": "",
+            "https_only": false,
+            "id": "/subscriptions/d9970c1f-28d7-49c6-acd2-aa1d9c0e9881/resourceGroups/rg-medibook/providers/Microsoft.Web/sites/medibook-web",
+            "identity": [],
+            "key_vault_reference_identity_id": "SystemAssigned",
+            "kind": "app,linux,container",
+            "location": "germanywestcentral",
+            "logs": [],
+            "name": "medibook-web",
+            "outbound_ip_address_list": [
+              "4.185.176.172",
+              "4.182.181.67",
+              "20.113.5.195",
+              "72.144.114.56",
+              "20.113.124.132",
+              "20.170.107.74",
+              "131.189.175.200",
+              "20.113.9.153",
+              "131.189.177.150",
+              "48.201.88.95",
+              "20.170.107.228",
+              "20.113.117.150",
+              "51.116.145.41"
+            ],
+            "outbound_ip_addresses": "4.185.176.172,4.182.181.67,20.113.5.195,72.144.114.56,20.113.124.132,20.170.107.74,131.189.175.200,20.113.9.153,131.189.177.150,48.201.88.95,20.170.107.228,20.113.117.150,51.116.145.41",
+            "possible_outbound_ip_address_list": [
+              "4.185.176.172",
+              "4.182.181.67",
+              "20.113.5.195",
+              "72.144.114.56",
+              "20.113.124.132",
+              "20.170.107.74",
+              "131.189.175.200",
+              "20.113.9.153",
+              "131.189.177.150",
+              "48.201.88.95",
+              "20.170.107.228",
+              "20.113.117.150",
+              "98.67.129.1",
+              "4.185.176.104",
+              "20.79.139.91",
+              "4.182.184.147",
+              "20.79.139.181",
+              "20.79.95.191",
+              "20.79.150.180",
+              "20.79.213.122",
+              "4.182.176.58",
+              "4.185.176.106",
+              "20.113.9.184",
+              "4.182.185.246",
+              "20.79.151.89",
+              "20.113.5.252",
+              "4.185.176.179",
+              "4.182.181.226",
+              "20.218.192.233",
+              "20.170.106.109",
+              "51.116.145.41"
+            ],
+            "possible_outbound_ip_addresses": "4.185.176.172,4.182.181.67,20.113.5.195,72.144.114.56,20.113.124.132,20.170.107.74,131.189.175.200,20.113.9.153,131.189.177.150,48.201.88.95,20.170.107.228,20.113.117.150,98.67.129.1,4.185.176.104,20.79.139.91,4.182.184.147,20.79.139.181,20.79.95.191,20.79.150.180,20.79.213.122,4.182.176.58,4.185.176.106,20.113.9.184,4.182.185.246,20.79.151.89,20.113.5.252,4.185.176.179,4.182.181.226,20.218.192.233,20.170.106.109,51.116.145.41",
+            "public_network_access_enabled": true,
+            "resource_group_name": "rg-medibook",
+            "service_plan_id": "/subscriptions/d9970c1f-28d7-49c6-acd2-aa1d9c0e9881/resourceGroups/rg-medibook/providers/Microsoft.Web/serverFarms/plan-medibook",
+            "site_config": [
+              {
+                "always_on": false,
+                "api_definition_url": "",
+                "api_management_api_id": "",
+                "app_command_line": "",
+                "application_stack": [
+                  {
+                    "docker_image": "",
+                    "docker_image_name": "bayebara01012000/medibook-web:latest",
+                    "docker_image_tag": "",
+                    "docker_registry_password": "",
+                    "docker_registry_url": "",
+                    "docker_registry_username": "",
+                    "dotnet_version": "",
+                    "go_version": "",
+                    "java_server": "",
+                    "java_server_version": "",
+                    "java_version": "",
+                    "node_version": "",
+                    "php_version": "",
+                    "python_version": "",
+                    "ruby_version": ""
+                  }
+                ],
+                "auto_heal_enabled": false,
+                "auto_heal_setting": [],
+                "container_registry_managed_identity_client_id": "",
+                "container_registry_use_managed_identity": false,
+                "cors": [],
+                "default_documents": [
+                  "Default.htm",
+                  "Default.html",
+                  "Default.asp",
+                  "index.htm",
+                  "index.html",
+                  "iisstart.htm",
+                  "default.aspx",
+                  "index.php",
+                  "hostingstart.html"
+                ],
+                "detailed_error_logging_enabled": false,
+                "ftps_state": "Disabled",
+                "health_check_eviction_time_in_min": 0,
+                "health_check_path": "",
+                "http2_enabled": false,
+                "ip_restriction": [],
+                "ip_restriction_default_action": "Allow",
+                "linux_fx_version": "DOCKER|/bayebara01012000/medibook-web:latest",
+                "load_balancing_mode": "LeastRequests",
+                "local_mysql_enabled": false,
+                "managed_pipeline_mode": "Integrated",
+                "minimum_tls_version": "1.2",
+                "remote_debugging_enabled": false,
+                "remote_debugging_version": "VS2022",
+                "scm_ip_restriction": [],
+                "scm_ip_restriction_default_action": "Allow",
+                "scm_minimum_tls_version": "1.2",
+                "scm_type": "None",
+                "scm_use_main_ip_restriction": false,
+                "use_32_bit_worker": true,
+                "vnet_route_all_enabled": false,
+                "websockets_enabled": false,
+                "worker_count": 1
+              }
+            ],
+            "site_credential": [
+              {
+                "name": "$medibook-web",
+                "password": "KxxsSiuaufntmieejA0NB70JtAq2Bnxow2K9FoYvFcsNvibP9aKmvkolBQsm"
+              }
+            ],
+            "sticky_settings": [],
+            "storage_account": [],
+            "tags": null,
+            "timeouts": null,
+            "virtual_network_subnet_id": "",
+            "webdeploy_publish_basic_authentication_enabled": true,
+            "zip_deploy_file": ""
+          },
+          "sensitive_attributes": [
+            [
+              {
+                "type": "get_attr",
+                "value": "site_credential"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "site_config"
+              },
+              {
+                "type": "index",
+                "value": {
+                  "value": 0,
+                  "type": "number"
+                }
+              },
+              {
+                "type": "get_attr",
+                "value": "application_stack"
+              },
+              {
+                "type": "index",
+                "value": {
+                  "value": 0,
+                  "type": "number"
+                }
+              },
+              {
+                "type": "get_attr",
+                "value": "docker_registry_password"
+              }
+            ],
+            [
+              {
+                "type": "get_attr",
+                "value": "custom_domain_verification_id"
+              }
+            ]
+          ],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjoxODAwMDAwMDAwMDAwLCJkZWxldGUiOjE4MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjoxODAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "azurerm_resource_group.rg",
+            "azurerm_service_plan.plan"
+          ]
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "rg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/d9970c1f-28d7-49c6-acd2-aa1d9c0e9881/resourceGroups/rg-medibook",
+            "location": "germanywestcentral",
+            "managed_by": "",
+            "name": "rg-medibook",
+            "tags": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo1NDAwMDAwMDAwMDAwLCJkZWxldGUiOjU0MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjo1NDAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    },
+    {
+      "mode": "managed",
+      "type": "azurerm_service_plan",
+      "name": "plan",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 1,
+          "attributes": {
+            "app_service_environment_id": "",
+            "id": "/subscriptions/d9970c1f-28d7-49c6-acd2-aa1d9c0e9881/resourceGroups/rg-medibook/providers/Microsoft.Web/serverFarms/plan-medibook",
+            "kind": "linux",
+            "location": "germanywestcentral",
+            "maximum_elastic_worker_count": 1,
+            "name": "plan-medibook",
+            "os_type": "Linux",
+            "per_site_scaling_enabled": false,
+            "reserved": true,
+            "resource_group_name": "rg-medibook",
+            "sku_name": "F1",
+            "tags": {},
+            "timeouts": null,
+            "worker_count": 1,
+            "zone_balancing_enabled": false
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjozNjAwMDAwMDAwMDAwLCJkZWxldGUiOjM2MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjozNjAwMDAwMDAwMDAwfSwic2NoZW1hX3ZlcnNpb24iOiIxIn0=",
+          "dependencies": [
+            "azurerm_resource_group.rg"
+          ]
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}
