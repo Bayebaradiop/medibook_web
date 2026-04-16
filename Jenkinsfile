@@ -25,7 +25,7 @@ pipeline {
 
         stage('Test') {
             steps {
-                sh 'npm run test -- --run'
+                sh 'npm run test -- --run --coverage'
             }
         }
 
@@ -37,6 +37,7 @@ pipeline {
                           -Dsonar.projectKey=medibook_web \
                           -Dsonar.organization=bayebaradiop \
                           -Dsonar.sources=src \
+                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                           -Dsonar.host.url=https://sonarcloud.io
                     '''
                 }

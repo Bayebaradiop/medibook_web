@@ -1,0 +1,99 @@
+1.4.1 Frontend
+
+1.4.1.1 Git et GitHub
+
+Git est un système de contrôle de version distribué qui permet de suivre l'historique des modifications du code source. GitHub est une plateforme d'hébergement de dépôts Git qui facilite la collaboration entre développeurs.
+
+Le code source du frontend est versionné avec Git et hébergé sur GitHub (branche bara_dev).
+
+1.4.1.2 Docker
+
+Docker est une plateforme de conteneurisation qui permet d'empaqueter une application avec toutes ses dépendances dans un conteneur isolé, garantissant un fonctionnement identique quel que soit l'environnement.
+
+L'application React est conteneurisée via un Dockerfile multi-stage :
+●	Build : compilation du code avec node:18-alpine
+●	Production : les fichiers compilés sont servis par Nginx (nginx:alpine)
+
+Nginx gère le routing SPA de React et la mise en cache des fichiers statiques.
+
+[Figure : Dockerfile multi-stage]
+
+1.4.1.3 Docker Hub
+
+Docker Hub est un registre cloud qui permet de stocker, partager et distribuer des images Docker. C'est l'équivalent de GitHub mais pour les images Docker.
+
+Les images Docker du frontend sont stockées sur Docker Hub avec deux tags : latest et le numéro de build Jenkins pour assurer la traçabilité.
+
+[Figure : Docker Hub]
+
+1.4.1.4 Jenkins
+
+Jenkins est un serveur d'automatisation open source qui permet de mettre en place des pipelines d'intégration continue (CI) et de déploiement continu (CD). Il exécute automatiquement une série de tâches à chaque modification du code.
+
+Jenkins est déployé via Docker avec une image personnalisée incluant Docker CLI et Trivy. Il est accessible sur le port 8087.
+
+[Figure : Jenkins Pipeline Frontend]
+
+1.4.1.5 Pipeline CI/CD
+
+Le pipeline est défini dans un Jenkinsfile et comporte 7 étapes :
+
+1. Checkout : récupération du code depuis GitHub (branche bara_dev).
+2. Install : installation des dépendances Node.js (npm ci).
+3. Test : exécution des tests unitaires avec Vitest.
+4. SonarCloud : analyse de la qualité du code. SonarCloud est un service cloud d'analyse statique qui détecte automatiquement les bugs, vulnérabilités, code smells et mesure la couverture de tests.
+5. Docker Build : construction de l'image Docker via le Dockerfile multi-stage.
+6. Trivy Scan : scan de sécurité de l'image Docker. Trivy est un scanner de vulnérabilités open source qui détecte les failles de sécurité connues (CVE) dans les images Docker. Seules les failles HIGH et CRITICAL sont remontées.
+7. Docker Push : publication de l'image sur Docker Hub.
+
+[Figure : Dashboard SonarCloud]
+[Figure : Rapport Trivy]
+
+1.4.1.6 Infrastructure Azure (Terraform)
+
+Terraform est un outil d'Infrastructure as Code (IaC) qui permet de définir, provisionner et gérer une infrastructure cloud à l'aide de fichiers de configuration déclaratifs.
+
+L'infrastructure de production est provisionnée sur Azure avec Terraform. Trois ressources sont créées :
+●	Resource Group (rg-medibook)
+●	Service Plan (plan-medibook, F1 gratuit, Linux)
+●	Web App (medibook-web) exécutant l'image Docker depuis Docker Hub
+
+Les fichiers .tf sont versionnés dans Git. Les variables sensibles sont stockées dans terraform.tfvars, exclu du dépôt.
+
+[Figure : Ressources Azure créées par Terraform]
+
+1.4.1.7 Déploiement automatisé (Ansible)
+
+Ansible est un outil d'automatisation open source qui permet d'exécuter des tâches de configuration et de déploiement sur des serveurs distants à partir de fichiers YAML appelés playbooks.
+
+Ansible automatise le déploiement via un playbook qui :
+1.	Met à jour l'image Docker sur Azure App Service
+2.	Redémarre l'application
+3.	Vérifie que l'application répond (HTTP 200)
+
+Le déploiement s'exécute en une seule commande : ansible-playbook playbook.yml.
+
+1.4.1.8 Sécurité et qualité
+
+●	SonarCloud : analyse statique du code
+●	Trivy : scan des vulnérabilités des images Docker
+●	Jenkins Credentials : gestion sécurisée des identifiants
+●	Terraform tfvars : variables sensibles exclues de Git
+
+1.5 Outils de supervision et de monitoring
+
+1.5.1 Prometheus
+
+Prometheus est un système open source de monitoring et d'alerte qui collecte et stocke des métriques sous forme de séries temporelles. Il fonctionne selon un modèle pull : il interroge périodiquement les services pour récupérer leurs données de performance.
+
+Prometheus collecte les métriques de l'application Spring Boot via l'endpoint /actuator/prometheus toutes les 15 secondes.
+
+[Figure : Prometheus Targets]
+
+1.5.2 Grafana
+
+Grafana est une plateforme open source de visualisation de données qui permet de créer des tableaux de bord interactifs à partir de différentes sources de données comme Prometheus.
+
+Grafana transforme les métriques Prometheus en tableaux de bord graphiques. Un dashboard pré-configuré avec 8 panneaux permet de surveiller : les connexions, les utilisateurs par rôle, les rendez-vous par statut, la latence HTTP, les cabinets actifs, les utilisateurs actifs, les inscriptions et les codes de statut HTTP.
+
+[Figure : Dashboard Grafana MediBook]
