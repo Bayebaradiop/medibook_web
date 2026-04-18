@@ -79,7 +79,7 @@ pipeline {
                             export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
 
                             terraform init -input=false
-                            terraform plan -out=tfplan -input=false
+                            terraform plan -out=tfplan -input=false -var="subscription_id=$AZURE_SUBSCRIPTION_ID"
                             terraform apply -auto-approve tfplan
                         '''
                     }
