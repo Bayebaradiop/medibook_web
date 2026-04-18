@@ -17,9 +17,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Install Terraform
-RUN wget -qO- https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip -O /tmp/terraform.zip && \
+RUN apt-get update && \
+    apt-get install -y unzip && \
+    wget -q https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip -O /tmp/terraform.zip && \
     unzip /tmp/terraform.zip -d /usr/local/bin/ && \
-    rm /tmp/terraform.zip
+    rm /tmp/terraform.zip && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Ansible
 RUN apt-get update && \
