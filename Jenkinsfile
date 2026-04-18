@@ -79,6 +79,12 @@ pipeline {
                             export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
 
                             terraform init -input=false
+
+                            # Import des ressources existantes (ignore si déjà dans le state)
+                            terraform import -var="subscription_id=$AZURE_SUBSCRIPTION_ID" azurerm_resource_group.rg /subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/rg-medibook || true
+                            terraform import -var="subscription_id=$AZURE_SUBSCRIPTION_ID" azurerm_service_plan.plan /subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/serverFarms/plan-medibook || true
+                            terraform import -var="subscription_id=$AZURE_SUBSCRIPTION_ID" azurerm_linux_web_app.app /subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/sites/medibook-web-odc || true
+
                             terraform plan -out=tfplan -input=false -var="subscription_id=$AZURE_SUBSCRIPTION_ID"
                             terraform apply -auto-approve tfplan
                         '''
