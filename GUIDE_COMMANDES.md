@@ -45,13 +45,14 @@ git push origin bara_dev
 
 # 2. Lancer le build sur Jenkins
 #    → http://localhost:8087 → ton job → Build Now
-#    → Attendre que les 7 stages passent ✅
-
-# 3. Déployer sur Azure avec Ansible
-az login
-cd ansible
-ansible-playbook playbook.yml
-cd ..
+#    → Attendre que les 9 stages passent ✅
+#
+#    Pipeline complet (tout automatique) :
+#    Checkout → Install → Test → SonarCloud → Docker Build → Trivy Scan → Docker Push → Terraform → Ansible Deploy
+#
+#    ✅ Terraform provisionne/met à jour l'infra Azure automatiquement
+#    ✅ Ansible déploie et vérifie l'app sur Azure automatiquement
+#    ✅ Plus besoin de lancer manuellement az login / ansible-playbook
 ```
 
 ---

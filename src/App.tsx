@@ -19,6 +19,9 @@ import AdminDashboard from "@/modules/dashboard/pages/AdminDashboardPage";
 import MedecinDashboard from "@/modules/dashboard/pages/MedecinDashboardPage";
 import SecretaireDashboard from "@/modules/dashboard/pages/SecretaireDashboardPage";
 
+// Admin
+import AdminsPage from "@/modules/admin/pages/AdminsPage";
+
 // Cabinet
 import CabinetsPage from "@/modules/cabinet/pages/CabinetsPage";
 import CabinetDetailPage from "@/modules/cabinet/pages/CabinetDetailPage";
@@ -76,6 +79,7 @@ const App = () => (
 
             {/* Super Admin */}
             <Route path="/super-admin" element={<RouteProtegee rolesAutorises={["SUPER_ADMIN"]}><SuperAdminDashboard /></RouteProtegee>} />
+            <Route path="/super-admin/admins" element={<RouteProtegee rolesAutorises={["SUPER_ADMIN"]}><AdminsPage /></RouteProtegee>} />
             <Route path="/super-admin/cabinets" element={<RouteProtegee rolesAutorises={["SUPER_ADMIN"]}><CabinetsPage /></RouteProtegee>} />
             <Route path="/super-admin/cabinets/nouveau" element={<RouteProtegee rolesAutorises={["SUPER_ADMIN"]}><CabinetFormPage /></RouteProtegee>} />
             <Route path="/super-admin/cabinets/:id" element={<RouteProtegee rolesAutorises={["SUPER_ADMIN"]}><CabinetDetailPage /></RouteProtegee>} />

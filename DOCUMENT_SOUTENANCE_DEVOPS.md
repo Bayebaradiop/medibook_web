@@ -167,32 +167,66 @@ Jenkins est un serveur d'automatisation open-source qui permet de construire, te
 
 ### Utilisation dans MediBook Web
 
-Le projet utilise une image Jenkins **personnalisée** (avec Docker CLI et Trivy installés) et un pipeline en **7 étapes** :
+Le projet utilise une image Jenkins **personnalisée** (avec Docker CLI, Trivy, Terraform, Ansible et Azure CLI installés) et un pipeline en **9 étapes** qui couvre le cycle complet : du code source jusqu'au déploiement en production.
 
 #### Image Jenkins personnalisée
 
 ```dockerfile
 FROM jenkins/jenkins:lts
 USER root
+
 # Docker CLI pour builder/pusher des images
 RUN apt-get update && apt-get install -y docker.io
+
 # Trivy pour le scan de vulnérabilités
-RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor -o /usr/share/keyrings/trivy.gpg && \
+RUN apt-get update && apt-get install -y wget apt-transport-https gnupg lsb-release && \
+    wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor -o /usr/share/keyrings/trivy.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb bookworm main" > /etc/apt/sources.list.d/trivy.list && \
     apt-get update && apt-get install -y trivy
+
+# Terraform pour l'Infrastructure as Code
+RUN apt-get update && apt-get install -y unzip && \
+    wget -q https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip -O /tmp/terraform.zip && \
+    unzip /tmp/terraform.zip -d /usr/local/bin/ && rm /tmp/terraform.zip
+
+# Ansible pour l'automatisation du déploiement
+RUN apt-get update && apt-get install -y python3 python3-pip && \
+    pip3 install --break-system-packages ansible
+
+# Azure CLI pour interagir avec Azure
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
 ```
 
-#### Pipeline CI/CD — 7 étapes
+#### Configuration des credentials Jenkins
+
+Pour que le pipeline puisse interagir avec Azure, un **Azure Service Principal** a été créé et configuré dans Jenkins :
+
+1. **Créer le Service Principal Azure** :
+   ```bash
+   az login
+   az ad sp create-for-rbac --name "jenkins-medibook" --role Contributor \
+     --scopes /subscriptions/<SUBSCRIPTION_ID>
+   ```
+
+2. **Ajouter le credential dans Jenkins** :
+   - Jenkins → Manage Jenkins → Credentials → Global → Add Credentials
+   - Type : **Microsoft Azure Service Principal** (plugin Azure Credentials)
+   - ID : `azure-credentials`
+   - Renseigner : Subscription ID, Client ID, Client Secret, Tenant ID
+
+#### Pipeline CI/CD — 9 étapes
 
 | Étape | Nom | Action | Outil |
 |---|---|---|---|
 | 1 | **Checkout** | Récupération du code source depuis GitHub | Git |
 | 2 | **Install** | Installation des dépendances (`npm ci`) | Node.js 18 |
-| 3 | **Test** | Exécution des tests unitaires | Vitest |
+| 3 | **Test** | Exécution des tests unitaires avec couverture | Vitest |
 | 4 | **SonarCloud** | Analyse de la qualité du code | SonarScanner |
 | 5 | **Docker Build** | Construction de l'image Docker (multi-stage) | Docker |
 | 6 | **Trivy Scan** | Scan de sécurité de l'image (HIGH, CRITICAL) | Trivy |
 | 7 | **Docker Push** | Publication de l'image sur Docker Hub | Docker Hub |
+| 8 | **Terraform** | Provisionnement/mise à jour de l'infra Azure | Terraform |
+| 9 | **Ansible Deploy** | Déploiement et vérification de l'app sur Azure | Ansible + Azure CLI |
 
 ```groovy
 pipeline {
@@ -205,7 +239,7 @@ pipeline {
     stages {
         stage('Checkout')    { steps { checkout scm } }
         stage('Install')     { steps { sh 'npm ci' } }
-        stage('Test')        { steps { sh 'npm run test -- --run' } }
+        stage('Test')        { steps { sh 'npm run test -- --run --coverage' } }
         stage('SonarCloud')  { steps {
             withSonarQubeEnv('SonarCloud') {
                 sh 'npx sonar-scanner -Dsonar.projectKey=medibook_web ...'
@@ -222,12 +256,46 @@ pipeline {
                 sh 'docker push ${DOCKER_IMAGE}:${DOCKER_TAG} && docker push ${DOCKER_IMAGE}:latest'
             }
         }}
+        stage('Terraform') { steps {
+            withCredentials([azureServicePrincipal('azure-credentials')]) {
+                dir('terraform') {
+                    sh '''
+                        export ARM_CLIENT_ID=$AZURE_CLIENT_ID
+                        export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+                        export ARM_TENANT_ID=$AZURE_TENANT_ID
+                        export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+                        terraform init -input=false
+                        terraform import ... || true  # Import des ressources existantes
+                        terraform plan -out=tfplan -input=false -var="subscription_id=$AZURE_SUBSCRIPTION_ID"
+                        terraform apply -auto-approve tfplan
+                    '''
+                }
+            }
+        }}
+        stage('Ansible Deploy') { steps {
+            withCredentials([azureServicePrincipal('azure-credentials')]) {
+                dir('ansible') {
+                    sh '''
+                        az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID
+                        ansible-playbook playbook.yml
+                    '''
+                }
+            }
+        }}
     }
     post { always { sh "docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true" } }
 }
 ```
 
 **Post-pipeline :** Nettoyage automatique de l'image locale pour libérer l'espace disque.
+
+#### Flux complet en un clic Build
+
+```
+Code → GitHub → Jenkins : Test → SonarCloud → Docker Build → Trivy → Docker Hub → Terraform (infra Azure) → Ansible (déploiement) → App en production
+```
+
+Un seul clic sur **Build Now** dans Jenkins exécute tout le pipeline de bout en bout, sans intervention manuelle.
 
 ---
 
@@ -358,9 +426,14 @@ resource "azurerm_linux_web_app" "app" {
 | Commande | Description |
 |---|---|
 | `terraform init` | Initialisation du projet et téléchargement des providers |
+| `terraform import` | Import des ressources Azure existantes dans le state |
 | `terraform plan` | Aperçu des changements à appliquer |
 | `terraform apply` | Création/mise à jour de l'infrastructure |
 | `terraform destroy` | Suppression complète de l'infrastructure |
+
+### Intégration dans Jenkins
+
+Terraform est exécuté automatiquement dans le pipeline Jenkins (étape 8). Le credential Azure Service Principal (`azure-credentials`) est utilisé pour s'authentifier. Les ressources Azure existantes sont automatiquement importées dans le state Terraform avant chaque `plan`, évitant les erreurs de ressources déjà existantes.
 
 ---
 
@@ -416,6 +489,10 @@ medibook-web.azurewebsites.net
       delay: 15
       until: result.status == 200
 ```
+
+### Intégration dans Jenkins
+
+Ansible est exécuté automatiquement dans le pipeline Jenkins (étape 9, après Terraform). Le pipeline se connecte à Azure via `az login --service-principal` avec le credential `azure-credentials`, puis exécute `ansible-playbook playbook.yml`. Le déploiement complet (mise à jour de l'image, redémarrage et vérification) est entièrement automatisé.
 
 ---
 

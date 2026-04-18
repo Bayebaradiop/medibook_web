@@ -1,6 +1,6 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Building2, Stethoscope, Users, Calendar, ClipboardList, Clock, BarChart3, CalendarX, Menu, X, UserCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, Building2, Stethoscope, Users, Calendar, ClipboardList, Clock, BarChart3, CalendarX, Menu, X, UserCircle, LogOut, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import type { UserRole } from '@/utils/constants';
 import { ROLE_LABELS } from '@/utils/constants';
@@ -15,6 +15,7 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
   SUPER_ADMIN: [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/super-admin' },
     { label: 'Cabinets', icon: Building2, path: '/super-admin/cabinets' },
+    { label: 'Admins', icon: ShieldCheck, path: '/super-admin/admins' },
   ],
   ADMIN: [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/admin' },
