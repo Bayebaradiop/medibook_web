@@ -16,4 +16,18 @@ RUN apt-get update && \
     apt-get install -y trivy && \
     rm -rf /var/lib/apt/lists/*
 
+# Install Terraform
+RUN wget -qO- https://releases.hashicorp.com/terraform/1.7.5/terraform_1.7.5_linux_amd64.zip -O /tmp/terraform.zip && \
+    unzip /tmp/terraform.zip -d /usr/local/bin/ && \
+    rm /tmp/terraform.zip
+
+# Install Ansible
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip && \
+    pip3 install --break-system-packages ansible && \
+    rm -rf /var/lib/apt/lists/*
+
+# Install Azure CLI
+RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+
 USER root

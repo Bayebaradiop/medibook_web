@@ -67,6 +67,47 @@ pipeline {
                 }
             }
         }
+
+        stage('Terraform') {
+            steps {
+                withCredentials([azureServicePrincipal('azure-credentials')]) {
+                    dir('terraform') {
+                        sh '''
+                            export ARM_CLIENT_ID=$AZURE_CLIENT_ID
+                            export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
+                            export ARM_TENANT_ID=$AZURE_TENANT_ID
+                            export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+
+                            terraform init -input=false
+                            terraform plan -out=tfplan -input=false
+                            terraform apply -auto-approve tfplan
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Ansible Deploy') {
+            steps {
+                withCredentials([azureServicePrincipal('azure-credentials')]) {
+                    dir('ansible') {
+                        sh '''
+                            export AZURE_CLIENT_ID=$AZURE_CLIENT_ID
+                            export AZURE_SECRET=$AZURE_CLIENT_SECRET
+                            export AZURE_TENANT=$AZURE_TENANT_ID
+                            export AZURE_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+
+                            az login --service-principal \
+                                -u $AZURE_CLIENT_ID \
+                                -p $AZURE_CLIENT_SECRET \
+                                --tenant $AZURE_TENANT_ID
+
+                            ansible-playbook playbook.yml
+                        '''
+                    }
+                }
+            }
+        }
     }
 
     post {
