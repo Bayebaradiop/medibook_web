@@ -1,16 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import SearchInput from '@/components/common/SearchInput';
 import StatusBadge from '@/components/common/StatusBadge';
 import { adminService } from '../services/adminService';
 import type { Utilisateur } from '@/modules/auth/types/auth.types';
-import { Loader2, Mail, Phone, Building2 } from 'lucide-react';
+import { Loader2, Mail, Phone, Building2, Pencil } from 'lucide-react';
 import { toast } from 'sonner';
 
 const AdminsPage = () => {
   const [admins, setAdmins] = useState<Utilisateur[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const chargerAdmins = useCallback(async () => {
     try {
@@ -25,6 +27,21 @@ const AdminsPage = () => {
   }, []);
 
   useEffect(() => { chargerAdmins(); }, [chargerAdmins]);
+
+  const handleToggleStatus = async (admin: Utilisateur) => {
+    try {
+      const res = await adminService.toggleStatus(admin.id);
+      const updated = (res.data as any)?.data;
+      if (updated) {
+        setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, status: updated.status } : a));
+      } else {
+        setAdmins(prev => prev.map(a => a.id === admin.id ? { ...a, status: a.status === 'ACTIF' ? 'INACTIF' : 'ACTIF' } : a));
+      }
+      toast.success(`Admin ${admin.prenom} ${admin.nom} ${admin.status === 'ACTIF' ? 'bloqué' : 'débloqué'} avec succès`);
+    } catch {
+      toast.error("Erreur lors du changement de statut");
+    }
+  };
 
   const filtered = admins.filter(a =>
     `${a.prenom} ${a.nom}`.toLowerCase().includes(search.toLowerCase()) ||
@@ -59,6 +76,7 @@ const AdminsPage = () => {
                 <th className="px-4 py-3 text-left">Téléphone</th>
                 <th className="px-4 py-3 text-left">Cabinet</th>
                 <th className="px-4 py-3 text-left">Statut</th>
+                <th className="px-4 py-3 text-left">Actions</th>
               </tr></thead>
               <tbody>
                 {filtered.map(a => (
@@ -85,10 +103,24 @@ const AdminsPage = () => {
                     <td className="px-4 py-3">
                       <StatusBadge status={a.status as any} type="entity" />
                     </td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1">
+                        {a.cabinetId && (
+                          <button onClick={() => navigate(`/super-admin/cabinets/${a.cabinetId}/modifier`)} className="p-2 rounded-lg hover:bg-muted transition-colors" title="Modifier">
+                            <Pencil size={16} />
+                          </button>
+                        )}
+                        <button onClick={() => handleToggleStatus(a)} className="p-2 rounded-lg hover:bg-muted transition-colors" title={a.status === 'ACTIF' ? 'Bloquer' : 'Débloquer'}>
+                          <div className={`w-8 h-4 rounded-full ${a.status === 'ACTIF' ? 'bg-primary' : 'bg-muted-foreground/30'} relative transition-colors`}>
+                            <div className={`absolute top-0.5 h-3 w-3 rounded-full bg-card transition-transform ${a.status === 'ACTIF' ? 'right-0.5' : 'left-0.5'}`} />
+                          </div>
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
                 {filtered.length === 0 && (
-                  <tr><td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">Aucun admin trouvé</td></tr>
+                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Aucun admin trouvé</td></tr>
                 )}
               </tbody>
             </table>

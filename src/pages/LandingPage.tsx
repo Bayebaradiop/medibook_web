@@ -26,7 +26,7 @@ const VIDEO_PHASES = [
     label: 'Discussion médecin',
     description: 'Le médecin échange avec le patient',
     icon: MessageSquare,
-    src: 'https://videos.pexels.com/video-files/5453377/5453377-uhd_2560_1440_25fps.mp4',
+    src: 'https://videos.pexels.com/video-files/4769486/4769486-uhd_2560_1440_25fps.mp4',
   },
   {
     id: 4,
