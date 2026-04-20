@@ -6,7 +6,7 @@ import { validerEmail, validerMotDePasse } from '../logique/auth.validation';
 import { AUTH_ERREURS } from '../messages/auth.erreurs';
 import { AUTH_SUCCES } from '../messages/auth.succes';
 import AuthLayout from '@/layouts/AuthLayout';
-import { Hospital, Mail, Lock, Eye, EyeOff, ShieldCheck, Stethoscope, ArrowRight } from 'lucide-react';
+import { Hospital, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 
 type ErreursChamp = Record<string, string>;
@@ -96,49 +96,14 @@ const LoginPage = () => {
 
   return (
     <AuthLayout>
-      <div className="w-full max-w-[480px]">
-        <div className="rounded-[32px] border border-white/80 bg-white/95 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.10)] backdrop-blur-xl sm:p-8">
-          <div className="mb-8 space-y-5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/10 bg-primary/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-              <ShieldCheck size={14} />
-              Connexion securisee
+      <div className="w-full max-w-[420px]">
+        <div className="rounded-3xl border border-white/80 bg-white/95 p-6 shadow-[0_24px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-8">
+          <div className="mb-8 flex flex-col items-center text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-light text-primary-foreground shadow-lg">
+              <Hospital size={28} />
             </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-[24px] bg-gradient-to-br from-primary via-primary to-primary-light text-primary-foreground shadow-[0_18px_34px_rgba(46,125,50,0.24)]">
-                <Hospital size={30} />
-              </div>
-
-              <div className="min-w-0">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-primary/70">MediBook</p>
-                <h1 className="mt-1 text-3xl font-bold tracking-tight text-slate-900">Bienvenue</h1>
-                <p className="mt-2 text-sm leading-6 text-slate-500">
-                  Connectez-vous pour gerer votre cabinet, vos rendez-vous et votre activite dans un espace plus net et plus lisible.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50/90 p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <Stethoscope size={16} className="text-primary" />
-                  Espace medical
-                </div>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  Admins, medecins et secretaires accedent a leur environnement en quelques secondes.
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
-                <div className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                  <ShieldCheck size={16} className="text-primary" />
-                  Acces protege
-                </div>
-                <p className="mt-2 text-xs leading-5 text-slate-500">
-                  Utilisez votre adresse professionnelle pour retrouver les donnees de votre cabinet.
-                </p>
-              </div>
-            </div>
+            <h1 className="mt-4 text-2xl font-bold tracking-tight text-slate-900">Bienvenue sur MediBook</h1>
+            <p className="mt-1.5 text-sm text-slate-500">Connectez-vous a votre espace</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
@@ -177,11 +142,8 @@ const LoginPage = () => {
               {erreurs.motDePasse && <p className="mt-1 text-xs text-destructive">{erreurs.motDePasse}</p>}
             </div>
 
-            <div className="flex items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-              <p className="text-xs leading-5 text-slate-500">
-                Besoin d&apos;aide pour retrouver votre acces ?
-              </p>
-              <Link to="/forgot-password" className="shrink-0 text-sm font-semibold text-primary hover:underline">
+            <div className="flex justify-end">
+              <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -189,19 +151,12 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="medibook-btn mt-2 flex w-full items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark shadow-[0_18px_34px_rgba(46,125,50,0.24)] hover:brightness-95"
+              className="medibook-btn mt-2 flex w-full items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary-dark shadow-[0_14px_28px_rgba(46,125,50,0.2)] hover:brightness-95"
             >
               {isLoading ? 'Connexion...' : 'Se connecter'}
               {!isLoading && <ArrowRight size={18} />}
             </button>
           </form>
-
-          <div className="mt-6 rounded-2xl border border-primary/10 bg-primary/5 px-4 py-4">
-            <p className="text-sm font-semibold text-slate-900">Un espace plus equilibre entre confiance et lisibilite.</p>
-            <p className="mt-1 text-xs leading-5 text-slate-500">
-              Le vert reste present pour guider l&apos;action, mais le blanc reprend la priorite pour une lecture plus confortable.
-            </p>
-          </div>
         </div>
       </div>
     </AuthLayout>
