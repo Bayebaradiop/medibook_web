@@ -20,6 +20,31 @@ const hasMessageProperty = (value: unknown): value is { message: string } =>
   "message" in value &&
   typeof (value as { message: unknown }).message === "string";
 
+const hasErrorProperty = (value: unknown): value is { error: string } =>
+  typeof value === "object" &&
+  value !== null &&
+  "error" in value &&
+  typeof (value as { error: unknown }).error === "string";
+
+const extraireMessageErreur = (value: unknown): string | undefined => {
+  if (hasMessageProperty(value)) return value.message;
+  if (hasErrorProperty(value)) return value.error;
+
+  if (typeof value === "object" && value !== null && "error" in value) {
+    const errorValue = (value as { error?: unknown }).error;
+    if (
+      typeof errorValue === "object" &&
+      errorValue !== null &&
+      "description" in errorValue &&
+      typeof (errorValue as { description?: unknown }).description === "string"
+    ) {
+      return (errorValue as { description: string }).description;
+    }
+  }
+
+  return undefined;
+};
+
 const extraireListe = <T,>(value: unknown): T[] => {
   if (Array.isArray(value)) return value as T[];
   if (hasDataProperty(value)) {
@@ -52,8 +77,11 @@ const mapperMessageVersErreursChamp = (message?: string): Record<string, string>
   if (message === EXCEPTION_ERREURS.HEURE_FIN_AVANT_DEBUT) {
     return { heureFin: message };
   }
-  if (message?.includes("dateFin")) {
+  if (message?.includes("dateFin") || message?.includes("date de fin")) {
     return { dateFin: message };
+  }
+  if (message?.includes("plusieurs jours")) {
+    return { heureDebut: message, heureFin: message };
   }
 
   return {};
@@ -82,7 +110,16 @@ const ExceptionsPage = () => {
     try {
       const res = await exceptionMedecinService.list();
       setExceptions(extraireListe<ExceptionPlanning>(res.data));
-    } catch {
+    } catch (error) {
+      if (isAxiosError(error)) {
+        const message = extraireMessageErreur(error.response?.data);
+        if (message) {
+          toast.error(message);
+          setExceptions([]);
+          return;
+        }
+      }
+
       toast.error(EXCEPTION_ERREURS.CHARGEMENT_ECHOUE);
       setExceptions([]);
     } finally {
@@ -135,9 +172,17 @@ const ExceptionsPage = () => {
           return;
         }
 
-        const mappedErrors = mapperMessageVersErreursChamp(hasMessageProperty(error.response?.data) ? error.response.data.message : undefined);
+        const mappedErrors = mapperMessageVersErreursChamp(extraireMessageErreur(error.response?.data));
         if (Object.keys(mappedErrors).length > 0) {
           setErreurs(mappedErrors);
+          return;
+        }
+      }
+
+      if (isAxiosError(error)) {
+        const message = extraireMessageErreur(error.response?.data);
+        if (message) {
+          toast.error(message);
           return;
         }
       }
@@ -162,6 +207,14 @@ const ExceptionsPage = () => {
       setDeleteId(null);
       await chargerExceptions();
     } catch (error) {
+      if (isAxiosError(error)) {
+        const message = extraireMessageErreur(error.response?.data);
+        if (message) {
+          toast.error(message);
+          return;
+        }
+      }
+
       if (isAxiosError(error) && hasMessageProperty(error.response?.data)) {
         toast.error(error.response.data.message);
       } else {
