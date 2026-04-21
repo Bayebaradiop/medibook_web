@@ -8,29 +8,29 @@
   :root {
     --font-poppins: 'Poppins', sans-serif;
 
-    /* Primary Green #2E7D32 → hsl(122, 46%, 33%) */
-    --primary: 122 46% 33%;
+    /* Primary Teal #2F7D79 → hsl(169, 25%, 40%) */
+    --primary: 169 25% 40%;
     --primary-foreground: 0 0% 100%;
 
-    /* Primary Light #66BB6A → hsl(123, 38%, 57%) */
-    --primary-light: 123 38% 57%;
+    /* Primary Light #4FA7A1 → hsl(170, 33%, 48%) */
+    --primary-light: 170 33% 48%;
 
-    /* Primary Dark #1B5E20 → hsl(122, 55%, 24%) */
-    --primary-dark: 122 55% 24%;
+    /* Primary Dark #1F5452 → hsl(169, 36%, 26%) */
+    --primary-dark: 169 36% 26%;
 
-    /* Background #F5F5F5 → hsl(0, 0%, 96%) */
-    --background: 0 0% 96%;
-    --foreground: 122 55% 24%;
+    /* Background #EAF6F5 → hsl(174, 40%, 94%) */
+    --background: 174 40% 94%;
+    --foreground: 169 36% 26%;
 
     /* Card #FFFFFF */
     --card: 0 0% 100%;
-    --card-foreground: 122 55% 24%;
+    --card-foreground: 169 36% 26%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 122 55% 24%;
+    --popover-foreground: 169 36% 26%;
 
     /* Secondary */
-    --secondary: 0 0% 96%;
+    --secondary: 174 40% 94%;
     --secondary-foreground: 0 0% 38%;
 
     /* Muted */
@@ -38,7 +38,7 @@
     --muted-foreground: 0 0% 62%;
 
     /* Accent */
-    --accent: 122 46% 33%;
+    --accent: 169 25% 40%;
     --accent-foreground: 0 0% 100%;
 
     /* Destructive #E53935 → hsl(1, 76%, 56%) */
@@ -47,14 +47,14 @@
 
     /* Status colors */
     --status-pending: 33 100% 58%;
-    --status-confirmed: 123 38% 57%;
+    --status-confirmed: 170 33% 48%;
     --status-completed: 200 10% 55%;
     --status-cancelled: 1 84% 63%;
-    --status-active: 122 40% 45%;
+    --status-active: 169 25% 40%;
     --status-inactive: 0 0% 62%;
 
-    /* Success #43A047 */
-    --success: 122 41% 45%;
+    /* Success #4FA7A1 */
+    --success: 170 33% 48%;
     --success-foreground: 0 0% 100%;
 
     /* Warning #FFA726 */
@@ -67,28 +67,28 @@
 
     --border: 0 0% 88%;
     --input: 0 0% 88%;
-    --ring: 122 46% 33%;
+    --ring: 169 25% 40%;
     --radius: 1rem;
 
-    --sidebar-background: 122 46% 33%;
+    --sidebar-background: 169 25% 40%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 122 46% 33%;
+    --sidebar-primary: 169 25% 40%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 122 46% 33%;
+    --sidebar-accent: 169 25% 40%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 123 38% 57%;
-    --sidebar-ring: 122 46% 33%;
+    --sidebar-border: 170 33% 48%;
+    --sidebar-ring: 169 25% 40%;
 
     /* Topbar */
-    --topbar-background: 122 41% 45%;
+    --topbar-background: 170 33% 48%;
 
     /* Shadows */
     --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.06);
     --shadow-sidebar: 2px 0 10px rgba(0, 0, 0, 0.06);
 
     /* Chart colors for dark mode compat */
-    --chart-1: 122 46% 33%;
-    --chart-2: 123 38% 57%;
+    --chart-1: 169 25% 40%;
+    --chart-2: 170 33% 48%;
     --chart-3: 33 100% 58%;
     --chart-4: 200 10% 55%;
     --chart-5: 1 76% 56%;
@@ -104,10 +104,10 @@
     --popover: 220 15% 14%;
     --popover-foreground: 0 0% 90%;
 
-    --primary: 122 46% 40%;
+    --primary: 169 25% 42%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 123 38% 50%;
-    --primary-dark: 122 55% 30%;
+    --primary-light: 170 33% 50%;
+    --primary-dark: 169 36% 28%;
 
     --secondary: 220 15% 18%;
     --secondary-foreground: 0 0% 70%;
@@ -115,13 +115,13 @@
     --muted: 220 15% 18%;
     --muted-foreground: 0 0% 55%;
 
-    --accent: 122 46% 40%;
+    --accent: 169 25% 42%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 1 76% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 122 41% 42%;
+    --success: 170 33% 50%;
     --success-foreground: 0 0% 100%;
     --warning: 33 100% 55%;
     --warning-foreground: 0 0% 100%;
@@ -129,24 +129,24 @@
     --info-foreground: 0 0% 100%;
 
     --status-pending: 33 100% 55%;
-    --status-confirmed: 123 38% 50%;
+    --status-confirmed: 170 33% 50%;
     --status-completed: 200 10% 50%;
     --status-cancelled: 1 84% 58%;
-    --status-active: 122 40% 42%;
+    --status-active: 169 25% 42%;
     --status-inactive: 0 0% 55%;
 
     --border: 220 15% 22%;
     --input: 220 15% 22%;
-    --ring: 122 46% 40%;
+    --ring: 169 25% 42%;
 
-    --sidebar-background: 122 46% 30%;
+    --sidebar-background: 169 25% 32%;
     --sidebar-foreground: 0 0% 100%;
-    --sidebar-primary: 122 46% 40%;
+    --sidebar-primary: 169 25% 42%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 122 46% 40%;
+    --sidebar-accent: 169 25% 42%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 122 46% 35%;
-    --sidebar-ring: 122 46% 40%;
+    --sidebar-border: 169 25% 37%;
+    --sidebar-ring: 169 25% 42%;
 
     /* Topbar */
     --topbar-background: 122 41% 40%;
