@@ -9,7 +9,9 @@ import {
   List, 
   Stethoscope, 
   RefreshCw,
-  Plus
+  Plus,
+  User,
+  AlertTriangle
 } from 'lucide-react';
 import { DAYS_OF_WEEK } from '@/utils/constants';
 
@@ -72,7 +74,29 @@ interface GrandAgendaUnifieProps {
   userRole?: 'MEDECIN' | 'SECRETAIRE' | 'ADMIN' | 'SUPER_ADMIN';
 }
 
-const HOURS = Array.from({ length: 12 }, (_, i) => `${(i + 8).toString().padStart(2, '0')}:00`);
+const START_HOUR = 7; // 07:00
+const END_HOUR = 20;  // 20:00
+const HOUR_HEIGHT = 64; // pixels par heure
+
+const HOURS = Array.from({ length: END_HOUR - START_HOUR + 1 }, (_, i) => {
+  const h = i + START_HOUR;
+  return `${h.toString().padStart(2, '0')}:00`;
+});
+
+// Helper pour convertir "09:30" ou "09:30:00" en minutes depuis minuit
+const parseTimeToMinutes = (timeStr?: string): number => {
+  if (!timeStr) return 0;
+  const parts = timeStr.split(':');
+  const h = parseInt(parts[0], 10) || 0;
+  const m = parseInt(parts[1], 10) || 0;
+  return h * 60 + m;
+};
+
+// Formater "09:30:00" -> "09:30"
+const formatTime = (timeStr?: string): string => {
+  if (!timeStr) return '';
+  return timeStr.slice(0, 5);
+};
 
 export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
   medecins = [],
@@ -88,11 +112,10 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
   onNewPlanning,
   userRole = 'MEDECIN'
 }) => {
-  // Date de référence pour la semaine sélectionnée (Défaut: Lundi de la semaine actuelle)
   const [currentWeekStart, setCurrentWeekStart] = useState<Date>(() => {
     const d = new Date();
     const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Ajuster au lundi
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
     const monday = new Date(d.setDate(diff));
     monday.setHours(0, 0, 0, 0);
     return monday;
@@ -100,7 +123,6 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
 
   const [activeTab, setActiveTab] = useState<'agenda' | 'templates' | 'exceptions'>('agenda');
 
-  // Naviguer entre les semaines
   const handlePrevWeek = () => {
     const prev = new Date(currentWeekStart);
     prev.setDate(prev.getDate() - 7);
@@ -147,25 +169,45 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
     return `${first.dayNumber} ${first.monthName} — ${last.dayNumber} ${last.monthName} ${last.dateObj.getFullYear()}`;
   }, [weekDays]);
 
-  // Helpers de normalisation
-  const normalizeTime = (timeStr?: string) => timeStr ? timeStr.slice(0, 5) : '';
+  // Calculer position verticale `top` (px) et hauteur `height` (px) selon heure de début et de fin
+  const getVerticalStyle = (startStr: string, endStr?: string, defaultDurationMin: number = 30) => {
+    const gridStartMins = START_HOUR * 60;
+    const startMins = parseTimeToMinutes(startStr);
+    
+    let durationMins = defaultDurationMin;
+    if (endStr) {
+      const endMins = parseTimeToMinutes(endStr);
+      if (endMins > startMins) {
+        durationMins = endMins - startMins;
+      }
+    }
+
+    const startFromGrid = Math.max(0, startMins - gridStartMins);
+    const topPx = (startFromGrid / 60) * HOUR_HEIGHT;
+    const heightPx = Math.max(26, (durationMins / 60) * HOUR_HEIGHT);
+
+    return {
+      top: `${topPx}px`,
+      height: `${heightPx}px`
+    };
+  };
 
   return (
     <div className="space-y-4">
-      {/* Barre de contrôle supérieure (Header Executive) */}
+      {/* Header Controls */}
       <div className="medibook-card bg-card p-4 sm:p-5 rounded-3xl border border-border/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         
-        {/* Filtre Médecin (Secrétaire) + Titre */}
+        {/* Filtre Médecin + Temporel */}
         <div className="flex flex-wrap items-center gap-3">
           {medecins.length > 0 && onSelectMedecin && (
             <div className="relative min-w-[220px]">
               <select
                 value={selectedMedecinId ?? ''}
                 onChange={(e) => onSelectMedecin(Number(e.target.value))}
-                className="medibook-input text-sm font-bold w-full pl-9"
+                className="medibook-input text-sm font-extrabold w-full pl-9 pr-8 bg-card text-foreground border-border hover:bg-muted focus:ring-2 focus:ring-primary transition-all rounded-2xl shadow-xs cursor-pointer"
               >
                 {medecins.map((m) => (
-                  <option key={m.id} value={m.id}>
+                  <option key={m.id} value={m.id} className="bg-card text-foreground font-semibold py-1">
                     Dr. {m.prenom} {m.nom} {m.specialiteNom ? `(${m.specialiteNom})` : ''}
                   </option>
                 ))}
@@ -174,7 +216,7 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
             </div>
           )}
 
-          {/* Navigation Temporelle */}
+          {/* Nav Temporelle */}
           <div className="flex items-center gap-1.5 bg-muted/40 p-1 rounded-2xl border border-border/60">
             <button
               onClick={handlePrevWeek}
@@ -204,9 +246,8 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
           </div>
         </div>
 
-        {/* Boutons d'Onglets & Actions Rapides */}
+        {/* Machine d'Onglets & Actions */}
         <div className="flex flex-wrap items-center gap-3">
-          {/* Machine d'Onglets */}
           <div className="flex rounded-2xl bg-muted/40 p-1 border border-border/60">
             <button
               onClick={() => setActiveTab('agenda')}
@@ -216,7 +257,7 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <CalendarIcon size={14} /> Agenda 7 Jours
+              <CalendarIcon size={14} /> Agenda Vertical 7J
             </button>
             <button
               onClick={() => setActiveTab('templates')}
@@ -226,7 +267,7 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Clock size={14} /> Emploi du Temps
+              <Clock size={14} /> Horaires Recurrents
             </button>
             <button
               onClick={() => setActiveTab('exceptions')}
@@ -240,7 +281,6 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
             </button>
           </div>
 
-          {/* Boutons Actions Rapides */}
           {onNewException && (
             <button
               onClick={onNewException}
@@ -271,125 +311,226 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
         </div>
       </div>
 
-      {/* VUE 1 : GRAND AGENDA UNIFIÉ (7 JOURS DYNAMIQUES) */}
+      {/* VUE 1 : AGENDA TEMPOREL VERTICAL 7 JOURS */}
       {activeTab === 'agenda' && (
-        <div className="medibook-card p-0 rounded-3xl border border-border/80 overflow-hidden shadow-sm">
+        <div className="medibook-card p-0 rounded-3xl border border-border/80 overflow-hidden shadow-sm bg-card">
+          {/* Légende rapide en haut */}
+          <div className="px-5 py-2.5 bg-muted/30 border-b border-border flex flex-wrap items-center gap-4 text-xs font-semibold">
+            <span className="text-muted-foreground">Légende :</span>
+            <div className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-md bg-sky-500 border border-sky-600" />
+              <span>RDV Confirmé (Étiré verticalement)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-md bg-emerald-500/20 border border-emerald-500" />
+              <span>Créneau Libre</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-md bg-destructive/20 border border-destructive" />
+              <span>Absence / Congé</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="h-3 w-3 rounded-md bg-primary/10 border border-primary/40" />
+              <span>Plage de Consultation</span>
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[950px] border-collapse">
-              <thead>
-                <tr className="bg-muted/40 border-b border-border text-xs uppercase tracking-wider">
-                  <th className="px-3 py-3 w-16 text-center text-muted-foreground border-r border-border/60">Heure</th>
-                  {weekDays.map((day) => (
-                    <th
-                      key={day.isoDate}
-                      className={`px-3 py-3 text-center border-r border-border/60 last:border-r-0 ${
-                        day.isToday ? 'bg-primary/10 text-primary font-extrabold' : 'text-foreground font-bold'
-                      }`}
-                    >
-                      <div className="flex flex-col items-center">
-                        <span className="text-[11px] text-muted-foreground">{day.dayName}</span>
-                        <span className={`text-base leading-tight ${day.isToday ? 'text-primary' : ''}`}>
-                          {day.dayNumber} {day.monthName}
-                        </span>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {HOURS.map((hour) => (
-                  <tr key={hour} className="border-b border-border/60 hover:bg-muted/10 transition-colors">
-                    <td className="px-2 py-3 text-xs font-bold text-center text-muted-foreground border-r border-border/60 bg-muted/20">
-                      {hour}
-                    </td>
-                    {weekDays.map((day) => {
-                      // 1. Vérifier si cette journée/heure tombe dans une EXCEPTION (Absence/Vacances/Férié)
-                      const matchingException = exceptions.find((ex) => {
-                        const inDateRange = day.isoDate >= ex.dateDebut && day.isoDate <= (ex.dateFin || ex.dateDebut);
-                        if (!inDateRange) return false;
-                        if (!ex.heureDebut || !ex.heureFin) return true; // Journée entière
-                        const slotHour = normalizeTime(hour);
-                        return slotHour >= normalizeTime(ex.heureDebut) && slotHour < normalizeTime(ex.heureFin);
-                      });
-
-                      // 2. Vérifier s'il y a un RDV réservé sur ce jour/heure
-                      const matchingRdv = rendezVous.find((r) => {
-                        return (r.date === day.isoDate || (Array.isArray(r.date) && `${r.date[0]}-${String(r.date[1]).padStart(2, '0')}-${String(r.date[2]).padStart(2, '0')}` === day.isoDate))
-                          && normalizeTime(r.heureDebut) === normalizeTime(hour);
-                      });
-
-                      // 3. Vérifier les créneaux libres de la base de données
-                      const matchingCreneaux = creneaux.filter((c) => {
-                        return (c.date === day.isoDate || (Array.isArray(c.date) && `${c.date[0]}-${String(c.date[1]).padStart(2, '0')}-${String(c.date[2]).padStart(2, '0')}` === day.isoDate))
-                          && normalizeTime(c.heureDebut) === normalizeTime(hour);
-                      });
-
-                      // 4. Vérifier le planning théorique
-                      const matchingPlanning = plannings.find((p) => {
-                        return p.jourSemaine === day.dayName 
-                          && normalizeTime(p.heureDebut) <= normalizeTime(hour) 
-                          && normalizeTime(p.heureFin) > normalizeTime(hour);
-                      });
-
-                      return (
-                        <td key={day.isoDate} className="px-1.5 py-1.5 border-r border-border/60 last:border-r-0 align-top h-16">
-                          {/* Cas A : Indisponibilité / Absence (Priorité 1) */}
-                          {matchingException ? (
-                            <div className="h-full p-2 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive flex flex-col justify-between text-xs font-semibold shadow-2xs">
-                              <div className="flex items-center justify-between gap-1">
-                                <span className="font-extrabold text-[11px] uppercase tracking-wide">
-                                  {matchingException.type === 'ABSENT' ? '🚫 Absent' : matchingException.type === 'VACANCES' ? '🌴 Congé' : '🔒 Fermé'}
-                                </span>
-                              </div>
-                              <p className="text-[10px] truncate opacity-90">{matchingException.motif || 'Indisponible'}</p>
-                            </div>
-                          ) : matchingRdv ? (
-                            /* Cas B : Rendez-vous confirmé/réservé (Priorité 2) */
-                            <div className="h-full p-2 rounded-xl bg-sky-500/15 border border-sky-500/30 text-sky-950 dark:text-sky-200 flex flex-col justify-between text-xs shadow-2xs">
-                              <div className="flex items-center justify-between font-extrabold text-[11px]">
-                                <span className="flex items-center gap-1">
-                                  <UserCheck size={12} className="text-sky-500" />
-                                  {matchingRdv.patientNom || matchingRdv.patientPrenom || 'Patient'}
-                                </span>
-                                <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-sky-500/20">{normalizeTime(matchingRdv.heureDebut)}</span>
-                              </div>
-                              <p className="text-[10px] text-sky-600 dark:text-sky-400 font-semibold">{matchingRdv.statut}</p>
-                            </div>
-                          ) : matchingCreneaux.length > 0 ? (
-                            /* Cas C : Créneaux générés libres dans la BD (Priorité 3) */
-                            <div className="space-y-1">
-                              {matchingCreneaux.map((cr) => (
-                                <div
-                                  key={cr.id}
-                                  className={`p-1.5 rounded-lg border text-[11px] font-bold text-center transition-all ${
-                                    cr.disponible
-                                      ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20'
-                                      : 'bg-muted border-border text-muted-foreground line-through'
-                                  }`}
-                                >
-                                  {normalizeTime(cr.heureDebut)} - {normalizeTime(cr.heureFin)}
-                                </div>
-                              ))}
-                            </div>
-                          ) : matchingPlanning && normalizeTime(matchingPlanning.heureDebut) === normalizeTime(hour) ? (
-                            /* Cas D : En-tête de tranche de travail récurrente */
-                            <div className="p-2 rounded-xl bg-primary/10 border-l-3 border-primary text-primary text-xs font-semibold">
-                              <p className="font-extrabold">{normalizeTime(matchingPlanning.heureDebut)} - {normalizeTime(matchingPlanning.heureFin)}</p>
-                              <p className="text-[10px] text-muted-foreground">Ouvert ({matchingPlanning.dureeCreneau}m)</p>
-                            </div>
-                          ) : null}
-                        </td>
-                      );
-                    })}
-                  </tr>
+            <div className="min-w-[1000px] relative select-none">
+              
+              {/* En-tête des 7 jours */}
+              <div className="grid grid-cols-[70px_repeat(7,1fr)] bg-muted/40 border-b border-border sticky top-0 z-20">
+                <div className="px-2 py-3 text-center text-xs font-bold text-muted-foreground border-r border-border/60">
+                  Heure
+                </div>
+                {weekDays.map((day) => (
+                  <div
+                    key={day.isoDate}
+                    className={`px-3 py-3 text-center border-r border-border/60 last:border-r-0 ${
+                      day.isToday ? 'bg-primary/10 text-primary font-extrabold' : 'text-foreground font-bold'
+                    }`}
+                  >
+                    <div className="flex flex-col items-center">
+                      <span className="text-[11px] text-muted-foreground uppercase tracking-wide">{day.dayName}</span>
+                      <span className={`text-base leading-tight ${day.isToday ? 'text-primary' : ''}`}>
+                        {day.dayNumber} {day.monthName}
+                      </span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+
+              {/* Grille Temporelle & Colonnes de jours */}
+              <div
+                className="grid grid-cols-[70px_repeat(7,1fr)] relative"
+                style={{ height: `${(END_HOUR - START_HOUR + 1) * HOUR_HEIGHT}px` }}
+              >
+                {/* Colonne des Heures (Axe Y vertical) */}
+                <div className="border-r border-border/60 bg-muted/15 relative">
+                  {HOURS.map((h, i) => (
+                    <div
+                      key={h}
+                      className="absolute left-0 right-0 text-center text-xs font-bold text-muted-foreground"
+                      style={{ top: `${i * HOUR_HEIGHT}px` }}
+                    >
+                      <span className="relative -top-2 bg-card px-1 rounded">{h}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* 7 Colonnes des Jours (Axe X horizontal) */}
+                {weekDays.map((day) => {
+                  // Filtrer les événements pour ce jour précis
+                  const dayRdvs = rendezVous.filter((r) => {
+                    const rDate = typeof r.date === 'string' ? r.date.substring(0, 10) : Array.isArray(r.date) ? `${r.date[0]}-${String(r.date[1]).padStart(2, '0')}-${String(r.date[2]).padStart(2, '0')}` : String(r.date);
+                    return rDate === day.isoDate;
+                  });
+
+                  const dayCreneaux = creneaux.filter((c) => {
+                    const cDate = typeof c.date === 'string' ? c.date.substring(0, 10) : Array.isArray(c.date) ? `${c.date[0]}-${String(c.date[1]).padStart(2, '0')}-${String(c.date[2]).padStart(2, '0')}` : String(c.date);
+                    return cDate === day.isoDate;
+                  });
+
+                  const dayExceptions = exceptions.filter((ex) => {
+                    return day.isoDate >= ex.dateDebut && day.isoDate <= (ex.dateFin || ex.dateDebut);
+                  });
+
+                  const dayPlannings = plannings.filter((p) => p.jourSemaine === day.dayName);
+
+                  return (
+                    <div
+                      key={day.isoDate}
+                      className="relative border-r border-border/60 last:border-r-0 h-full"
+                    >
+                      {/* Lignes d'heures d'arrière-plan */}
+                      {HOURS.map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute left-0 right-0 border-b border-border/40 pointer-events-none"
+                          style={{ top: `${i * HOUR_HEIGHT}px`, height: `${HOUR_HEIGHT}px` }}
+                        />
+                      ))}
+
+                      {/* 1. BLOCS DE PLANNINGS THÉORIQUES (Fond teinté léger) */}
+                      {dayPlannings.map((p) => {
+                        const style = getVerticalStyle(p.heureDebut, p.heureFin, 60);
+                        return (
+                          <div
+                            key={`plan-${p.id}`}
+                            className="absolute left-1 right-1 rounded-xl bg-primary/10 border-l-4 border-primary p-2 opacity-65 pointer-events-none transition-all z-0"
+                            style={style}
+                          >
+                            <span className="text-[10px] font-extrabold text-primary block truncate">
+                              Plage Consultation: {formatTime(p.heureDebut)} - {formatTime(p.heureFin)}
+                            </span>
+                          </div>
+                        );
+                      })}
+
+                      {/* 2. BLOCS D'EXCEPTIONS / ABSENCES (Blocs Rouges Verticaux) */}
+                      {dayExceptions.map((ex) => {
+                        const isFullDay = !ex.heureDebut || !ex.heureFin;
+                        const style = isFullDay
+                          ? { top: '0px', height: `${(END_HOUR - START_HOUR + 1) * HOUR_HEIGHT}px` }
+                          : getVerticalStyle(ex.heureDebut!, ex.heureFin, 60);
+
+                        return (
+                          <div
+                            key={`exc-${ex.id}`}
+                            className="absolute left-1.5 right-1.5 rounded-2xl bg-destructive/20 border-2 border-destructive/60 p-2.5 text-destructive flex flex-col justify-between shadow-md z-10 backdrop-blur-xs"
+                            style={style}
+                          >
+                            <div>
+                              <div className="flex items-center gap-1 font-extrabold text-xs">
+                                <AlertTriangle size={14} className="shrink-0" />
+                                <span className="uppercase tracking-wide truncate">
+                                  {ex.type === 'ABSENT' ? '🚫 Absence' : ex.type === 'VACANCES' ? '🌴 Vacances' : '🔒 Indisponible'}
+                                </span>
+                              </div>
+                              {ex.dateDebut !== ex.dateFin && (
+                                <p className="text-[10px] font-black bg-destructive/30 px-1.5 py-0.5 rounded-md mt-1 inline-block">
+                                  Du {ex.dateDebut} au {ex.dateFin}
+                                </p>
+                              )}
+                              <p className="text-[11px] font-bold mt-1 leading-tight">
+                                {isFullDay ? 'Journée Entière' : `${formatTime(ex.heureDebut)} — ${formatTime(ex.heureFin)}`}
+                              </p>
+                              {ex.motif && (
+                                <p className="text-[10px] opacity-90 truncate mt-0.5 font-medium">« {ex.motif} »</p>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                      {/* 3. BLOCS DE CRÉNEAUX LIBRES (Créneaux éligibles verts) */}
+                      {dayCreneaux.map((cr) => {
+                        const style = getVerticalStyle(cr.heureDebut, cr.heureFin, 30);
+                        return (
+                          <div
+                            key={`cren-${cr.id}`}
+                            className={`absolute left-2 right-2 rounded-xl p-1.5 border text-xs font-bold flex items-center justify-between transition-all z-10 shadow-2xs ${
+                              cr.disponible
+                                ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/25'
+                                : 'bg-muted/80 border-border text-muted-foreground line-through opacity-60'
+                            }`}
+                            style={style}
+                          >
+                            <span className="truncate text-[11px]">
+                              {formatTime(cr.heureDebut)} - {formatTime(cr.heureFin)}
+                            </span>
+                            {cr.disponible && (
+                              <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-emerald-500 text-white font-extrabold">
+                                Libre
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {/* 4. BLOCS DE RENDEZ-VOUS CONFIRMÉS (Blocs Bleus Verticaux Étirés) */}
+                      {dayRdvs.map((rv) => {
+                        const style = getVerticalStyle(rv.heureDebut, rv.heureFin, 45);
+                        return (
+                          <div
+                            key={`rdv-${rv.id}`}
+                            className="absolute left-2 right-2 rounded-2xl bg-gradient-to-b from-sky-600 to-sky-700 text-white p-2.5 shadow-lg border border-sky-400 flex flex-col justify-between transition-all hover:scale-[1.02] z-20"
+                            style={style}
+                          >
+                            <div>
+                              <div className="flex items-center justify-between gap-1 text-xs font-extrabold mb-0.5">
+                                <span className="flex items-center gap-1 truncate">
+                                  <User size={13} className="text-sky-200 shrink-0" />
+                                  <span className="truncate">
+                                    {[rv.patientPrenom, rv.patientNom].filter(Boolean).join(' ') || 'Patient'}
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[11px] font-bold text-sky-100">
+                                <Clock size={11} className="shrink-0" />
+                                <span>{formatTime(rv.heureDebut)} {rv.heureFin ? `→ ${formatTime(rv.heureFin)}` : ''}</span>
+                              </div>
+                            </div>
+                            <div className="flex items-center justify-between text-[10px] font-extrabold pt-1 border-t border-sky-400/40 mt-1">
+                              <span className="px-1.5 py-0.5 rounded-md bg-white/20 backdrop-blur-xs uppercase">
+                                {rv.statut || 'Confirmé'}
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
+
+                    </div>
+                  );
+                })}
+              </div>
+
+            </div>
           </div>
         </div>
       )}
 
-      {/* VUE 2 : EMPLOI DU TEMPS RÉCURRENT (TEMPLATES DE SEMAINE) */}
+      {/* VUE 2 : EMPLOI DU TEMPS RÉCURRENT */}
       {activeTab === 'templates' && (
         <div className="medibook-card bg-card p-6 rounded-3xl border border-border/80 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
@@ -418,7 +559,7 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
                       {dayPlannings.map((p) => (
                         <div key={p.id} className="p-3 rounded-xl bg-primary/5 border border-primary/20 flex items-center justify-between">
                           <div>
-                            <p className="text-xs font-bold text-foreground">{normalizeTime(p.heureDebut)} — {normalizeTime(p.heureFin)}</p>
+                            <p className="text-xs font-bold text-foreground">{formatTime(p.heureDebut)} — {formatTime(p.heureFin)}</p>
                             <p className="text-[10px] text-muted-foreground">Créneaux de {p.dureeCreneau} min</p>
                           </div>
                         </div>
@@ -464,7 +605,7 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {ex.heureDebut && ex.heureFin ? `Horaire: ${normalizeTime(ex.heureDebut)} - ${normalizeTime(ex.heureFin)}` : 'Journée entière'}
+                        {ex.heureDebut && ex.heureFin ? `Horaire: ${formatTime(ex.heureDebut)} - ${formatTime(ex.heureFin)}` : 'Journée entière'}
                         {ex.motif ? ` · Motif: ${ex.motif}` : ''}
                       </p>
                     </div>

@@ -33,8 +33,7 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
   SECRETAIRE: [
     { label: 'Dashboard', icon: LayoutDashboard, path: '/secretaire' },
     { label: 'Médecins', icon: Users, path: '/secretaire/medecins' },
-    { label: 'Plannings', icon: Calendar, path: '/secretaire/plannings' },
-    { label: 'Créneaux', icon: Clock, path: '/secretaire/creneaux' },
+    { label: 'Grand Agenda', icon: Calendar, path: '/secretaire/plannings' },
     { label: 'Rendez-vous', icon: ClipboardList, path: '/secretaire/rendez-vous' },
     { label: 'RDV en attente', icon: Clock, path: '/secretaire/rdv-en-attente' },
     { label: 'Exceptions', icon: CalendarX, path: '/secretaire/exceptions' },

@@ -9,6 +9,9 @@ export const exceptionMedecinService = {
   create: (data: ExceptionForm) =>
     apiClient.post<ExceptionPlanning>(EXCEPTION_API.MEDECIN_CREATE, data),
 
+  update: (id: number, data: ExceptionForm) =>
+    apiClient.put<ExceptionPlanning>(EXCEPTION_API.MEDECIN_UPDATE(id), data),
+
   delete: (id: number) =>
     apiClient.delete(EXCEPTION_API.MEDECIN_DELETE(id)),
 };
@@ -20,6 +23,9 @@ export const exceptionSecretaireService = {
   create: (medecinId: number, data: ExceptionForm) =>
     apiClient.post<ExceptionPlanning>(EXCEPTION_API.SECRETAIRE_CREATE(medecinId), data),
 
-  delete: (id: number) =>
+  update: (id: number, data: ExceptionForm) =>
+    apiClient.put<ExceptionPlanning>(EXCEPTION_API.SECRETAIRE_UPDATE(id), data),
+
+  delete: (medecinId: number, id: number) =>
     apiClient.delete(EXCEPTION_API.SECRETAIRE_DELETE(id)),
 };

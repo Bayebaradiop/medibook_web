@@ -198,7 +198,7 @@ const SecretaireDashboard = () => {
               </button>
 
               <button
-                onClick={() => navigate('/secretaire/creneaux')}
+                onClick={() => navigate('/secretaire/plannings')}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white text-slate-950 hover:bg-slate-100 text-xs font-extrabold transition-all shadow-md active:scale-95"
               >
                 <Calendar size={14} className="text-primary" />

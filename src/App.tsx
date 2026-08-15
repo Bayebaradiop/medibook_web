@@ -50,9 +50,6 @@ import RendezVousDetailPage from "@/modules/rdv/pages/RendezVousDetailPage";
 import SecretaireRendezVousPage from "@/modules/rdv/pages/SecretaireRendezVousPage";
 import RendezVousEnAttentePage from "@/modules/rdv/pages/RendezVousEnAttentePage";
 
-// Créneaux
-import CreneauxPage from "@/modules/creneau/pages/CreneauxPage";
-
 // Exceptions
 import ExceptionsPage from "@/modules/exception/pages/ExceptionsPage";
 import SecretaireExceptionsPage from "@/modules/exception/pages/SecretaireExceptionsPage";
@@ -110,7 +107,7 @@ const App = () => (
             <Route path="/secretaire/medecins" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><SecretaireMedecinsPage /></RouteProtegee>} />
             <Route path="/secretaire/plannings" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><SecretairePlanningPage /></RouteProtegee>} />
             <Route path="/secretaire/plannings/nouveau" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><PlanningFormPage /></RouteProtegee>} />
-            <Route path="/secretaire/creneaux" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><CreneauxPage /></RouteProtegee>} />
+            <Route path="/secretaire/creneaux" element={<Navigate to="/secretaire/plannings" replace />} />
             <Route path="/secretaire/rendez-vous" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><SecretaireRendezVousPage /></RouteProtegee>} />
             <Route path="/secretaire/rdv-en-attente" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><RendezVousEnAttentePage /></RouteProtegee>} />
             <Route path="/secretaire/exceptions" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><SecretaireExceptionsPage /></RouteProtegee>} />
