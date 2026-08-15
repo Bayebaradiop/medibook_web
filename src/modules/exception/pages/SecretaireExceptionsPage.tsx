@@ -416,20 +416,11 @@ const SecretaireExceptionsPage = () => {
               {erreurs.heureFin && <p className="text-xs text-destructive mt-1">{erreurs.heureFin}</p>}
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Laissez les heures vides pour une journée entière ou des vacances sur plusieurs jours.
-          </p>
-          <div>
-            <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
-              Motif
-            </label>
-            <textarea
-              className={`medibook-input w-full min-h-[80px] resize-none ${erreurs.motif ? "border-destructive" : ""}`}
-              value={form.motif}
-              onChange={(e) => updateForm("motif", e.target.value)}
-            />
-            {erreurs.motif && <p className="text-xs text-destructive mt-1">{erreurs.motif}</p>}
+          <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-900 dark:text-amber-300 flex items-start gap-2.5">
+            <span className="font-bold">⚠️ Impact Secrétariat :</span>
+            <span>La création de cette exception bloquera immédiatement tous les créneaux libres du médecin sur la période sélectionnée.</span>
           </div>
+
           <div className="flex justify-end gap-3">
             <button onClick={() => setModalOpen(false)} className="medibook-btn-outline h-10 px-4 text-sm">
               Annuler

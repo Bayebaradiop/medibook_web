@@ -45,9 +45,18 @@ const CSS_VARS = [
   "--success",
 ];
 
-function clearThemeVars() {
+export function clearThemeVars() {
   const root = document.documentElement.style;
   CSS_VARS.forEach((v) => root.removeProperty(v));
+}
+
+export function clearCachedTheme() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+export function resetCabinetTheme() {
+  clearThemeVars();
+  clearCachedTheme();
 }
 
 function getCachedTheme(): { primaire: string; secondaire: string } | null {
@@ -61,10 +70,6 @@ function getCachedTheme(): { primaire: string; secondaire: string } | null {
 
 function setCachedTheme(primaire: string, secondaire: string) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ primaire, secondaire }));
-}
-
-function clearCachedTheme() {
-  localStorage.removeItem(STORAGE_KEY);
 }
 
 function applyThemeColors(couleurPrimaire: string, couleurSecondaire: string | null) {

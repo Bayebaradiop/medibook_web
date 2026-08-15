@@ -374,20 +374,11 @@ const ExceptionsPage = () => {
               {erreurs.heureFin && <p className="text-xs text-destructive mt-1">{erreurs.heureFin}</p>}
             </div>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Laissez les heures vides pour une journée entière ou des vacances sur plusieurs jours.
-          </p>
-          <div>
-            <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">
-              Motif
-            </label>
-            <textarea
-              className={`medibook-input w-full min-h-[80px] resize-none ${erreurs.motif ? "border-destructive" : ""}`}
-              value={form.motif}
-              onChange={(e) => updateForm("motif", e.target.value)}
-            />
-            {erreurs.motif && <p className="text-xs text-destructive mt-1">{erreurs.motif}</p>}
+          <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-xs text-sky-900 dark:text-sky-300 flex items-start gap-2.5">
+            <span className="font-bold">ℹ️ Info :</span>
+            <span>La création d&apos;une exception désactivera automatiquement l&apos;ensemble des créneaux de consultation disponibles sur cette période.</span>
           </div>
+
           <div className="flex justify-end gap-3">
             <button onClick={() => setModalOpen(false)} className="medibook-btn-outline h-10 px-4 text-sm">
               Annuler

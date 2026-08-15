@@ -15,8 +15,8 @@ const SCREEN_DURATION = 2500;
 // Écran d'accueil de l'app mobile
 const HomeScreen = () => (
   <div className="flex h-full flex-col bg-[#F5F5F5]">
-    {/* Header gradient */}
-    <div className="rounded-b-3xl bg-gradient-to-br from-[#1B5E20] to-[#2E7D32] px-3 pb-4 pt-6">
+    {/* Header gradient - Couleur Teal MediBook */}
+    <div className="rounded-b-3xl bg-gradient-to-br from-[#1F5452] to-[#2F7D79] px-3 pb-4 pt-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-[8px] font-bold text-white">
@@ -38,7 +38,7 @@ const HomeScreen = () => (
     {/* Prochain RDV */}
     <div className="px-3 pt-3">
       <p className="text-[8px] font-semibold text-gray-800">Prochain rendez-vous</p>
-      <div className="mt-1.5 rounded-2xl bg-gradient-to-r from-[#2E7D32] to-[#66BB6A] p-2.5">
+      <div className="mt-1.5 rounded-2xl bg-gradient-to-r from-[#2F7D79] to-[#4FA7A1] p-2.5 shadow-md shadow-[#2F7D79]/20">
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-white/20 text-[7px] font-bold text-white">
             Dr
@@ -67,8 +67,8 @@ const HomeScreen = () => (
       <div className="mt-1.5 grid grid-cols-3 gap-1.5">
         {['Cardiologie', 'Dentaire', 'Général'].map((spec) => (
           <div key={spec} className="flex flex-col items-center rounded-xl bg-white p-2 shadow-sm">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#2E7D32]/10">
-              <Hospital size={10} className="text-[#2E7D32]" />
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#2F7D79]/10">
+              <Hospital size={10} className="text-[#2F7D79]" />
             </div>
             <span className="mt-1 text-[6px] text-gray-600">{spec}</span>
           </div>
@@ -85,8 +85,8 @@ const HomeScreen = () => (
         { icon: User, label: 'Profil', active: false },
       ].map((item) => (
         <div key={item.label} className="flex flex-col items-center gap-0.5">
-          <item.icon size={12} className={item.active ? 'text-[#2E7D32]' : 'text-gray-400'} />
-          <span className={`text-[5px] ${item.active ? 'font-semibold text-[#2E7D32]' : 'text-gray-400'}`}>
+          <item.icon size={12} className={item.active ? 'text-[#2F7D79]' : 'text-gray-400'} />
+          <span className={`text-[5px] ${item.active ? 'font-semibold text-[#2F7D79]' : 'text-gray-400'}`}>
             {item.label}
           </span>
         </div>
@@ -103,7 +103,7 @@ const DoctorsScreen = () => (
       <p className="text-center text-[10px] font-semibold text-gray-800">Médecins</p>
       {/* Chips spécialités */}
       <div className="mt-2 flex gap-1 overflow-hidden">
-        <span className="whitespace-nowrap rounded-full bg-[#2E7D32] px-2 py-0.5 text-[6px] font-medium text-white">
+        <span className="whitespace-nowrap rounded-full bg-[#2F7D79] px-2 py-0.5 text-[6px] font-medium text-white">
           Tous
         </span>
         <span className="whitespace-nowrap rounded-full border border-gray-200 px-2 py-0.5 text-[6px] text-gray-500">
@@ -123,14 +123,14 @@ const DoctorsScreen = () => (
         { name: 'Dr. Awa Diallo', spec: 'Dermatologie', cabinet: 'Centre Médical Fann', rating: '4.7' },
       ].map((doc) => (
         <div key={doc.name} className="flex items-center gap-2 rounded-2xl bg-white p-2 shadow-sm">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2E7D32]/10 text-[7px] font-bold text-[#2E7D32]">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#2F7D79]/10 text-[7px] font-bold text-[#2F7D79]">
             {doc.name.split(' ').slice(1).map(n => n[0]).join('')}
           </div>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[8px] font-semibold text-gray-800">{doc.name}</p>
             <div className="flex items-center gap-1">
-              <Hospital size={7} className="text-[#2E7D32]" />
-              <span className="text-[6px] text-[#2E7D32]">{doc.spec}</span>
+              <Hospital size={7} className="text-[#2F7D79]" />
+              <span className="text-[6px] text-[#2F7D79]">{doc.spec}</span>
             </div>
             <div className="flex items-center gap-1">
               <MapPin size={7} className="text-gray-400" />
@@ -157,8 +157,8 @@ const DoctorsScreen = () => (
         { icon: User, label: 'Profil', active: false },
       ].map((item) => (
         <div key={item.label} className="flex flex-col items-center gap-0.5">
-          <item.icon size={12} className={item.active ? 'text-[#2E7D32]' : 'text-gray-400'} />
-          <span className={`text-[5px] ${item.active ? 'font-semibold text-[#2E7D32]' : 'text-gray-400'}`}>
+          <item.icon size={12} className={item.active ? 'text-[#2F7D79]' : 'text-gray-400'} />
+          <span className={`text-[5px] ${item.active ? 'font-semibold text-[#2F7D79]' : 'text-gray-400'}`}>
             {item.label}
           </span>
         </div>
@@ -171,7 +171,7 @@ const DoctorsScreen = () => (
 const BookingScreen = () => (
   <div className="flex h-full flex-col bg-[#F5F5F5]">
     {/* Doctor header */}
-    <div className="rounded-b-3xl bg-gradient-to-br from-[#1B5E20] to-[#2E7D32] px-3 pb-4 pt-6">
+    <div className="rounded-b-3xl bg-gradient-to-br from-[#1F5452] to-[#2F7D79] px-3 pb-4 pt-6">
       <p className="text-center text-[8px] text-white/70">Prendre rendez-vous</p>
       <div className="mt-2 flex flex-col items-center">
         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-[10px] font-bold text-white">
@@ -197,7 +197,7 @@ const BookingScreen = () => (
             key={d.num}
             className={`flex flex-1 flex-col items-center rounded-xl py-1.5 ${
               i === 0
-                ? 'bg-[#2E7D32] text-white shadow-md shadow-[#2E7D32]/30'
+                ? 'bg-[#2F7D79] text-white shadow-md shadow-[#2F7D79]/30'
                 : 'border border-gray-200 bg-white'
             }`}
           >
@@ -218,7 +218,7 @@ const BookingScreen = () => (
             key={t}
             className={`rounded-lg px-2 py-1 text-[6px] font-medium ${
               i === 0
-                ? 'bg-[#2E7D32] text-white shadow-sm shadow-[#2E7D32]/30'
+                ? 'bg-[#2F7D79] text-white shadow-sm shadow-[#2F7D79]/30'
                 : i === 3
                   ? 'bg-gray-100 text-gray-300 line-through'
                   : 'border border-gray-200 bg-white text-gray-600'
@@ -240,7 +240,7 @@ const BookingScreen = () => (
 
     {/* Confirm button */}
     <div className="mt-auto px-3 pb-3">
-      <div className="flex items-center justify-center gap-1 rounded-2xl bg-[#2E7D32] py-2 shadow-lg shadow-[#2E7D32]/30">
+      <div className="flex items-center justify-center gap-1 rounded-2xl bg-[#2F7D79] py-2 shadow-lg shadow-[#2F7D79]/30">
         <Calendar size={10} className="text-white" />
         <span className="text-[8px] font-semibold text-white">Confirmer le rendez-vous</span>
       </div>
@@ -255,9 +255,9 @@ const ConfirmedScreen = () => (
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
       transition={{ type: 'spring', stiffness: 200, delay: 0.2 }}
-      className="flex h-14 w-14 items-center justify-center rounded-full bg-[#2E7D32]/10"
+      className="flex h-14 w-14 items-center justify-center rounded-full bg-[#2F7D79]/10"
     >
-      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2E7D32]">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#2F7D79]">
         <Check size={18} className="text-white" />
       </div>
     </motion.div>
@@ -270,25 +270,25 @@ const ConfirmedScreen = () => (
 
     <div className="mt-3 w-full rounded-2xl bg-white p-3 shadow-sm">
       <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2E7D32]/10 text-[7px] font-bold text-[#2E7D32]">
+        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#2F7D79]/10 text-[7px] font-bold text-[#2F7D79]">
           FN
         </div>
         <div>
           <p className="text-[8px] font-semibold text-gray-800">Dr. Fatou Ndiaye</p>
-          <p className="text-[6px] text-[#2E7D32]">Cardiologie</p>
+          <p className="text-[6px] text-[#2F7D79]">Cardiologie</p>
         </div>
       </div>
       <div className="mt-2 space-y-1 border-t border-gray-100 pt-2">
         <div className="flex items-center gap-1.5">
-          <Calendar size={8} className="text-[#2E7D32]" />
+          <Calendar size={8} className="text-[#2F7D79]" />
           <span className="text-[7px] text-gray-600">Lundi 20 Mars 2026</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <Clock size={8} className="text-[#2E7D32]" />
+          <Clock size={8} className="text-[#2F7D79]" />
           <span className="text-[7px] text-gray-600">09:00 - 09:30</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <MapPin size={8} className="text-[#2E7D32]" />
+          <MapPin size={8} className="text-[#2F7D79]" />
           <span className="text-[7px] text-gray-600">Cabinet Dakar Santé</span>
         </div>
       </div>
@@ -338,7 +338,7 @@ const PhoneMockup = ({ isVisible }: PhoneMockupProps) => {
       style={{ perspective: 1000 }}
     >
       {/* Phone frame */}
-      <div className="relative h-[320px] w-[160px] overflow-hidden rounded-[24px] border-[3px] border-gray-700 bg-black shadow-2xl shadow-black/50 sm:h-[380px] sm:w-[185px]">
+      <div className="relative h-[320px] w-[160px] overflow-hidden rounded-[24px] border-[3px] border-slate-700 bg-black shadow-2xl shadow-black/50 sm:h-[380px] sm:w-[185px]">
         {/* Notch */}
         <div className="absolute left-1/2 top-0 z-20 h-4 w-14 -translate-x-1/2 rounded-b-xl bg-black" />
 
@@ -364,15 +364,15 @@ const PhoneMockup = ({ isVisible }: PhoneMockupProps) => {
             <div
               key={i}
               className={`h-1 rounded-full transition-all duration-300 ${
-                i === screenIndex ? 'w-4 bg-[#2E7D32]' : 'w-1 bg-white/40'
+                i === screenIndex ? 'w-4 bg-[#2F7D79]' : 'w-1 bg-white/40'
               }`}
             />
           ))}
         </div>
       </div>
 
-      {/* Glow effect */}
-      <div className="absolute -inset-4 -z-10 rounded-[32px] bg-primary/20 blur-xl" />
+      {/* Glow effect matching app primary teal */}
+      <div className="absolute -inset-4 -z-10 rounded-[32px] bg-[#2F7D79]/30 blur-xl" />
     </motion.div>
   );
 };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff, Hospital, KeyRound, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Stethoscope, KeyRound, Lock, Mail, ArrowRight, ArrowLeft, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import AuthLayout from "@/layouts/AuthLayout";
 import { authService } from "../services/authService";
@@ -148,99 +148,137 @@ const ForgotPasswordPage = () => {
   return (
     <AuthLayout>
       <div className="w-full max-w-md">
-        <div className="medibook-card p-8">
-          <div className="flex flex-col items-center mb-8">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground mb-4">
-              <Hospital size={32} />
+        <div className="rounded-3xl border border-white/20 bg-white/95 p-6 sm:p-8 shadow-2xl backdrop-blur-2xl">
+          <div className="flex flex-col items-center mb-6 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#2F7D79] text-white shadow-lg shadow-[#2F7D79]/30 mb-3">
+              <Stethoscope size={28} />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {step === "email" ? "Mot de passe oublié" : "Réinitialiser le mot de passe"}
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+              {step === "email" ? "Mot de passe oublié ?" : "Réinitialiser votre mot de passe"}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1 text-center">
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
               {step === "email"
-                ? "Entrez votre email pour recevoir un code de réinitialisation."
-                : `Saisissez le code reçu par email pour ${email}.`}
+                ? "Saisissez votre adresse email pour recevoir un code de réinitialisation."
+                : `Saisissez le code à 6 chiffres envoyé à ${email}.`}
             </p>
           </div>
 
           {step === "email" ? (
             <form onSubmit={handleSendCode} className="space-y-4" noValidate>
               <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Email</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Email
+                </label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => { setEmail(e.target.value); clearError("email"); }}
                     placeholder="votre@email.com"
-                    className={`medibook-input w-full pl-10 ${erreurs.email ? "border-destructive ring-1 ring-destructive" : ""}`}
+                    className={`w-full rounded-2xl border bg-slate-50/70 py-3 pl-10 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 transition-all focus:bg-white focus:border-[#2F7D79] focus:outline-none focus:ring-2 focus:ring-[#2F7D79]/20 ${
+                      erreurs.email ? "border-red-500 ring-2 ring-red-500/20" : "border-slate-200"
+                    }`}
                   />
                 </div>
-                {erreurs.email && <p className="mt-1 text-xs text-destructive">{erreurs.email}</p>}
+                {erreurs.email && <p className="mt-1 text-xs font-semibold text-red-500">{erreurs.email}</p>}
               </div>
-              <button type="submit" disabled={isLoading} className="medibook-btn w-full">
-                {isLoading ? "Envoi..." : "Envoyer le code"}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3.5 px-6 rounded-2xl bg-[#2F7D79] hover:bg-[#256461] text-white text-sm font-bold shadow-lg shadow-[#2F7D79]/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70"
+              >
+                {isLoading ? "Envoi du code..." : "Envoyer le code"}
+                {!isLoading && <ArrowRight size={18} />}
               </button>
             </form>
           ) : (
             <form onSubmit={handleResetPassword} className="space-y-4" noValidate>
               <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Code</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Code de confirmation (6 chiffres)
+                </label>
                 <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input
                     type="text"
                     value={code}
                     onChange={(e) => { setCode(e.target.value); clearError("code"); }}
                     placeholder="123456"
-                    className={`medibook-input w-full pl-10 ${erreurs.code ? "border-destructive ring-1 ring-destructive" : ""}`}
+                    className={`w-full rounded-2xl border bg-slate-50/70 py-3 pl-10 pr-4 text-sm font-medium text-slate-900 tracking-widest placeholder:text-slate-400 transition-all focus:bg-white focus:border-[#2F7D79] focus:outline-none focus:ring-2 focus:ring-[#2F7D79]/20 ${
+                      erreurs.code ? "border-red-500 ring-2 ring-red-500/20" : "border-slate-200"
+                    }`}
                     maxLength={6}
                   />
                 </div>
-                {erreurs.code && <p className="mt-1 text-xs text-destructive">{erreurs.code}</p>}
+                {erreurs.code && <p className="mt-1 text-xs font-semibold text-red-500">{erreurs.code}</p>}
               </div>
+
               <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Nouveau mot de passe</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Nouveau mot de passe
+                </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input
                     type={showPass ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => { setNewPassword(e.target.value); clearError("newPassword"); }}
                     placeholder="••••••••"
-                    className={`medibook-input w-full pl-10 pr-10 ${erreurs.newPassword ? "border-destructive ring-1 ring-destructive" : ""}`}
+                    className={`w-full rounded-2xl border bg-slate-50/70 py-3 pl-10 pr-10 text-sm font-medium text-slate-900 placeholder:text-slate-400 transition-all focus:bg-white focus:border-[#2F7D79] focus:outline-none focus:ring-2 focus:ring-[#2F7D79]/20 ${
+                      erreurs.newPassword ? "border-red-500 ring-2 ring-red-500/20" : "border-slate-200"
+                    }`}
                   />
-                  <button type="button" onClick={() => setShowPass((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <button
+                    type="button"
+                    onClick={() => setShowPass((v) => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
                     {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {erreurs.newPassword && <p className="mt-1 text-xs text-destructive">{erreurs.newPassword}</p>}
+                {erreurs.newPassword && <p className="mt-1 text-xs font-semibold text-red-500">{erreurs.newPassword}</p>}
               </div>
+
               <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Confirmer le mot de passe</label>
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                  Confirmer le mot de passe
+                </label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                   <input
                     type={showConfirmPass ? "text" : "password"}
                     value={confirmPassword}
                     onChange={(e) => { setConfirmPassword(e.target.value); clearError("confirmPassword"); }}
                     placeholder="••••••••"
-                    className={`medibook-input w-full pl-10 pr-10 ${erreurs.confirmPassword ? "border-destructive ring-1 ring-destructive" : ""}`}
+                    className={`w-full rounded-2xl border bg-slate-50/70 py-3 pl-10 pr-10 text-sm font-medium text-slate-900 placeholder:text-slate-400 transition-all focus:bg-white focus:border-[#2F7D79] focus:outline-none focus:ring-2 focus:ring-[#2F7D79]/20 ${
+                      erreurs.confirmPassword ? "border-red-500 ring-2 ring-red-500/20" : "border-slate-200"
+                    }`}
                   />
-                  <button type="button" onClick={() => setShowConfirmPass((v) => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPass((v) => !v)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
                     {showConfirmPass ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
                 </div>
-                {erreurs.confirmPassword && <p className="mt-1 text-xs text-destructive">{erreurs.confirmPassword}</p>}
+                {erreurs.confirmPassword && <p className="mt-1 text-xs font-semibold text-red-500">{erreurs.confirmPassword}</p>}
               </div>
-              <button type="submit" disabled={isLoading} className="medibook-btn w-full">
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3.5 px-6 rounded-2xl bg-[#2F7D79] hover:bg-[#256461] text-white text-sm font-bold shadow-lg shadow-[#2F7D79]/30 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70"
+              >
                 {isLoading ? "Réinitialisation..." : "Réinitialiser le mot de passe"}
               </button>
+
               <button
                 type="button"
                 onClick={() => setStep("email")}
-                className="medibook-btn-outline w-full"
+                className="w-full py-3 px-6 rounded-2xl border border-slate-200 text-slate-700 hover:bg-slate-50 text-xs font-semibold transition-all"
                 disabled={isLoading}
               >
                 Modifier l'email
@@ -249,7 +287,8 @@ const ForgotPasswordPage = () => {
           )}
 
           <div className="mt-6 text-center">
-            <Link to="/login" className="text-sm font-medium text-primary hover:underline">
+            <Link to="/login" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2F7D79] hover:underline">
+              <ArrowLeft size={14} />
               Retour à la connexion
             </Link>
           </div>

@@ -18,7 +18,7 @@ const Topbar = ({ title }: TopbarProps) => {
   const { isDark, toggle } = useTheme();
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b-[3px] border-primary bg-card px-4 lg:px-8">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border/80 bg-card/95 backdrop-blur-md px-4 lg:px-8 shadow-sm transition-colors">
       <h1 className="text-lg lg:text-xl font-bold text-foreground pl-12 lg:pl-0">{title}</h1>
       <div className="flex items-center gap-2">
         {/* Dark mode toggle */}

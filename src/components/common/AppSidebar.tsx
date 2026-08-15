@@ -61,36 +61,36 @@ const AppSidebar = () => {
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Logo */}
-      <div className="flex items-center gap-3 px-6 py-5 border-b border-white/15">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 text-white font-bold text-lg">M</div>
-        <span className="text-xl font-bold text-white">MediBook</span>
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10 dark:border-slate-800">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-white font-extrabold text-lg shadow-sm shadow-primary/30">M</div>
+        <span className="text-xl font-bold text-white dark:text-white tracking-tight">MediBook</span>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto">
         {items.map(item => (
           <button
             key={item.path}
             onClick={() => { navigate(item.path); setMobileOpen(false); }}
             className={`sidebar-item w-full ${isActive(item.path) ? 'sidebar-item-active' : ''}`}
           >
-            <item.icon size={20} />
-            <span>{item.label}</span>
+            <item.icon size={20} className="shrink-0" />
+            <span className="truncate">{item.label}</span>
           </button>
         ))}
       </nav>
 
       {/* User */}
-      <div className="border-t border-white/15 p-4">
+      <div className="border-t border-white/10 dark:border-slate-800 p-4">
         <button onClick={() => { navigate('/profil'); setMobileOpen(false); }} className="sidebar-item w-full mb-1">
-          <UserCircle size={20} />
+          <UserCircle size={20} className="shrink-0" />
           <div className="text-left min-w-0">
-            <p className="text-sm font-medium truncate">{user.prenom} {user.nom}</p>
-            <p className="text-xs text-white/60">{ROLE_LABELS[role]}</p>
+            <p className="text-sm font-semibold truncate text-white dark:text-slate-100">{user.prenom} {user.nom}</p>
+            <p className="text-xs text-white/70 dark:text-slate-300 font-medium">{ROLE_LABELS[role]}</p>
           </div>
         </button>
-        <button onClick={() => { logout(); navigate('/login'); }} className="sidebar-item w-full text-red-300 hover:text-red-200 hover:bg-red-500/20">
-          <LogOut size={20} />
+        <button onClick={() => { logout(); navigate('/login'); }} className="sidebar-item w-full text-rose-300 dark:text-rose-400 hover:text-white dark:hover:text-white hover:bg-rose-500/20 dark:hover:bg-rose-500/30">
+          <LogOut size={20} className="shrink-0" />
           <span>Déconnexion</span>
         </button>
       </div>
@@ -100,23 +100,23 @@ const AppSidebar = () => {
   return (
     <>
       {/* Mobile toggle */}
-      <button onClick={() => setMobileOpen(true)} className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-xl bg-card shadow-md">
+      <button onClick={() => setMobileOpen(true)} className="fixed top-4 left-4 z-50 lg:hidden p-2 rounded-xl bg-card border border-border shadow-md text-foreground">
         <Menu size={22} />
       </button>
 
       {/* Mobile overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
-          <div className="absolute inset-0 bg-foreground/40" onClick={() => setMobileOpen(false)} />
-          <aside className="absolute left-0 top-0 h-full w-[272px] bg-sidebar shadow-[var(--shadow-sidebar)] animate-in slide-in-from-left">
-            <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-muted-foreground"><X size={20} /></button>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setMobileOpen(false)} />
+          <aside className="absolute left-0 top-0 h-full w-[272px] bg-sidebar border-r border-sidebar-border shadow-[var(--shadow-sidebar)] animate-in slide-in-from-left">
+            <button onClick={() => setMobileOpen(false)} className="absolute top-4 right-4 text-white/70 hover:text-white"><X size={20} /></button>
             {sidebarContent}
           </aside>
         </div>
       )}
 
       {/* Desktop */}
-      <aside className="hidden lg:flex h-screen w-[272px] shrink-0 flex-col bg-sidebar shadow-[var(--shadow-sidebar)] sticky top-0">
+      <aside className="hidden lg:flex h-screen w-[272px] shrink-0 flex-col bg-sidebar border-r border-white/10 dark:border-slate-800/80 shadow-[var(--shadow-sidebar)] sticky top-0">
         {sidebarContent}
       </aside>
     </>

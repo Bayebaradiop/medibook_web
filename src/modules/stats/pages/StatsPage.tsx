@@ -85,13 +85,13 @@ const StatsPage = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="medibook-card">
-            <h3 className="font-semibold mb-4">RDV par statut</h3>
+            <h3 className="font-semibold mb-4 text-foreground">RDV par statut</h3>
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={statusData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(0,0%,88%)" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} allowDecimals={false} />
-                <Tooltip />
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.15)" />
+                <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#94A3B8" }} />
+                <YAxis tick={{ fontSize: 12, fill: "#94A3B8" }} allowDecimals={false} />
+                <Tooltip contentStyle={{ backgroundColor: "#0F172A", borderRadius: "12px", border: "1px solid #1E293B", color: "#fff", fontSize: "12px" }} />
                 <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                   {statusData.map((e, i) => (
                     <Cell key={i} fill={e.fill} />
@@ -102,7 +102,7 @@ const StatsPage = () => {
           </div>
 
           <div className="medibook-card">
-            <h3 className="font-semibold mb-4">Répartition des RDV</h3>
+            <h3 className="font-semibold mb-4 text-foreground">Répartition des RDV</h3>
             {pieData.length > 0 ? (
               <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
