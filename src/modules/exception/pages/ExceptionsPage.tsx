@@ -124,6 +124,7 @@ const ExceptionsPage = () => {
   const [searchQuery, setSearchQuery] = useState<string>("");
 
   const chargerExceptions = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await exceptionMedecinService.list();
       setExceptions(extraireListe<ExceptionPlanning>(res.data));
@@ -136,7 +137,6 @@ const ExceptionsPage = () => {
           return;
         }
       }
-
       toast.error(EXCEPTION_ERREURS.CHARGEMENT_ECHOUE);
       setExceptions([]);
     } finally {
@@ -190,9 +190,7 @@ const ExceptionsPage = () => {
 
     const fieldErrors = validerExceptionForm(payload);
     setErreurs(fieldErrors);
-    if (Object.keys(fieldErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(fieldErrors).length > 0) return;
 
     setSubmitting(true);
     try {
@@ -224,14 +222,6 @@ const ExceptionsPage = () => {
         }
       }
 
-      if (isAxiosError(error)) {
-        const message = extraireMessageErreur(error.response?.data);
-        if (message) {
-          toast.error(message);
-          return;
-        }
-      }
-
       if (isAxiosError(error) && hasMessageProperty(error.response?.data)) {
         toast.error(error.response.data.message);
       } else {
@@ -259,12 +249,7 @@ const ExceptionsPage = () => {
           return;
         }
       }
-
-      if (isAxiosError(error) && hasMessageProperty(error.response?.data)) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error(EXCEPTION_ERREURS.SUPPRESSION_ECHOUEE);
-      }
+      toast.error(EXCEPTION_ERREURS.SUPPRESSION_ECHOUEE);
     } finally {
       setDeleting(false);
     }
@@ -282,110 +267,89 @@ const ExceptionsPage = () => {
     });
   }, [exceptions, filterType, searchQuery]);
 
-  if (loading) {
-    return (
-      <DashboardLayout title="Mes Absences & Congés">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
-    );
-  }
-
   return (
     <DashboardLayout title="Mes Absences & Congés">
-      <div className="space-y-6">
+      <div className="space-y-5">
         
-        {/* Bannière Executive Médecin */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-amber-950 to-slate-900 text-white p-6 sm:p-7 shadow-xl border border-amber-500/20">
-          <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 h-48 w-48 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div>
-              <div className="flex items-center gap-2 text-amber-400 font-extrabold text-xs uppercase tracking-widest mb-1.5">
-                <CalendarX size={16} />
-                <span>Gestion de Disponibilité Praticien</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Mes Absences & Congés
-              </h2>
-              <p className="text-sm text-slate-300 max-w-xl mt-1 leading-relaxed">
-                Déclarez, modifiez ou supprimez vos congés et absences. Les créneaux de consultation seront automatiquement synchronisés.
-              </p>
-            </div>
-
-            <button
-              onClick={handleOpenCreate}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold transition-all shadow-lg active:scale-95 shrink-0"
-            >
-              <Plus size={16} />
-              <span>Signaler une Absence</span>
-            </button>
+        {/* En-tête d'action rapide */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground">
+              Déclarez et gérez vos périodes d&apos;indisponibilité.
+            </span>
           </div>
+
+          <button
+            onClick={handleOpenCreate}
+            className="medibook-btn h-10 px-4 text-xs font-bold flex items-center justify-center gap-2 shrink-0"
+          >
+            <Plus size={16} />
+            <span>Signaler une Absence</span>
+          </button>
         </div>
 
         {/* Métriques */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-extrabold text-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="medibook-card bg-card p-3.5 rounded-2xl border border-border flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-bold text-base">
               🚫
             </div>
             <div>
-              <p className="text-2xl font-black text-foreground">
+              <p className="text-xl font-bold text-foreground">
                 {exceptions.filter((e) => e.type === "ABSENT").length}
               </p>
-              <p className="text-xs text-muted-foreground font-semibold">Absences Inopinées</p>
+              <p className="text-xs text-muted-foreground font-medium">Absences Inopinées</p>
             </div>
           </div>
 
-          <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-sky-500/10 text-sky-600 flex items-center justify-center font-extrabold text-xl">
+          <div className="medibook-card bg-card p-3.5 rounded-2xl border border-border flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center font-bold text-base">
               🌴
             </div>
             <div>
-              <p className="text-2xl font-black text-foreground">
+              <p className="text-xl font-bold text-foreground">
                 {exceptions.filter((e) => e.type === "VACANCES").length}
               </p>
-              <p className="text-xs text-muted-foreground font-semibold">Congés & Vacances</p>
+              <p className="text-xs text-muted-foreground font-medium">Congés & Vacances</p>
             </div>
           </div>
 
-          <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-extrabold text-xl">
+          <div className="medibook-card bg-card p-3.5 rounded-2xl border border-border flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-base">
               🔒
             </div>
             <div>
-              <p className="text-2xl font-black text-foreground">
+              <p className="text-xl font-bold text-foreground">
                 {exceptions.filter((e) => e.type === "FERME").length}
               </p>
-              <p className="text-xs text-muted-foreground font-semibold">Fermetures / Fériés</p>
+              <p className="text-xs text-muted-foreground font-medium">Fermetures / Fériés</p>
             </div>
           </div>
         </div>
 
         {/* Barre de Filtres */}
-        <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="medibook-card bg-card p-4 rounded-2xl border border-border flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="relative w-full md:w-80">
             <input
               type="text"
               placeholder="Rechercher une absence..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="medibook-input w-full pl-9 text-xs"
+              className="medibook-input w-full pl-9 text-xs font-medium"
             />
             <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
-            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">Filtrer :</span>
+            <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Filtrer :</span>
             {['TOUS', 'ABSENT', 'VACANCES', 'FERME'].map((t) => (
               <button
                 key={t}
                 onClick={() => setFilterType(t)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   filterType === t
-                    ? 'bg-amber-400 text-slate-950 shadow-xs'
-                    : 'bg-muted/50 text-muted-foreground hover:text-foreground'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'bg-muted/60 text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {t === 'TOUS' ? 'Tous' : t === 'ABSENT' ? '🚫 Absent' : t === 'VACANCES' ? '🌴 Vacances' : '🔒 Fermé'}
@@ -394,32 +358,33 @@ const ExceptionsPage = () => {
 
             <button
               onClick={chargerExceptions}
-              className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all ml-auto"
+              className="p-1.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all ml-auto"
               title="Actualiser"
             >
-              <RefreshCw size={15} />
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
             </button>
           </div>
         </div>
 
         {/* Grille des Absences */}
-        <div className="medibook-card bg-card p-6 rounded-3xl border border-border/80 shadow-sm space-y-4">
+        <div className="medibook-card bg-card p-5 rounded-2xl border border-border space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-foreground text-base flex items-center gap-2">
-              <CalendarX size={18} className="text-amber-500" />
+            <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
+              <CalendarX size={16} className="text-primary" />
               <span>Historique de mes Indisponibilités</span>
             </h3>
-            <span className="text-xs font-bold text-muted-foreground px-2.5 py-1 rounded-xl bg-muted">
+            <span className="text-xs font-semibold text-muted-foreground px-2 py-0.5 rounded-lg bg-muted">
               {filteredExceptions.length} enregistrement(s)
             </span>
           </div>
 
-          {filteredExceptions.length === 0 ? (
-            <div className="text-center py-16 border border-dashed border-border rounded-3xl space-y-3">
-              <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mx-auto text-2xl">
-                ✨
-              </div>
-              <p className="text-sm font-bold text-foreground">Aucune absence enregistrée</p>
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            </div>
+          ) : filteredExceptions.length === 0 ? (
+            <div className="text-center py-12 border border-dashed border-border rounded-2xl space-y-2">
+              <p className="text-xs font-bold text-foreground">Aucune absence enregistrée</p>
               <p className="text-xs text-muted-foreground">Vous n&apos;avez aucune indisponibilité planifiée.</p>
             </div>
           ) : (
@@ -431,66 +396,62 @@ const ExceptionsPage = () => {
                 return (
                   <div
                     key={ex.id}
-                    className="p-5 rounded-2xl bg-card border border-border/80 hover:border-amber-500/40 transition-all shadow-2xs hover:shadow-md space-y-3 flex flex-col justify-between"
+                    className="p-4 rounded-xl bg-card border border-border hover:border-primary/40 transition-all space-y-3 flex flex-col justify-between"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className={`h-11 w-11 rounded-2xl flex items-center justify-center font-bold text-lg ${
-                          ex.type === 'ABSENT' ? 'bg-rose-500/15 text-rose-600' : ex.type === 'VACANCES' ? 'bg-sky-500/15 text-sky-600' : 'bg-amber-500/15 text-amber-600'
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center font-bold text-base ${
+                          ex.type === 'ABSENT' ? 'bg-rose-500/10 text-rose-600' : ex.type === 'VACANCES' ? 'bg-sky-500/10 text-sky-600' : 'bg-amber-500/10 text-amber-600'
                         }`}>
-                          {ex.type === 'ABSENT' ? <AlertTriangle size={20} /> : ex.type === 'VACANCES' ? <Umbrella size={20} /> : <Lock size={20} />}
+                          {ex.type === 'ABSENT' ? <AlertTriangle size={18} /> : ex.type === 'VACANCES' ? <Umbrella size={18} /> : <Lock size={18} />}
                         </div>
                         <div>
-                          <span className={`text-[10px] uppercase font-extrabold px-2.5 py-0.5 rounded-lg ${
-                            ex.type === 'ABSENT' ? 'bg-rose-500/15 text-rose-600 border border-rose-500/30' : ex.type === 'VACANCES' ? 'bg-sky-500/15 text-sky-600 border border-sky-500/30' : 'bg-amber-500/15 text-amber-600 border border-amber-500/30'
+                          <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md ${
+                            ex.type === 'ABSENT' ? 'bg-rose-500/10 text-rose-600' : ex.type === 'VACANCES' ? 'bg-sky-500/10 text-sky-600' : 'bg-amber-500/10 text-amber-600'
                           }`}>
                             {ex.type === 'ABSENT' ? 'Absence' : ex.type === 'VACANCES' ? 'Congés' : 'Fermeture'}
                           </span>
 
-                          {/* Affichage unifié des dates Début et Fin sur le même cadre */}
-                          <div className="flex items-center gap-1.5 mt-1.5">
-                            <CalendarIcon size={14} className="text-amber-500 shrink-0" />
-                            <p className="text-sm font-black text-foreground">
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <CalendarIcon size={13} className="text-primary shrink-0" />
+                            <p className="text-xs font-bold text-foreground">
                               {isSingleDay ? (
                                 `Le ${ex.dateDebut}`
                               ) : (
-                                <span className="bg-amber-500/10 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-lg border border-amber-500/20 font-extrabold">
-                                  Du {ex.dateDebut} au {ex.dateFin}
-                                </span>
+                                <span>Du {ex.dateDebut} au {ex.dateFin}</span>
                               )}
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Actions : Modifier & Supprimer */}
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleOpenEdit(ex)}
-                          className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                           title="Modifier cette absence"
                         >
-                          <Pencil size={16} />
+                          <Pencil size={15} />
                         </button>
                         <button
                           onClick={() => setDeleteId(ex.id)}
-                          className="p-2 rounded-xl text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-all"
-                          title="Annuler cette absence (réouvre vos créneaux)"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-all"
+                          title="Annuler cette absence"
                           disabled={deleting}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t border-border/50 flex flex-wrap items-center justify-between gap-2 text-xs">
-                      <div className="flex items-center gap-1.5 text-muted-foreground font-semibold">
-                        <Clock size={14} className="text-primary" />
+                      <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                        <Clock size={13} className="text-primary" />
                         <span>{isFullDay ? 'Journée Complète' : `${ex.heureDebut?.slice(0, 5)} — ${ex.heureFin?.slice(0, 5)}`}</span>
                       </div>
 
                       {ex.motif && (
-                        <p className="text-xs text-foreground/80 font-medium italic bg-muted/40 px-2.5 py-1 rounded-xl truncate max-w-[200px]">
+                        <p className="text-xs text-muted-foreground italic truncate max-w-[180px]">
                           « {ex.motif} »
                         </p>
                       )}
@@ -508,7 +469,7 @@ const ExceptionsPage = () => {
         <div className="space-y-4 pt-2">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Date début <span className="text-rose-500">*</span>
               </label>
               <input
@@ -521,7 +482,7 @@ const ExceptionsPage = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Date fin <span className="text-rose-500">*</span>
               </label>
               <input
@@ -535,27 +496,27 @@ const ExceptionsPage = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-foreground mb-1.5 block">
+            <label className="text-xs font-bold text-foreground mb-1 block">
               Type d&apos;indisponibilité
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { type: 'ABSENT', label: '🚫 Absence', desc: 'Maladie / Imprévu' },
-                { type: 'VACANCES', label: '🌴 Congés', desc: 'Vacances prévues' },
-                { type: 'FERME', label: '🔒 Fermé', desc: 'Jour Férié / Cabinet' },
+                { type: 'ABSENT', label: '🚫 Absence', desc: 'Imprévu' },
+                { type: 'VACANCES', label: '🌴 Congés', desc: 'Vacances' },
+                { type: 'FERME', label: '🔒 Fermé', desc: 'Férié' },
               ].map((item) => (
                 <button
                   key={item.type}
                   type="button"
                   onClick={() => updateForm('type', item.type as ExceptionForm['type'])}
-                  className={`p-3 rounded-2xl border text-left transition-all ${
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
                     form.type === item.type
-                      ? 'border-amber-500 bg-amber-500/10 text-amber-900 dark:text-amber-300 font-extrabold shadow-2xs'
+                      ? 'border-primary bg-primary/10 text-primary font-bold shadow-2xs'
                       : 'border-border bg-card text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <p className="text-xs font-bold">{item.label}</p>
-                  <p className="text-[10px] opacity-75 mt-0.5">{item.desc}</p>
+                  <p className="text-[10px] opacity-75">{item.desc}</p>
                 </button>
               ))}
             </div>
@@ -563,7 +524,7 @@ const ExceptionsPage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Heure début (Optionnel)
               </label>
               <input
@@ -576,7 +537,7 @@ const ExceptionsPage = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Heure fin (Optionnel)
               </label>
               <input
@@ -590,7 +551,7 @@ const ExceptionsPage = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-foreground mb-1.5 block">
+            <label className="text-xs font-bold text-foreground mb-1 block">
               Motif / Raison
             </label>
             <input
@@ -602,24 +563,21 @@ const ExceptionsPage = () => {
             />
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/20 text-xs text-sky-900 dark:text-sky-300 flex items-start gap-2.5">
-            <Info size={18} className="shrink-0 text-sky-500 mt-0.5" />
-            <div>
-              <p className="font-extrabold">Synchronisation des Créneaux :</p>
-              <p className="opacity-90">Vos créneaux de consultation sur cette période seront verrouillés. Lors de la modification ou annulation, les créneaux sans RDV confirmé redeviendront réservables.</p>
-            </div>
+          <div className="p-3 rounded-xl bg-muted/50 border border-border text-xs text-muted-foreground flex items-start gap-2">
+            <Info size={16} className="shrink-0 text-primary mt-0.5" />
+            <p>Vos créneaux de consultation sur cette période seront verrouillés. En cas de modification ou suppression, les créneaux sans RDV redeviendront réservables.</p>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button onClick={() => setModalOpen(false)} className="medibook-btn-outline h-10 px-4 text-xs font-bold">
+            <button onClick={() => setModalOpen(false)} className="medibook-btn-outline h-9 px-4 text-xs font-bold">
               Annuler
             </button>
             <button
               onClick={handleSave}
-              className="medibook-btn bg-amber-400 hover:bg-amber-300 text-slate-950 h-10 px-5 text-xs font-bold shadow-md"
+              className="medibook-btn h-9 px-4 text-xs font-bold shadow-sm"
               disabled={submitting}
             >
-              {submitting ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Enregistrer l'Absence"}
+              {submitting ? "Enregistrement..." : editingId ? "Enregistrer" : "Créer l'Absence"}
             </button>
           </div>
         </div>
@@ -628,10 +586,10 @@ const ExceptionsPage = () => {
       <ConfirmDialog
         open={!!deleteId}
         title="Retirer cette indisponibilité"
-        message="Êtes-vous sûr de vouloir supprimer cette absence ? Les créneaux de consultation sans rendez-vous confirmé redeviendront réservables."
+        message="Êtes-vous sûr de vouloir supprimer cette absence ? Les créneaux de consultation sans rendez-vous redeviendront réservables."
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        confirmLabel={deleting ? "Suppression..." : "Supprimer & Libérer Créneaux"}
+        confirmLabel={deleting ? "Suppression..." : "Supprimer & Libérer"}
       />
     </DashboardLayout>
   );

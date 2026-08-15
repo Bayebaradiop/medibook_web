@@ -2,7 +2,14 @@ import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { DAYS_OF_WEEK } from '@/utils/constants';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Loader2, 
+  Clock, 
+  Stethoscope, 
+  Sparkles, 
+  CheckCircle2
+} from 'lucide-react';
 import { toast } from 'sonner';
 import { planningService } from '@/modules/planning/services/planningService';
 import { secretaireMedecinsService } from '@/modules/utilisateur/services/utilisateurService';
@@ -39,25 +46,11 @@ const extraireErreursChamp = (payload?: BackendErrorPayload): ErreursChamp => {
 
 const mapperMessageVersErreursChamp = (message?: string): ErreursChamp => {
   if (!message) return {};
-
   const normalise = message.toLowerCase();
-
-  if (normalise.includes('heure de fin') || normalise.includes('heure fin')) {
-    return { heureFin: message };
-  }
-
-  if (normalise.includes('heure de début') || normalise.includes('heure debut')) {
-    return { heureDebut: message };
-  }
-
-  if (normalise.includes('médecin') || normalise.includes('medecin')) {
-    return { medecinId: message };
-  }
-
-  if (normalise.includes('planning') || normalise.includes('créneau') || normalise.includes('creneau')) {
-    return { heureDebut: message, heureFin: message };
-  }
-
+  if (normalise.includes('heure de fin') || normalise.includes('heure fin')) return { heureFin: message };
+  if (normalise.includes('heure de début') || normalise.includes('heure debut')) return { heureDebut: message };
+  if (normalise.includes('médecin') || normalise.includes('medecin')) return { medecinId: message };
+  if (normalise.includes('planning') || normalise.includes('créneau')) return { heureDebut: message, heureFin: message };
   return {};
 };
 
@@ -80,7 +73,7 @@ const PlanningFormPage = () => {
         const raw = estObjet(res.data) && 'data' in res.data ? (res.data as any).data : res.data;
         const liste = Array.isArray(raw) ? raw : Array.isArray(raw?.content) ? raw.content : [];
         setMedecins(liste);
-        if (liste.length > 0) setMedecinId(liste[0].id);
+        if (liste.length > 0) setMedecinId(Number(liste[0].id));
       } catch {
         toast.error(PLANNING_ERREURS.CHARGEMENT_ECHOUE);
       } finally {
@@ -91,6 +84,7 @@ const PlanningFormPage = () => {
   }, []);
 
   const preview = useMemo(() => {
+    if (!heureDebut || !heureFin) return [];
     const slots: string[] = [];
     const [sh, sm] = heureDebut.split(':').map(Number);
     const [eh, em] = heureFin.split(':').map(Number);
@@ -106,18 +100,6 @@ const PlanningFormPage = () => {
     }
     return slots;
   }, [heureDebut, heureFin, duree]);
-
-  const afficherErreursChamps = (nouvellesErreurs: ErreursChamp) => {
-    setErreurs(nouvellesErreurs);
-
-    const premierChamp = Object.keys(nouvellesErreurs)[0];
-    if (!premierChamp) return;
-
-    requestAnimationFrame(() => {
-      const champ = document.querySelector<HTMLElement>(`[name="${premierChamp}"]`);
-      champ?.focus();
-    });
-  };
 
   const updateField = (champ: string, valeur: string | number) => {
     if (champ === 'medecinId') setMedecinId(Number(valeur));
@@ -138,17 +120,10 @@ const PlanningFormPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const payload = {
-      medecinId,
-      jourSemaine,
-      heureDebut,
-      heureFin,
-      dureeCreneau: duree,
-    };
-
+    const payload = { medecinId, jourSemaine, heureDebut, heureFin, dureeCreneau: duree };
     const validation = validerPlanningForm(payload);
     if (Object.keys(validation).length > 0) {
-      afficherErreursChamps(validation);
+      setErreurs(validation);
       return;
     }
 
@@ -163,96 +138,184 @@ const PlanningFormPage = () => {
         ? error.response.data as BackendErrorPayload
         : undefined;
       const fieldErrors = extraireErreursChamp(resp);
-
-      if (Object.keys(fieldErrors).length > 0) {
-        afficherErreursChamps(fieldErrors);
-        return;
-      }
-
-      const messageErreur = resp?.message || resp?.error?.description;
-      const mappedErrors = mapperMessageVersErreursChamp(messageErreur);
-      if (Object.keys(mappedErrors).length > 0) {
-        afficherErreursChamps(mappedErrors);
-        return;
-      }
-
-      const msg = messageErreur || PLANNING_ERREURS.CREATION_ECHOUEE;
+      if (Object.keys(fieldErrors).length > 0) { setErreurs(fieldErrors); return; }
+      const msg = resp?.message || resp?.error?.description || PLANNING_ERREURS.CREATION_ECHOUEE;
+      setErreurs(mapperMessageVersErreursChamp(msg));
       toast.error(msg);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const inputClass = (champ: string) =>
-    `medibook-input w-full ${erreurs[champ] ? 'border-destructive ring-1 ring-destructive' : ''}`;
-
-  if (loading) return (
-    <DashboardLayout title="Nouveau Planning">
-      <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div>
-    </DashboardLayout>
-  );
+  if (loading) {
+    return (
+      <DashboardLayout title="Nouveau Planning">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Nouveau Planning">
-      <div className="space-y-6 max-w-3xl">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft size={18} /> Retour</button>
+      <div className="max-w-5xl mx-auto space-y-4">
+        
+        {/* Barre de Commandes Supérieure Compacte */}
+        <div className="flex items-center justify-between">
+          <button 
+            onClick={() => navigate(-1)} 
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-bold text-muted-foreground hover:text-foreground transition-all"
+          >
+            <ArrowLeft size={14} />
+            <span>Retour</span>
+          </button>
 
-        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          <div className="medibook-card">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Médecin</label>
-                <select name="medecinId" value={medecinId} onChange={e => updateField('medecinId', e.target.value)} className={inputClass('medecinId')}>
-                  {medecins.map(m => <option key={m.id} value={m.id}>Dr. {m.prenom} {m.nom}</option>)}
-                </select>
-                {erreurs.medecinId && <p className="mt-1 text-xs text-destructive">{erreurs.medecinId}</p>}
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Jour</label>
-                <select name="jourSemaine" value={jourSemaine} onChange={e => updateField('jourSemaine', e.target.value)} className={inputClass('jourSemaine')}>
-                  {DAYS_OF_WEEK.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-                {erreurs.jourSemaine && <p className="mt-1 text-xs text-destructive">{erreurs.jourSemaine}</p>}
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Heure début</label>
-                <input name="heureDebut" type="time" value={heureDebut} onChange={e => updateField('heureDebut', e.target.value)} className={inputClass('heureDebut')} />
-                {erreurs.heureDebut && <p className="mt-1 text-xs text-destructive">{erreurs.heureDebut}</p>}
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Heure fin</label>
-                <input name="heureFin" type="time" value={heureFin} onChange={e => updateField('heureFin', e.target.value)} className={inputClass('heureFin')} />
-                {erreurs.heureFin && <p className="mt-1 text-xs text-destructive">{erreurs.heureFin}</p>}
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Durée créneau (min)</label>
-                <select name="dureeCreneau" value={duree} onChange={e => updateField('dureeCreneau', e.target.value)} className={inputClass('dureeCreneau')}>
-                  {durations.map(d => <option key={d} value={d}>{d} minutes</option>)}
-                </select>
-                {erreurs.dureeCreneau && <p className="mt-1 text-xs text-destructive">{erreurs.dureeCreneau}</p>}
-              </div>
-            </div>
+          <div className="flex items-center gap-2">
+            <button 
+              type="button" 
+              onClick={() => navigate(-1)} 
+              className="px-3.5 py-1.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-bold text-muted-foreground transition-all"
+            >
+              Annuler
+            </button>
+            <button 
+              onClick={handleSubmit}
+              disabled={submitting || preview.length === 0} 
+              className="medibook-btn px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+            >
+              {submitting ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
+              <span>Générer le Planning</span>
+            </button>
           </div>
+        </div>
 
-          {preview.length > 0 && (
-            <div className="medibook-card">
-              <h3 className="font-semibold mb-3">Aperçu des créneaux ({preview.length})</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                {preview.map((slot, i) => (
-                  <div key={i} className="bg-primary/5 text-primary text-xs font-medium rounded-lg p-2 text-center border border-primary/10">{slot}</div>
+        {/* Grille 2 Colonnes Compacte Sans Scroll */}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          
+          {/* Colonne Gauche : Paramètres (7 cols) */}
+          <div className="md:col-span-7 medibook-card bg-card p-5 rounded-2xl border border-border space-y-4">
+            
+            {/* Médecin */}
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1 block flex items-center gap-1.5">
+                <Stethoscope size={14} className="text-primary" />
+                Médecin Praticien
+              </label>
+              <select 
+                value={medecinId} 
+                onChange={e => updateField('medecinId', e.target.value)}
+                className="medibook-input w-full text-xs font-bold bg-card text-foreground border-border hover:bg-muted focus:ring-2 focus:ring-primary rounded-xl cursor-pointer"
+              >
+                {medecins.map(m => (
+                  <option key={m.id} value={m.id} className="bg-card text-foreground">
+                    Dr. {m.prenom} {m.nom} {m.specialiteNom ? `(${m.specialiteNom})` : ''}
+                  </option>
+                ))}
+              </select>
+              {erreurs.medecinId && <p className="text-[11px] text-rose-500 mt-0.5 font-semibold">{erreurs.medecinId}</p>}
+            </div>
+
+            {/* Jour de la Semaine */}
+            <div>
+              <label className="text-xs font-bold text-foreground mb-1.5 block">Jour d&apos;ouverture</label>
+              <div className="grid grid-cols-7 gap-1">
+                {DAYS_OF_WEEK.map((day) => (
+                  <button
+                    key={day}
+                    type="button"
+                    onClick={() => updateField('jourSemaine', day)}
+                    className={`py-1.5 text-[11px] font-bold rounded-lg border transition-all ${
+                      jourSemaine === day
+                        ? 'border-primary bg-primary text-primary-foreground shadow-2xs'
+                        : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted'
+                    }`}
+                  >
+                    {day.slice(0, 3)}
+                  </button>
                 ))}
               </div>
             </div>
-          )}
 
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => navigate(-1)} className="medibook-btn-outline">Annuler</button>
-            <button type="submit" disabled={submitting} className="medibook-btn flex items-center gap-2">
-              {submitting && <Loader2 className="animate-spin" size={16} />}
-              Créer le planning
-            </button>
+            {/* Horaires et Durée */}
+            <div className="grid grid-cols-3 gap-3 pt-1">
+              <div>
+                <label className="text-xs font-bold text-foreground mb-1 block flex items-center gap-1">
+                  <Clock size={12} className="text-primary" /> Heure début
+                </label>
+                <input 
+                  type="time" 
+                  value={heureDebut} 
+                  onChange={e => updateField('heureDebut', e.target.value)} 
+                  className="medibook-input w-full text-xs font-bold rounded-xl"
+                />
+                {erreurs.heureDebut && <p className="text-[10px] text-rose-500 mt-0.5 font-semibold">{erreurs.heureDebut}</p>}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground mb-1 block flex items-center gap-1">
+                  <Clock size={12} className="text-primary" /> Heure fin
+                </label>
+                <input 
+                  type="time" 
+                  value={heureFin} 
+                  onChange={e => updateField('heureFin', e.target.value)} 
+                  className="medibook-input w-full text-xs font-bold rounded-xl"
+                />
+                {erreurs.heureFin && <p className="text-[10px] text-rose-500 mt-0.5 font-semibold">{erreurs.heureFin}</p>}
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-foreground mb-1 block">Durée créneau</label>
+                <select 
+                  value={duree} 
+                  onChange={e => updateField('dureeCreneau', e.target.value)} 
+                  className="medibook-input w-full text-xs font-bold rounded-xl bg-card text-foreground cursor-pointer"
+                >
+                  {durations.map(d => <option key={d} value={d} className="bg-card text-foreground">{d} min</option>)}
+                </select>
+              </div>
+            </div>
+
           </div>
+
+          {/* Colonne Droite : Aperçu Compact (5 cols) */}
+          <div className="md:col-span-5 medibook-card bg-card p-5 rounded-2xl border border-border flex flex-col justify-between space-y-3">
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
+                  <Sparkles size={14} className="text-amber-500" />
+                  <span>Aperçu Généré</span>
+                </h3>
+                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg border border-primary/20">
+                  {preview.length} créneaux
+                </span>
+              </div>
+
+              <p className="text-[11px] text-muted-foreground font-medium mb-3">
+                Chaque <span className="font-bold text-foreground">{jourSemaine}</span> de <span className="font-bold text-foreground">{heureDebut}</span> à <span className="font-bold text-foreground">{heureFin}</span> ({duree} min / RDV).
+              </p>
+
+              <div className="grid grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-1">
+                {preview.map((slot, i) => (
+                  <div 
+                    key={i} 
+                    className="bg-muted/40 text-foreground text-[11px] font-bold rounded-lg py-1 px-2 text-center border border-border/50 flex items-center justify-center gap-1"
+                  >
+                    <CheckCircle2 size={11} className="text-emerald-500" />
+                    <span>{slot}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-border/60 text-[11px] text-muted-foreground italic">
+              * Les créneaux générés seront réservables immédiatement.
+            </div>
+          </div>
+
         </form>
+
       </div>
     </DashboardLayout>
   );

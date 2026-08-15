@@ -8,8 +8,8 @@ import {
   Pencil,
   CalendarX, 
   Loader2, 
-  Stethoscope, 
   Search, 
+  Stethoscope, 
   Clock, 
   AlertTriangle,
   Umbrella,
@@ -20,13 +20,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
-import { secretaireMedecinsService } from "@/modules/utilisateur/services/utilisateurService";
-import type { Medecin } from "@/modules/utilisateur/types/utilisateur.types";
 import { exceptionSecretaireService } from "../services/exceptionService";
 import type { ExceptionForm, ExceptionPlanning } from "../types/exception.types";
 import { EXCEPTION_ERREURS } from "../messages/exception.erreurs";
 import { EXCEPTION_SUCCES } from "../messages/exception.succes";
 import { validerExceptionForm } from "../logique/exception.validation";
+import { secretaireMedecinsService } from "@/modules/utilisateur/services/utilisateurService";
+import type { Medecin } from "@/modules/utilisateur/types/utilisateur.types";
 
 const hasDataProperty = (value: unknown): value is { data: unknown } =>
   typeof value === "object" && value !== null && "data" in value;
@@ -115,9 +115,8 @@ const initialForm: ExceptionForm = {
 
 const SecretaireExceptionsPage = () => {
   const [loading, setLoading] = useState(true);
-  const [loadingExceptions, setLoadingExceptions] = useState(false);
-  const [selectedMedecin, setSelectedMedecin] = useState<number | null>(null);
   const [medecins, setMedecins] = useState<Medecin[]>([]);
+  const [selectedMedecinId, setSelectedMedecinId] = useState<number | null>(null);
   const [exceptions, setExceptions] = useState<ExceptionPlanning[]>([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -129,10 +128,29 @@ const SecretaireExceptionsPage = () => {
   const [filterType, setFilterType] = useState<string>("TOUS");
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  useEffect(() => {
+    const fetchMedecins = async () => {
+      try {
+        const res = await secretaireMedecinsService.list();
+        const liste = extraireListe<Medecin>(res.data);
+        setMedecins(liste);
+        if (liste.length > 0) {
+          setSelectedMedecinId(liste[0].id);
+        } else {
+          setLoading(false);
+        }
+      } catch {
+        toast.error("Erreur lors du chargement des médecins.");
+        setLoading(false);
+      }
+    };
+    fetchMedecins();
+  }, []);
+
   const chargerExceptions = useCallback(async (medecinId: number) => {
-    setLoadingExceptions(true);
+    setLoading(true);
     try {
-      const res = await exceptionSecretaireService.list(medecinId);
+      const res = await exceptionSecretaireService.listByMedecin(medecinId);
       setExceptions(extraireListe<ExceptionPlanning>(res.data));
     } catch (error) {
       if (isAxiosError(error)) {
@@ -143,41 +161,18 @@ const SecretaireExceptionsPage = () => {
           return;
         }
       }
-
       toast.error(EXCEPTION_ERREURS.CHARGEMENT_ECHOUE);
       setExceptions([]);
     } finally {
-      setLoadingExceptions(false);
+      setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const res = await secretaireMedecinsService.list();
-        const liste = extraireListe<Medecin>(res.data);
-        setMedecins(liste);
-
-        if (liste.length > 0) {
-          const medecinId = Number(liste[0].id);
-          setSelectedMedecin(medecinId);
-          await chargerExceptions(medecinId);
-        }
-      } catch {
-        toast.error("Erreur lors du chargement des médecins");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    init();
-  }, [chargerExceptions]);
-
-  const handleChangeMedecin = async (value: string) => {
-    const medecinId = Number(value);
-    setSelectedMedecin(medecinId);
-    await chargerExceptions(medecinId);
-  };
+    if (selectedMedecinId) {
+      chargerExceptions(selectedMedecinId);
+    }
+  }, [selectedMedecinId, chargerExceptions]);
 
   const updateForm = <K extends keyof ExceptionForm>(champ: K, valeur: ExceptionForm[K]) => {
     setForm((prev) => ({ ...prev, [champ]: valeur }));
@@ -210,7 +205,10 @@ const SecretaireExceptionsPage = () => {
   };
 
   const handleSave = async () => {
-    if (!selectedMedecin) return;
+    if (!selectedMedecinId) {
+      toast.error("Veuillez sélectionner un médecin.");
+      return;
+    }
 
     const payload: ExceptionForm = {
       dateDebut: form.dateDebut,
@@ -223,17 +221,15 @@ const SecretaireExceptionsPage = () => {
 
     const fieldErrors = validerExceptionForm(payload);
     setErreurs(fieldErrors);
-    if (Object.keys(fieldErrors).length > 0) {
-      return;
-    }
+    if (Object.keys(fieldErrors).length > 0) return;
 
     setSubmitting(true);
     try {
       if (editingId) {
         await exceptionSecretaireService.update(editingId, payload);
-        toast.success("Indisponibilité mise à jour ! Créneaux recalculés.");
+        toast.success("Indisponibilité mise à jour ! Les créneaux ont été recalculés.");
       } else {
-        await exceptionSecretaireService.create(selectedMedecin, payload);
+        await exceptionSecretaireService.createForMedecin(selectedMedecinId, payload);
         toast.success(EXCEPTION_SUCCES.CREATION_REUSSIE);
       }
 
@@ -241,7 +237,7 @@ const SecretaireExceptionsPage = () => {
       setForm(initialForm);
       setEditingId(null);
       setErreurs({});
-      await chargerExceptions(selectedMedecin);
+      await chargerExceptions(selectedMedecinId);
     } catch (error) {
       if (isAxiosError(error)) {
         const fieldErrorsFromApi = extraireErreursChamp(error.response);
@@ -257,14 +253,6 @@ const SecretaireExceptionsPage = () => {
         }
       }
 
-      if (isAxiosError(error)) {
-        const message = extraireMessageErreur(error.response?.data);
-        if (message) {
-          toast.error(message);
-          return;
-        }
-      }
-
       if (isAxiosError(error) && hasMessageProperty(error.response?.data)) {
         toast.error(error.response.data.message);
       } else {
@@ -276,14 +264,14 @@ const SecretaireExceptionsPage = () => {
   };
 
   const handleDelete = async () => {
-    if (!deleteId || !selectedMedecin) return;
+    if (!deleteId || !selectedMedecinId) return;
 
     setDeleting(true);
     try {
-      await exceptionSecretaireService.delete(selectedMedecin, deleteId);
-      toast.success("Indisponibilité supprimée. Créneaux de nouveau disponibles !");
+      await exceptionSecretaireService.delete(deleteId);
+      toast.success("Indisponibilité annulée. Créneaux libérés avec succès !");
       setDeleteId(null);
-      await chargerExceptions(selectedMedecin);
+      await chargerExceptions(selectedMedecinId);
     } catch (error) {
       if (isAxiosError(error)) {
         const message = extraireMessageErreur(error.response?.data);
@@ -292,12 +280,7 @@ const SecretaireExceptionsPage = () => {
           return;
         }
       }
-
-      if (isAxiosError(error) && hasMessageProperty(error.response?.data)) {
-        toast.error(error.response.data.message);
-      } else {
-        toast.error(EXCEPTION_ERREURS.SUPPRESSION_ECHOUEE);
-      }
+      toast.error(EXCEPTION_ERREURS.SUPPRESSION_ECHOUEE);
     } finally {
       setDeleting(false);
     }
@@ -315,179 +298,142 @@ const SecretaireExceptionsPage = () => {
     });
   }, [exceptions, filterType, searchQuery]);
 
-  const selectedMedecinObj = useMemo(() => {
-    return medecins.find((m) => m.id === selectedMedecin);
-  }, [medecins, selectedMedecin]);
-
-  if (loading) {
-    return (
-      <DashboardLayout title="Gestion des Absences & Imprévus">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      </DashboardLayout>
-    );
-  }
+  const medecinActif = medecins.find((m) => m.id === selectedMedecinId);
 
   return (
-    <DashboardLayout title="Gestion des Absences & Imprévus">
-      <div className="space-y-6">
+    <DashboardLayout title="Gestion des Indisponibilités">
+      <div className="space-y-5">
         
-        {/* Bannière Executive Secrétariat */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white p-6 sm:p-7 shadow-xl border border-rose-500/20">
-          <div className="absolute right-0 top-0 translate-x-8 -translate-y-8 h-48 w-48 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div>
-              <div className="flex items-center gap-2 text-rose-400 font-extrabold text-xs uppercase tracking-widest mb-1.5">
-                <CalendarX size={16} />
-                <span>Registre d&apos;Indisponibilité des Praticiens</span>
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                Absences & Congés Praticiens
-              </h2>
-              <p className="text-sm text-slate-300 max-w-xl mt-1 leading-relaxed">
-                Signalez, modifiez ou annulez les fermetures et congés. Les créneaux concernés seront automatiquement bloqués ou réouverts.
-              </p>
+        {/* Barre Supérieure : Sélecteur de Médecin & Bouton Ajouter */}
+        <div className="medibook-card bg-card p-4 rounded-2xl border border-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 font-bold">
+              <Stethoscope size={20} />
             </div>
-
-            {/* Sélecteur de Médecin + Action */}
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
-              <div className="relative min-w-[240px]">
-                <select
-                  value={selectedMedecin?.toString() ?? ""}
-                  onChange={(e) => handleChangeMedecin(e.target.value)}
-                  className="medibook-input text-sm font-extrabold w-full pl-10 pr-8 bg-slate-900 text-slate-100 border-slate-700 hover:bg-slate-800 focus:bg-slate-900 focus:ring-2 focus:ring-rose-500 transition-all rounded-2xl shadow-md cursor-pointer"
-                  disabled={medecins.length === 0}
-                >
-                  {medecins.length === 0 ? (
-                    <option value="" className="bg-slate-900 text-slate-100">Aucun médecin disponible</option>
-                  ) : (
-                    medecins.map((m) => (
-                      <option key={m.id} value={m.id} className="bg-slate-900 text-slate-100 font-semibold py-1">
-                        Dr. {m.prenom} {m.nom} {m.specialiteNom ? `(${m.specialiteNom})` : ''}
-                      </option>
-                    ))
-                  )}
-                </select>
-                <Stethoscope className="h-4 w-4 text-rose-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              </div>
-
-              <button
-                onClick={handleOpenCreate}
-                disabled={!selectedMedecin}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-500 hover:bg-rose-600 text-white text-xs font-extrabold transition-all shadow-lg active:scale-95 disabled:opacity-50"
+            <div className="flex-1 max-w-md">
+              <label className="text-xs font-semibold text-muted-foreground mb-1 block">Médecin Praticien</label>
+              <select
+                value={selectedMedecinId ?? ''}
+                onChange={(e) => setSelectedMedecinId(Number(e.target.value))}
+                className="medibook-input w-full text-xs font-bold bg-card text-foreground cursor-pointer"
               >
-                <Plus size={16} />
-                <span>Déclarer une Absence</span>
-              </button>
+                {medecins.map((m) => (
+                  <option key={m.id} value={m.id} className="bg-card text-foreground">
+                    Dr. {m.prenom} {m.nom} {m.specialiteNom ? `(${m.specialiteNom})` : ''}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
+
+          <button
+            onClick={handleOpenCreate}
+            disabled={!selectedMedecinId}
+            className="medibook-btn h-10 px-4 text-xs font-bold flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
+          >
+            <Plus size={16} />
+            <span>Signaler une Absence</span>
+          </button>
         </div>
 
         {/* Métriques */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-extrabold text-xl">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="medibook-card bg-card p-3.5 rounded-2xl border border-border flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center font-bold text-base">
               🚫
             </div>
             <div>
-              <p className="text-2xl font-black text-foreground">
+              <p className="text-xl font-bold text-foreground">
                 {exceptions.filter((e) => e.type === "ABSENT").length}
               </p>
-              <p className="text-xs text-muted-foreground font-semibold">Absences Inopinées</p>
+              <p className="text-xs text-muted-foreground font-medium">Absences</p>
             </div>
           </div>
 
-          <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-sky-500/10 text-sky-600 flex items-center justify-center font-extrabold text-xl">
+          <div className="medibook-card bg-card p-3.5 rounded-2xl border border-border flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-sky-500/10 text-sky-600 flex items-center justify-center font-bold text-base">
               🌴
             </div>
             <div>
-              <p className="text-2xl font-black text-foreground">
+              <p className="text-xl font-bold text-foreground">
                 {exceptions.filter((e) => e.type === "VACANCES").length}
               </p>
-              <p className="text-xs text-muted-foreground font-semibold">Congés & Vacances</p>
+              <p className="text-xs text-muted-foreground font-medium">Congés & Vacances</p>
             </div>
           </div>
 
-          <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-extrabold text-xl">
+          <div className="medibook-card bg-card p-3.5 rounded-2xl border border-border flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center font-bold text-base">
               🔒
             </div>
             <div>
-              <p className="text-2xl font-black text-foreground">
+              <p className="text-xl font-bold text-foreground">
                 {exceptions.filter((e) => e.type === "FERME").length}
               </p>
-              <p className="text-xs text-muted-foreground font-semibold">Fermetures / Fériés</p>
+              <p className="text-xs text-muted-foreground font-medium">Fermetures / Fériés</p>
             </div>
           </div>
         </div>
 
-        {/* Barre de Recherche et Filtres */}
-        <div className="medibook-card bg-card p-4 rounded-3xl border border-border/80 shadow-xs flex flex-col md:flex-row items-center justify-between gap-4">
+        {/* Barre de Filtres */}
+        <div className="medibook-card bg-card p-4 rounded-2xl border border-border flex flex-col md:flex-row items-center justify-between gap-3">
           <div className="relative w-full md:w-80">
             <input
               type="text"
-              placeholder="Rechercher par date ou motif..."
+              placeholder="Rechercher une absence..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="medibook-input w-full pl-9 text-xs"
+              className="medibook-input w-full pl-9 text-xs font-medium"
             />
             <Search className="h-4 w-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
           </div>
 
           <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto">
-            <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">Filtrer par :</span>
+            <span className="text-xs font-semibold text-muted-foreground whitespace-nowrap">Filtrer :</span>
             {['TOUS', 'ABSENT', 'VACANCES', 'FERME'].map((t) => (
               <button
                 key={t}
                 onClick={() => setFilterType(t)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   filterType === t
-                    ? 'bg-rose-500 text-white shadow-xs'
-                    : 'bg-muted/50 text-muted-foreground hover:text-foreground'
+                    ? 'bg-primary text-primary-foreground shadow-2xs'
+                    : 'bg-muted/60 text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {t === 'TOUS' ? 'Tous' : t === 'ABSENT' ? '🚫 Absent' : t === 'VACANCES' ? '🌴 Vacances' : '🔒 Fermé'}
               </button>
             ))}
 
-            {selectedMedecin && (
-              <button
-                onClick={() => chargerExceptions(selectedMedecin)}
-                className="p-2 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all ml-auto"
-                title="Actualiser"
-              >
-                <RefreshCw size={15} className={loadingExceptions ? 'animate-spin' : ''} />
-              </button>
-            )}
+            <button
+              onClick={() => selectedMedecinId && chargerExceptions(selectedMedecinId)}
+              className="p-1.5 rounded-xl border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground transition-all ml-auto"
+              title="Actualiser"
+            >
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            </button>
           </div>
         </div>
 
-        {/* Grille des Cartes d'Exceptions */}
-        <div className="medibook-card bg-card p-6 rounded-3xl border border-border/80 shadow-sm space-y-4">
+        {/* Grille des Absences */}
+        <div className="medibook-card bg-card p-5 rounded-2xl border border-border space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-bold text-foreground text-base flex items-center gap-2">
-              <CalendarX size={18} className="text-rose-500" />
-              <span>Registre d&apos;Absences {selectedMedecinObj ? `— Dr. ${selectedMedecinObj.prenom} ${selectedMedecinObj.nom}` : ''}</span>
+            <h3 className="font-bold text-foreground text-sm flex items-center gap-2">
+              <CalendarX size={16} className="text-primary" />
+              <span>Indisponibilités de Dr. {medecinActif ? `${medecinActif.prenom} ${medecinActif.nom}` : ''}</span>
             </h3>
-            <span className="text-xs font-bold text-muted-foreground px-2.5 py-1 rounded-xl bg-muted">
+            <span className="text-xs font-semibold text-muted-foreground px-2 py-0.5 rounded-lg bg-muted">
               {filteredExceptions.length} enregistrement(s)
             </span>
           </div>
 
-          {loadingExceptions ? (
-            <div className="flex items-center justify-center py-12 text-muted-foreground">
-              <Loader2 className="h-6 w-6 animate-spin text-rose-500 mr-2" /> Chargement des données...
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
             </div>
           ) : filteredExceptions.length === 0 ? (
-            <div className="text-center py-16 border border-dashed border-border rounded-3xl space-y-3">
-              <div className="h-12 w-12 rounded-2xl bg-muted flex items-center justify-center mx-auto text-2xl">
-                🍃
-              </div>
-              <p className="text-sm font-bold text-foreground">Aucune absence enregistrée</p>
-              <p className="text-xs text-muted-foreground">Ce praticien n&apos;a aucune indisponibilité sur la période filtrée.</p>
+            <div className="text-center py-12 border border-dashed border-border rounded-2xl space-y-2">
+              <p className="text-xs font-bold text-foreground">Aucune absence enregistrée</p>
+              <p className="text-xs text-muted-foreground">Ce praticien n&apos;a aucune indisponibilité planifiée.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -498,66 +444,62 @@ const SecretaireExceptionsPage = () => {
                 return (
                   <div
                     key={ex.id}
-                    className="p-5 rounded-2xl bg-card border border-border/80 hover:border-rose-500/40 transition-all shadow-2xs hover:shadow-md space-y-3 flex flex-col justify-between"
+                    className="p-4 rounded-xl bg-card border border-border hover:border-primary/40 transition-all space-y-3 flex flex-col justify-between"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className={`h-11 w-11 rounded-2xl flex items-center justify-center font-bold text-lg ${
-                          ex.type === 'ABSENT' ? 'bg-rose-500/15 text-rose-600' : ex.type === 'VACANCES' ? 'bg-sky-500/15 text-sky-600' : 'bg-amber-500/15 text-amber-600'
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center font-bold text-base ${
+                          ex.type === 'ABSENT' ? 'bg-rose-500/10 text-rose-600' : ex.type === 'VACANCES' ? 'bg-sky-500/10 text-sky-600' : 'bg-amber-500/10 text-amber-600'
                         }`}>
-                          {ex.type === 'ABSENT' ? <AlertTriangle size={20} /> : ex.type === 'VACANCES' ? <Umbrella size={20} /> : <Lock size={20} />}
+                          {ex.type === 'ABSENT' ? <AlertTriangle size={18} /> : ex.type === 'VACANCES' ? <Umbrella size={18} /> : <Lock size={18} />}
                         </div>
                         <div>
-                          <span className={`text-[10px] uppercase font-extrabold px-2.5 py-0.5 rounded-lg ${
-                            ex.type === 'ABSENT' ? 'bg-rose-500/15 text-rose-600 border border-rose-500/30' : ex.type === 'VACANCES' ? 'bg-sky-500/15 text-sky-600 border border-sky-500/30' : 'bg-amber-500/15 text-amber-600 border border-amber-500/30'
+                          <span className={`text-[10px] uppercase font-extrabold px-2 py-0.5 rounded-md ${
+                            ex.type === 'ABSENT' ? 'bg-rose-500/10 text-rose-600' : ex.type === 'VACANCES' ? 'bg-sky-500/10 text-sky-600' : 'bg-amber-500/10 text-amber-600'
                           }`}>
                             {ex.type === 'ABSENT' ? 'Absence' : ex.type === 'VACANCES' ? 'Congés' : 'Fermeture'}
                           </span>
 
-                          {/* Affichage unifié des dates Début et Fin sur le même cadre */}
-                          <div className="flex items-center gap-1.5 mt-1.5">
-                            <CalendarIcon size={14} className="text-rose-500 shrink-0" />
-                            <p className="text-sm font-black text-foreground">
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <CalendarIcon size={13} className="text-primary shrink-0" />
+                            <p className="text-xs font-bold text-foreground">
                               {isSingleDay ? (
                                 `Le ${ex.dateDebut}`
                               ) : (
-                                <span className="bg-rose-500/10 text-rose-700 dark:text-rose-300 px-2 py-0.5 rounded-lg border border-rose-500/20 font-extrabold">
-                                  Du {ex.dateDebut} au {ex.dateFin}
-                                </span>
+                                <span>Du {ex.dateDebut} au {ex.dateFin}</span>
                               )}
                             </p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Actions : Modifier & Supprimer */}
                       <div className="flex items-center gap-1">
                         <button
                           onClick={() => handleOpenEdit(ex)}
-                          className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-                          title="Modifier cette indisponibilité"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+                          title="Modifier"
                         >
-                          <Pencil size={16} />
+                          <Pencil size={15} />
                         </button>
                         <button
                           onClick={() => setDeleteId(ex.id)}
-                          className="p-2 rounded-xl text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-all"
-                          title="Supprimer cette indisponibilité (réouvre les créneaux)"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-all"
+                          title="Supprimer"
                           disabled={deleting}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
 
                     <div className="pt-2 border-t border-border/50 flex flex-wrap items-center justify-between gap-2 text-xs">
-                      <div className="flex items-center gap-1.5 text-muted-foreground font-semibold">
-                        <Clock size={14} className="text-primary" />
+                      <div className="flex items-center gap-1.5 text-muted-foreground font-medium">
+                        <Clock size={13} className="text-primary" />
                         <span>{isFullDay ? 'Journée Complète' : `${ex.heureDebut?.slice(0, 5)} — ${ex.heureFin?.slice(0, 5)}`}</span>
                       </div>
 
                       {ex.motif && (
-                        <p className="text-xs text-foreground/80 font-medium italic bg-muted/40 px-2.5 py-1 rounded-xl truncate max-w-[200px]">
+                        <p className="text-xs text-muted-foreground italic truncate max-w-[180px]">
                           « {ex.motif} »
                         </p>
                       )}
@@ -571,11 +513,11 @@ const SecretaireExceptionsPage = () => {
       </div>
 
       {/* Modal Création / Edition */}
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? "Modifier l'Indisponibilité Praticien" : "Déclarer une Indisponibilité Praticien"}>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={editingId ? "Modifier l'Indisponibilité" : "Signaler une Absence ou un Congé"}>
         <div className="space-y-4 pt-2">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Date début <span className="text-rose-500">*</span>
               </label>
               <input
@@ -588,7 +530,7 @@ const SecretaireExceptionsPage = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Date fin <span className="text-rose-500">*</span>
               </label>
               <input
@@ -602,27 +544,27 @@ const SecretaireExceptionsPage = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-foreground mb-1.5 block">
+            <label className="text-xs font-bold text-foreground mb-1 block">
               Type d&apos;indisponibilité
             </label>
             <div className="grid grid-cols-3 gap-2">
               {[
-                { type: 'ABSENT', label: '🚫 Absence', desc: 'Maladie / Imprévu' },
-                { type: 'VACANCES', label: '🌴 Congés', desc: 'Vacances prévues' },
-                { type: 'FERME', label: '🔒 Fermé', desc: 'Jour Férié / Cabinet' },
+                { type: 'ABSENT', label: '🚫 Absence', desc: 'Imprévu' },
+                { type: 'VACANCES', label: '🌴 Congés', desc: 'Vacances' },
+                { type: 'FERME', label: '🔒 Fermé', desc: 'Férié' },
               ].map((item) => (
                 <button
                   key={item.type}
                   type="button"
                   onClick={() => updateForm('type', item.type as ExceptionForm['type'])}
-                  className={`p-3 rounded-2xl border text-left transition-all ${
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
                     form.type === item.type
-                      ? 'border-rose-500 bg-rose-500/10 text-rose-600 font-extrabold shadow-2xs'
+                      ? 'border-primary bg-primary/10 text-primary font-bold shadow-2xs'
                       : 'border-border bg-card text-muted-foreground hover:text-foreground'
                   }`}
                 >
                   <p className="text-xs font-bold">{item.label}</p>
-                  <p className="text-[10px] opacity-75 mt-0.5">{item.desc}</p>
+                  <p className="text-[10px] opacity-75">{item.desc}</p>
                 </button>
               ))}
             </div>
@@ -630,7 +572,7 @@ const SecretaireExceptionsPage = () => {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Heure début (Optionnel)
               </label>
               <input
@@ -643,7 +585,7 @@ const SecretaireExceptionsPage = () => {
             </div>
 
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">
+              <label className="text-xs font-bold text-foreground mb-1 block">
                 Heure fin (Optionnel)
               </label>
               <input
@@ -657,36 +599,33 @@ const SecretaireExceptionsPage = () => {
           </div>
 
           <div>
-            <label className="text-xs font-bold text-foreground mb-1.5 block">
-              Motif / Raison (Interne)
+            <label className="text-xs font-bold text-foreground mb-1 block">
+              Motif / Raison
             </label>
             <input
               type="text"
-              placeholder="Ex: Formations médicale, Congé annuel, Imprévu personnel..."
+              placeholder="Ex: Formation, Congés payés..."
               className="medibook-input w-full text-xs font-medium"
               value={form.motif ?? ""}
               onChange={(e) => updateForm("motif", e.target.value)}
             />
           </div>
 
-          <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-900 dark:text-rose-300 flex items-start gap-2.5">
-            <Info size={18} className="shrink-0 text-rose-500 mt-0.5" />
-            <div>
-              <p className="font-extrabold">Gestion Automatique des Créneaux :</p>
-              <p className="opacity-90">Les créneaux de consultation sur la période choisie seront automatiquement bloqués. En cas d&apos;annulation ou modification, les créneaux libérés redeviendront réservables.</p>
-            </div>
+          <div className="p-3 rounded-xl bg-muted/50 border border-border text-xs text-muted-foreground flex items-start gap-2">
+            <Info size={16} className="shrink-0 text-primary mt-0.5" />
+            <p>Les créneaux de consultation sans RDV confirmé seront réouverts en cas d&apos;annulation ou de modification de l&apos;absence.</p>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">
-            <button onClick={() => setModalOpen(false)} className="medibook-btn-outline h-10 px-4 text-xs font-bold">
+            <button onClick={() => setModalOpen(false)} className="medibook-btn-outline h-9 px-4 text-xs font-bold">
               Annuler
             </button>
             <button
               onClick={handleSave}
-              className="medibook-btn bg-rose-500 hover:bg-rose-600 h-10 px-5 text-xs font-bold text-white shadow-md"
+              className="medibook-btn h-9 px-4 text-xs font-bold shadow-sm"
               disabled={submitting}
             >
-              {submitting ? "Enregistrement..." : editingId ? "Enregistrer les modifications" : "Confirmer l'Absence"}
+              {submitting ? "Enregistrement..." : editingId ? "Enregistrer" : "Créer l'Absence"}
             </button>
           </div>
         </div>
@@ -694,11 +633,11 @@ const SecretaireExceptionsPage = () => {
 
       <ConfirmDialog
         open={!!deleteId}
-        title="Supprimer l'indisponibilité"
-        message="Êtes-vous sûr de vouloir retirer cette absence ? Les créneaux du médecin qui n'ont pas de RDV confirmé redeviendront disponibles à la réservation."
+        title="Retirer cette indisponibilité"
+        message="Êtes-vous sûr de vouloir supprimer cette absence ? Les créneaux de consultation sans rendez-vous redeviendront disponibles."
         onConfirm={handleDelete}
         onCancel={() => setDeleteId(null)}
-        confirmLabel={deleting ? "Suppression..." : "Supprimer & Libérer Créneaux"}
+        confirmLabel={deleting ? "Suppression..." : "Supprimer & Libérer"}
       />
     </DashboardLayout>
   );
