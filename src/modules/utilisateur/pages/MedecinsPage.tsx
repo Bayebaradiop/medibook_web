@@ -18,7 +18,7 @@ const Avatar = ({ photo, prenom, nom, size = 'md' }: { photo?: string; prenom: s
   return photo ? (
     <img src={photo} alt={`${prenom} ${nom}`} className={`${cls} rounded-xl object-cover shadow-sm flex-shrink-0`} />
   ) : (
-    <div className={`${cls} flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/60 text-white font-bold shadow-sm flex-shrink-0`}>{initials}</div>
+    <div className={`${cls} flex items-center justify-center rounded-xl bg-teal-700 text-white font-bold shadow-xs flex-shrink-0`}>{initials}</div>
   );
 };
 
@@ -93,7 +93,7 @@ const MedecinsPage = () => {
             {filtered.map(m => (
               <div key={m.id} onClick={() => navigate(`/admin/medecins/${m.id}`)} className="medibook-card p-0 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group hover:-translate-y-0.5">
                 {/* Card top accent */}
-                <div className="h-1.5 bg-gradient-to-r from-primary via-primary/70 to-transparent" />
+                <div className="h-1 bg-teal-600" />
                 <div className="p-5">
                   {/* Header: photo + identity */}
                   <div className="flex items-start gap-4 mb-4">

@@ -47,7 +47,7 @@ const CabinetDetailPage = () => {
         </button>
 
         <div className="medibook-card overflow-hidden">
-          <div className="bg-gradient-to-r from-primary-dark to-primary-light p-6 -m-4 mb-4 rounded-t-2xl">
+          <div className="bg-teal-800 text-white p-6 -m-4 mb-4 rounded-t-2xl">
             <h2 className="text-xl font-bold text-primary-foreground">{cabinet.nom}</h2>
             <StatusBadge status={cabinet.status as any} type="entity" />
           </div>

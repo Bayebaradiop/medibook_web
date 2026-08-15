@@ -4,6 +4,7 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import StatsCard from '@/components/common/StatsCard';
 import StatusBadge from '@/components/common/StatusBadge';
 import { useAuth } from '@/contexts/AuthContext';
+import { getSalutation } from '@/utils/salutation';
 import { 
   Users, 
   UserCheck, 
@@ -39,7 +40,7 @@ const Avatar = ({ photo, prenom, nom, size = 'md' }: { photo?: string; prenom: s
   return photo ? (
     <img src={photo} alt={`${prenom} ${nom}`} className={`${cls} rounded-xl object-cover ring-2 ring-primary/20 flex-shrink-0`} />
   ) : (
-    <div className={`${cls} flex items-center justify-center rounded-xl bg-gradient-to-br from-primary via-primary/80 to-teal-700 text-white font-bold flex-shrink-0 shadow-sm`}>
+    <div className={`${cls} flex items-center justify-center rounded-xl bg-teal-700 text-white font-bold flex-shrink-0 shadow-xs`}>
       {initials}
     </div>
   );
@@ -260,7 +261,7 @@ const AdminDashboard = () => {
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-                Bonjour, {user?.prenom || 'Admin'} {user?.nom || ''} 👋
+                {getSalutation()}, {user?.prenom || 'Admin'} {user?.nom || ''} 👋
               </h1>
               <p className="text-sm text-white/80 max-w-xl">
                 Supervisez en temps réel le personnel médical, suivez l'activité des rendez-vous et gérez votre cabinet avec simplicité.

@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import { medecinService } from '../services/utilisateurService';
 import { specialiteService } from '@/modules/specialite/services/specialiteService';
@@ -8,7 +8,20 @@ import { UTILISATEUR_ERREURS } from '../messages/utilisateur.erreurs';
 import { UTILISATEUR_SUCCES } from '../messages/utilisateur.succes';
 import type { Medecin } from '../types/utilisateur.types';
 import type { Specialite } from '@/modules/specialite/types/specialite.types';
-import { ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Upload,
+  Loader2,
+  User,
+  Mail,
+  Phone,
+  Stethoscope,
+  Lock,
+  Camera,
+  X,
+  CheckCircle2,
+  UserPlus
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 type ErreursChamp = Record<string, string>;
@@ -22,7 +35,12 @@ interface BackendErrorPayload {
 }
 
 const ErreurChamp = ({ id, message }: { id: string; message?: string }) =>
-  message ? <p id={id} className="mt-1 text-xs text-destructive">{message}</p> : null;
+  message ? (
+    <p id={id} className="mt-1.5 text-xs font-medium text-destructive flex items-center gap-1">
+      <span className="inline-block w-1.5 h-1.5 rounded-full bg-destructive" />
+      {message}
+    </p>
+  ) : null;
 
 const estObjet = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
@@ -68,6 +86,7 @@ const MedecinFormPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isEdit = !!id && id !== 'nouveau';
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [specialites, setSpecialites] = useState<Specialite[]>([]);
   const [loadingInit, setLoadingInit] = useState(true);
@@ -140,6 +159,12 @@ const MedecinFormPage = () => {
     }
   };
 
+  const removePhoto = () => {
+    setPhoto(null);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const data = {
@@ -191,7 +216,7 @@ const MedecinFormPage = () => {
   };
 
   const inputClass = (champ: string) =>
-    `medibook-input w-full ${erreurs[champ] ? 'border-destructive ring-1 ring-destructive' : ''}`;
+    `medibook-input w-full pl-11 transition-all ${erreurs[champ] ? 'border-destructive ring-2 ring-destructive/20' : ''}`;
 
   const inputProps = (champ: string) => ({
     name: champ,
@@ -200,60 +225,226 @@ const MedecinFormPage = () => {
     'aria-describedby': erreurs[champ] ? `${champ}-error` : undefined,
   });
 
-  if (loadingInit) return <DashboardLayout title="Médecin"><div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div></DashboardLayout>;
+  if (loadingInit) return (
+    <DashboardLayout title="Médecin">
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
+        <Loader2 className="animate-spin text-primary" size={36} />
+        <p className="text-sm font-medium text-muted-foreground">Chargement des données du médecin...</p>
+      </div>
+    </DashboardLayout>
+  );
 
   return (
     <DashboardLayout title={isEdit ? 'Modifier le médecin' : 'Nouveau médecin'}>
-      <div className="space-y-6 max-w-3xl">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft size={18} /> Retour</button>
+      <div className="space-y-8 max-w-3xl mx-auto pb-12">
+        {/* Navigation retour */}
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          Retour
+        </button>
+
         <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-          <div className="medibook-card flex flex-col items-center">
-            <label className="w-24 h-24 rounded-full border-2 border-dashed border-input flex items-center justify-center hover:border-primary transition-colors cursor-pointer overflow-hidden">
-              {photoPreview ? <img src={photoPreview} alt="Photo" className="w-full h-full object-cover" /> : <Upload size={28} className="text-muted-foreground" />}
-              <input type="file" accept="image/*" onChange={handlePhoto} className="hidden" />
-            </label>
-            <p className="text-xs text-muted-foreground mt-2">Cliquez pour ajouter une photo</p>
-          </div>
-          <div className="medibook-card">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Prénom</label>
-                <input value={form.prenom} onChange={e => update('prenom', e.target.value)} {...inputProps('prenom')} />
-                <ErreurChamp id="prenom-error" message={erreurs.prenom} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Nom</label>
-                <input value={form.nom} onChange={e => update('nom', e.target.value)} {...inputProps('nom')} />
-                <ErreurChamp id="nom-error" message={erreurs.nom} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Email</label>
-                <input type="email" value={form.email} onChange={e => update('email', e.target.value)} {...inputProps('email')} />
-                <ErreurChamp id="email-error" message={erreurs.email} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Téléphone</label>
-                <input value={form.telephone} onChange={e => update('telephone', e.target.value)} {...inputProps('telephone')} />
-                <ErreurChamp id="telephone-error" message={erreurs.telephone} />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Spécialité</label>
-                <select value={form.specialiteId} onChange={e => update('specialiteId', e.target.value)} {...inputProps('specialiteId')}>
-                  <option value="">Sélectionner</option>
-                  {specialites.map(s => <option key={s.id} value={s.id}>{s.nom}</option>)}
-                </select>
-                <ErreurChamp id="specialiteId-error" message={erreurs.specialiteId} />
-              </div>
-              {!isEdit && <div>
-                <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Mot de passe</label>
-                <input type="password" value={form.motDePasse} onChange={e => update('motDePasse', e.target.value)} {...inputProps('motDePasse')} />
-                <ErreurChamp id="motDePasse-error" message={erreurs.motDePasse} />
-              </div>}
+          {/* SECTION PHOTO DE PROFIL */}
+          <div className="medibook-card flex flex-col items-center justify-center py-8 relative">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhoto}
+              className="hidden"
+            />
+
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              {photoPreview ? (
+                <div className="relative">
+                  <img
+                    src={photoPreview}
+                    alt="Aperçu photo"
+                    className="w-28 h-28 rounded-full object-cover ring-4 ring-primary/20 shadow-md"
+                  />
+                  <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                    <Camera size={24} />
+                  </div>
+                </div>
+              ) : (
+                <div className="w-28 h-28 rounded-full border-2 border-dashed border-border group-hover:border-primary bg-secondary/30 flex flex-col items-center justify-center text-muted-foreground group-hover:text-primary transition-colors shadow-inner">
+                  <Camera size={28} />
+                  <span className="text-[10px] font-semibold mt-1">Photo</span>
+                </div>
+              )}
+            </div>
+
+            <div className="text-center mt-3 space-y-1">
+              <p className="text-xs font-semibold text-foreground">Photo professionnelle du praticien</p>
+              <p className="text-[11px] text-muted-foreground">Cliquez sur le cercle pour importer une image (PNG, JPG)</p>
+              {photoPreview && (
+                <button
+                  type="button"
+                  onClick={removePhoto}
+                  className="text-xs font-semibold text-destructive hover:underline inline-flex items-center gap-1 pt-1"
+                >
+                  <X size={12} /> Supprimer la photo
+                </button>
+              )}
             </div>
           </div>
-          <div className="flex justify-end gap-3">
-            <button type="button" onClick={() => navigate(-1)} className="medibook-btn-outline">Annuler</button>
-            <button type="submit" disabled={saving} className="medibook-btn">{saving ? 'Enregistrement...' : 'Enregistrer'}</button>
+
+          {/* SECTION INFORMATIONS DU MÉDECIN */}
+          <div className="medibook-card space-y-6">
+            <div className="flex items-center gap-3 pb-4 border-b border-border/60">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <Stethoscope size={20} />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-foreground">Identité & Informations Médicales</h3>
+                <p className="text-xs text-muted-foreground">Renseignez les coordonnées professionnelles du praticien</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Prénom */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Prénom <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={form.prenom}
+                    onChange={e => update('prenom', e.target.value)}
+                    placeholder="Prénom du médecin"
+                    {...inputProps('prenom')}
+                  />
+                </div>
+                <ErreurChamp id="prenom-error" message={erreurs.prenom} />
+              </div>
+
+              {/* Nom */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Nom <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={form.nom}
+                    onChange={e => update('nom', e.target.value)}
+                    placeholder="Nom du médecin"
+                    {...inputProps('nom')}
+                  />
+                </div>
+                <ErreurChamp id="nom-error" message={erreurs.nom} />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Email Professionnel <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={e => update('email', e.target.value)}
+                    placeholder="dr.prenom@medibook.sn"
+                    {...inputProps('email')}
+                  />
+                </div>
+                <ErreurChamp id="email-error" message={erreurs.email} />
+              </div>
+
+              {/* Téléphone */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Téléphone Portable <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <Phone size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={form.telephone}
+                    onChange={e => update('telephone', e.target.value)}
+                    placeholder="+221 77 123 45 67"
+                    {...inputProps('telephone')}
+                  />
+                </div>
+                <ErreurChamp id="telephone-error" message={erreurs.telephone} />
+              </div>
+
+              {/* Spécialité */}
+              <div className="md:col-span-2">
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Spécialité Médicale <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <Stethoscope size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <select
+                    value={form.specialiteId}
+                    onChange={e => update('specialiteId', e.target.value)}
+                    {...inputProps('specialiteId')}
+                  >
+                    <option value="">Sélectionner une spécialité...</option>
+                    {specialites.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <ErreurChamp id="specialiteId-error" message={erreurs.specialiteId} />
+              </div>
+
+              {/* Mot de passe initial (si création) */}
+              {!isEdit && (
+                <div className="md:col-span-2">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                    Mot de passe Initial <span className="text-destructive">*</span>
+                  </label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="password"
+                      value={form.motDePasse}
+                      onChange={e => update('motDePasse', e.target.value)}
+                      placeholder="••••••••••••"
+                      {...inputProps('motDePasse')}
+                    />
+                  </div>
+                  <ErreurChamp id="motDePasse-error" message={erreurs.motDePasse} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* BARRE D'ACTIONS */}
+          <div className="flex items-center justify-end gap-4 pt-4 border-t border-border/80">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="medibook-btn-outline px-6"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="medibook-btn flex items-center gap-2 px-8 min-w-[180px] justify-center"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} />
+                  <span>Enregistrement...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={18} />
+                  <span>{isEdit ? 'Enregistrer les modifications' : 'Créer le praticien'}</span>
+                </>
+              )}
+            </button>
           </div>
         </form>
       </div>

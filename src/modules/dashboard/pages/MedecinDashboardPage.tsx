@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
+import { getSalutation } from "@/utils/salutation";
 import StatusBadge from "@/components/common/StatusBadge";
 import {
   CalendarDays,
@@ -205,7 +206,7 @@ const MedecinDashboard = () => {
                 <span>Espace Praticien • Consultations Ouvertes</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
-                Bonjour, Dr. {user?.prenom} {user?.nom} <Sparkles className="h-6 w-6 text-amber-300" />
+                {getSalutation()}, Dr. {user?.prenom} {user?.nom} <Sparkles className="h-6 w-6 text-amber-300" />
               </h1>
               <p className="text-sm text-white/90 max-w-xl">
                 Vous avez <span className="font-bold text-white underline decoration-amber-300">{todayRdvs.length} rendez-vous</span> programmés aujourd&apos;hui. Suivez vos consultations en temps réel.

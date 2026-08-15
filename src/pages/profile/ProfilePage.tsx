@@ -6,6 +6,23 @@ import { toast } from 'sonner';
 import { AUTH_ERREURS } from '@/modules/auth/messages/auth.erreurs';
 import { AUTH_SUCCES } from '@/modules/auth/messages/auth.succes';
 import { UTILISATEUR_ERREURS } from '@/modules/utilisateur/messages/utilisateur.erreurs';
+import {
+  User,
+  Mail,
+  Phone,
+  Shield,
+  ShieldCheck,
+  Edit3,
+  Check,
+  X,
+  Camera,
+  Loader2,
+  Lock,
+  Sparkles,
+  Building2,
+  BadgeCheck,
+  CheckCircle2,
+} from 'lucide-react';
 
 const TEL_REGEX = /^[+]?[0-9][0-9\s\-()]{7,19}$/;
 
@@ -60,6 +77,7 @@ const ProfilePage = () => {
       });
     }
   };
+
   const getInitials = () => `${user?.prenom?.[0] || ''}${user?.nom?.[0] || ''}`;
 
   const handleCancel = () => {
@@ -116,57 +134,224 @@ const ProfilePage = () => {
     }
   };
 
+  const getRoleBadgeStyle = (r?: string) => {
+    switch (r) {
+      case 'SUPER_ADMIN':
+        return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
+      case 'ADMIN':
+        return 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/20';
+      case 'MEDECIN':
+        return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
+      case 'SECRETAIRE':
+        return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
+      default:
+        return 'bg-primary/10 text-primary border-primary/20';
+    }
+  };
+
   return (
     <DashboardLayout title="Mon Profil">
-      <div className="max-w-2xl space-y-6">
-        <div className="medibook-card flex flex-col items-center">
-          {user?.photo ? (
-            <img
-              src={user.photo}
-              alt={`${user.prenom} ${user.nom}`}
-              className="h-24 w-24 rounded-full object-cover border border-border"
-            />
-          ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-full bg-primary/10 text-primary font-bold text-3xl">
-              {getInitials()}
+      <div className="max-w-4xl mx-auto space-y-8 pb-12">
+        {/* BANNIÈRE HÉRO DU PROFIL */}
+        <div className="relative overflow-hidden rounded-3xl bg-card border border-border/80 p-6 md:p-8 shadow-xs">
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-6 relative z-10">
+            {/* AVATAR + BADGE STATUS */}
+            <div className="relative group shrink-0">
+              <div className="p-1 rounded-full bg-background border-2 border-teal-500/30 shadow-xs">
+                {user?.photo ? (
+                  <img
+                    src={user.photo}
+                    alt={`${user.prenom} ${user.nom}`}
+                    className="h-28 w-28 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-28 w-28 items-center justify-center rounded-full bg-teal-700 text-white font-extrabold text-3xl shadow-xs">
+                    {getInitials()}
+                  </div>
+                )}
+              </div>
+              <button
+                type="button"
+                className="absolute bottom-1 right-1 p-2.5 rounded-full bg-primary text-white shadow-lg hover:scale-110 transition-transform cursor-pointer border-2 border-background"
+                title="Changer de photo de profil"
+                onClick={() => toast.info("La mise à jour de photo sera disponible très prochainement.")}
+              >
+                <Camera size={14} />
+              </button>
             </div>
-          )}
-          <h2 className="text-xl font-bold mt-3">{user?.prenom} {user?.nom}</h2>
-          <span className="medibook-badge bg-primary/10 text-primary mt-1">{role ? ROLE_LABELS[role] : ''}</span>
+
+            {/* INFORMATIONS PRINCIPALES */}
+            <div className="flex-1 text-center md:text-left space-y-2">
+              <div className="flex flex-col md:flex-row md:items-center gap-2">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-foreground tracking-tight">
+                  {user?.prenom} {user?.nom}
+                </h1>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getRoleBadgeStyle(
+                    role
+                  )}`}
+                >
+                  <BadgeCheck size={14} />
+                  {role ? ROLE_LABELS[role] : 'Utilisateur'}
+                </span>
+              </div>
+
+              <p className="text-sm font-medium text-muted-foreground flex items-center justify-center md:justify-start gap-2">
+                <Mail size={16} className="text-primary" />
+                {user?.email}
+              </p>
+
+              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 pt-2 text-xs font-medium text-muted-foreground">
+                {user?.telephone && (
+                  <span className="flex items-center gap-1 bg-background/80 backdrop-blur-sm px-3 py-1.5 rounded-xl border border-border">
+                    <Phone size={14} className="text-primary" />
+                    {user.telephone}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* BOUTON ÉDITION */}
+            <div className="shrink-0 pt-2 md:pt-0">
+              {!editing ? (
+                <button
+                  onClick={() => setEditing(true)}
+                  className="medibook-btn flex items-center gap-2 px-5 py-2.5 h-11 text-sm shadow-md"
+                >
+                  <Edit3 size={16} />
+                  <span>Modifier le profil</span>
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCancel}
+                    disabled={isSaving}
+                    className="medibook-btn-outline px-4 h-10 text-sm flex items-center gap-1.5"
+                  >
+                    <X size={16} />
+                    <span>Annuler</span>
+                  </button>
+                  <button
+                    onClick={() => void handleSave()}
+                    disabled={isSaving}
+                    className="medibook-btn px-5 h-10 text-sm flex items-center gap-1.5"
+                  >
+                    {isSaving ? (
+                      <>
+                        <Loader2 size={16} className="animate-spin" />
+                        <span>Sauvegarde...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Check size={16} />
+                        <span>Sauvegarder</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className="medibook-card">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Prénom</label>
-              <input value={form.prenom} onChange={e => update('prenom', e.target.value)} disabled={!editing} className={`medibook-input w-full disabled:opacity-60 ${erreurs.prenom ? 'border-destructive ring-1 ring-destructive' : ''}`} />
-              {erreurs.prenom && <p className="mt-1 text-xs text-destructive">{erreurs.prenom}</p>}
-            </div>
-            <div>
-              <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Nom</label>
-              <input value={form.nom} onChange={e => update('nom', e.target.value)} disabled={!editing} className={`medibook-input w-full disabled:opacity-60 ${erreurs.nom ? 'border-destructive ring-1 ring-destructive' : ''}`} />
-              {erreurs.nom && <p className="mt-1 text-xs text-destructive">{erreurs.nom}</p>}
-            </div>
-            <div><label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Email</label><input value={user?.email || ''} disabled className="medibook-input w-full disabled:opacity-60" /></div>
-            <div>
-              <label className="text-sm font-medium text-secondary-foreground mb-1.5 block">Téléphone</label>
-              <input value={form.telephone} onChange={e => update('telephone', e.target.value)} disabled={!editing} className={`medibook-input w-full disabled:opacity-60 ${erreurs.telephone ? 'border-destructive ring-1 ring-destructive' : ''}`} />
-              {erreurs.telephone && <p className="mt-1 text-xs text-destructive">{erreurs.telephone}</p>}
-            </div>
-          </div>
-          <div className="flex justify-end mt-4">
-            {editing ? (
-              <div className="flex gap-3">
-                <button onClick={handleCancel} className="medibook-btn-outline h-10 px-4 text-sm" disabled={isSaving}>Annuler</button>
-                <button onClick={() => void handleSave()} className="medibook-btn h-10 px-4 text-sm" disabled={isSaving}>
-                  {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
-                </button>
+        {/* SECTION EDITEUR DE COORDONNÉES */}
+        <div className="medibook-card overflow-hidden">
+          <div className="flex items-center justify-between pb-4 mb-6 border-b border-border/60">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <User size={20} />
               </div>
-            ) : (
-              <button onClick={() => setEditing(true)} className="medibook-btn h-10 px-4 text-sm">Modifier</button>
+              <div>
+                <h3 className="font-bold text-base text-foreground">Coordonnées Personnelles</h3>
+                <p className="text-xs text-muted-foreground">Vos informations d'identification sur MediBook</p>
+              </div>
+            </div>
+            {editing && (
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse">
+                Mode Édition Actif
+              </span>
             )}
           </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* Prénom */}
+            <div>
+              <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                Prénom
+              </label>
+              <div className="relative">
+                <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={form.prenom}
+                  onChange={e => update('prenom', e.target.value)}
+                  disabled={!editing}
+                  placeholder="Votre prénom"
+                  className={`medibook-input w-full pl-11 disabled:bg-secondary/40 disabled:opacity-80 transition-all ${
+                    erreurs.prenom ? 'border-destructive ring-2 ring-destructive/20' : ''
+                  }`}
+                />
+              </div>
+              {erreurs.prenom && <p className="mt-1.5 text-xs font-medium text-destructive">{erreurs.prenom}</p>}
+            </div>
+
+            {/* Nom */}
+            <div>
+              <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                Nom
+              </label>
+              <div className="relative">
+                <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={form.nom}
+                  onChange={e => update('nom', e.target.value)}
+                  disabled={!editing}
+                  placeholder="Votre nom"
+                  className={`medibook-input w-full pl-11 disabled:bg-secondary/40 disabled:opacity-80 transition-all ${
+                    erreurs.nom ? 'border-destructive ring-2 ring-destructive/20' : ''
+                  }`}
+                />
+              </div>
+              {erreurs.nom && <p className="mt-1.5 text-xs font-medium text-destructive">{erreurs.nom}</p>}
+            </div>
+
+            {/* Email (Lecture seule) */}
+            <div>
+              <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                <span>Adresse Email</span>
+                <span className="text-[10px] lowercase text-muted-foreground font-normal">(Non modifiable)</span>
+              </label>
+              <div className="relative">
+                <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={user?.email || ''}
+                  disabled
+                  className="medibook-input w-full pl-11 bg-secondary/40 opacity-80 cursor-not-allowed"
+                />
+              </div>
+            </div>
+
+            {/* Téléphone */}
+            <div>
+              <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                Numéro de Téléphone
+              </label>
+              <div className="relative">
+                <Phone size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={form.telephone}
+                  onChange={e => update('telephone', e.target.value)}
+                  disabled={!editing}
+                  placeholder="+221 77 123 45 67"
+                  className={`medibook-input w-full pl-11 disabled:bg-secondary/40 disabled:opacity-80 transition-all ${
+                    erreurs.telephone ? 'border-destructive ring-2 ring-destructive/20' : ''
+                  }`}
+                />
+              </div>
+              {erreurs.telephone && <p className="mt-1.5 text-xs font-medium text-destructive">{erreurs.telephone}</p>}
+            </div>
+          </div>
         </div>
+
       </div>
     </DashboardLayout>
   );

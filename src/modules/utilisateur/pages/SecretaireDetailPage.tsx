@@ -4,10 +4,19 @@ import DashboardLayout from '@/layouts/DashboardLayout';
 import StatusBadge from '@/components/common/StatusBadge';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
 import { secretaireService } from '../services/utilisateurService';
-import { UTILISATEUR_ERREURS } from '../messages/utilisateur.erreurs';
-import { UTILISATEUR_SUCCES } from '../messages/utilisateur.succes';
 import type { Secretaire } from '../types/utilisateur.types';
-import { ArrowLeft, Pencil, Ban, Trash2, Loader2, Mail, Phone, Building2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Pencil,
+  Ban,
+  Trash2,
+  Loader2,
+  Mail,
+  Phone,
+  Building2,
+  UserCheck,
+  ShieldCheck
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 const SecretaireDetailPage = () => {
@@ -55,64 +64,148 @@ const SecretaireDetailPage = () => {
     setConfirmDelete(false);
   };
 
-  if (loading) return <DashboardLayout title="Secrétaire"><div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div></DashboardLayout>;
+  if (loading) {
+    return (
+      <DashboardLayout title="Secrétaire">
+        <div className="flex flex-col items-center justify-center py-24 gap-3">
+          <Loader2 className="animate-spin text-teal-600" size={32} />
+          <p className="text-xs font-semibold text-muted-foreground">Chargement des détails de la secrétaire...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   if (!secretaire) return null;
 
-  const initials = `${secretaire.prenom[0] || ''}${secretaire.nom[0] || ''}`;
+  const initials = `${secretaire.prenom[0] || ''}${secretaire.nom[0] || ''}`.toUpperCase();
 
   return (
-    <DashboardLayout title="Détails de la secrétaire">
-      <div className="space-y-6 max-w-4xl">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"><ArrowLeft size={18} /> Retour</button>
+    <DashboardLayout title="Fiche Secrétaire">
+      <div className="space-y-6 max-w-4xl mx-auto pb-12">
+        {/* Navigation retour */}
+        <button
+          onClick={() => navigate('/admin/secretaires')}
+          className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          Retour aux secrétaires
+        </button>
 
-        <div className="medibook-card overflow-hidden p-0">
-          <div className="h-36 bg-gradient-to-br from-primary/20 via-primary/10 to-transparent relative">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%221.5%22%20fill%3D%22rgba(59%2C130%2C246%2C0.08)%22%2F%3E%3C%2Fsvg%3E')] opacity-60" />
-          </div>
-          <div className="px-6 pb-6">
-            <div className="flex flex-col sm:flex-row gap-5 -mt-16 relative z-10">
+        {/* CARTE DE PROFIL NETTE ET ÉPURÉE (AUCUN DÉGRADÉ) */}
+        <div className="bg-card rounded-2xl border border-border/80 shadow-xs p-6 md:p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-border/60">
+            <div className="flex items-center gap-5">
+              {/* Avatar solide */}
               {secretaire.photo ? (
-                <img src={secretaire.photo} alt={`${secretaire.prenom} ${secretaire.nom}`} className="h-28 w-28 rounded-2xl object-cover ring-4 ring-background shadow-xl flex-shrink-0" />
+                <img
+                  src={secretaire.photo}
+                  alt={`${secretaire.prenom} ${secretaire.nom}`}
+                  className="h-20 w-20 rounded-2xl object-cover ring-2 ring-teal-500/20 shadow-xs shrink-0"
+                />
               ) : (
-                <div className="h-28 w-28 rounded-2xl bg-gradient-to-br from-primary to-primary/60 ring-4 ring-background shadow-xl flex items-center justify-center text-white font-bold text-4xl flex-shrink-0">{initials}</div>
-              )}
-              <div className="flex-1 pt-2 sm:pt-8">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <h2 className="text-2xl font-bold tracking-tight">{secretaire.prenom} {secretaire.nom}</h2>
-                      <StatusBadge status={secretaire.status} type="entity" />
-                    </div>
-                    <p className="text-sm text-muted-foreground mt-1">Secrétaire médicale</p>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button onClick={() => navigate(`/admin/secretaires/${id}/modifier`)} className="medibook-btn h-9 px-3.5 text-sm flex items-center gap-1.5"><Pencil size={14} /> Modifier</button>
-                    <button onClick={handleToggleStatus} className="medibook-btn-outline h-9 px-3.5 text-sm flex items-center gap-1.5"><Ban size={14} /> {secretaire.status === 'ACTIF' ? 'Bloquer' : 'Débloquer'}</button>
-                    <button onClick={() => setConfirmDelete(true)} className="h-9 px-3.5 text-sm font-semibold rounded-2xl bg-destructive text-card transition-all duration-200 active:scale-[0.98] hover:brightness-90 flex items-center gap-1.5"><Trash2 size={14} /> Supprimer</button>
-                  </div>
+                <div className="h-20 w-20 rounded-2xl bg-teal-700 text-white font-extrabold text-2xl flex items-center justify-center shadow-xs shrink-0">
+                  {initials}
                 </div>
+              )}
+
+              {/* Titre & Statuts */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-2xl font-bold text-foreground tracking-tight">
+                    {secretaire.prenom} {secretaire.nom}
+                  </h1>
+                  <StatusBadge status={secretaire.status} type="entity" />
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-teal-500/10 text-teal-700 dark:text-teal-300 text-xs font-semibold border border-teal-500/20">
+                    <UserCheck size={13} />
+                    Secrétaire Médicale
+                  </span>
+                  {secretaire.cabinetNom && (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-secondary text-secondary-foreground text-xs font-semibold border border-border">
+                      <Building2 size={13} className="text-muted-foreground" />
+                      {secretaire.cabinetNom}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Actions Rapides */}
+            <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto pt-2 md:pt-0">
+              <button
+                onClick={() => navigate(`/admin/secretaires/${id}/modifier`)}
+                className="medibook-btn h-9 px-4 text-xs font-semibold inline-flex items-center gap-1.5"
+              >
+                <Pencil size={14} />
+                Modifier
+              </button>
+
+              <button
+                onClick={handleToggleStatus}
+                className="medibook-btn-outline h-9 px-3.5 text-xs font-semibold inline-flex items-center gap-1.5"
+              >
+                <Ban size={14} />
+                {secretaire.status === 'ACTIF' ? 'Désactiver' : 'Activer'}
+              </button>
+
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="h-9 px-3.5 text-xs font-semibold rounded-xl bg-destructive/10 text-destructive hover:bg-destructive hover:text-white transition-colors inline-flex items-center gap-1.5"
+              >
+                <Trash2 size={14} />
+                Supprimer
+              </button>
+            </div>
+          </div>
+
+          {/* GRID D'INFORMATIONS SOLIDE & ÉPURÉ */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6">
+            {/* Email */}
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border border-teal-200/50 dark:border-teal-800/50 flex items-center justify-center shrink-0">
+                <Mail size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Email Professionnel</p>
+                <p className="text-sm font-semibold text-foreground truncate mt-0.5">{secretaire.email}</p>
+              </div>
+            </div>
+
+            {/* Téléphone */}
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border border-teal-200/50 dark:border-teal-800/50 flex items-center justify-center shrink-0">
+                <Phone size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Téléphone Portable</p>
+                <p className="text-sm font-semibold text-foreground mt-0.5">{secretaire.telephone || 'Non renseigné'}</p>
+              </div>
+            </div>
+
+            {/* Cabinet */}
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-xl bg-teal-50 dark:bg-teal-950/50 text-teal-700 dark:text-teal-300 border border-teal-200/50 dark:border-teal-800/50 flex items-center justify-center shrink-0">
+                <Building2 size={18} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">Cabinet Rattaché</p>
+                <p className="text-sm font-semibold text-foreground truncate mt-0.5">{secretaire.cabinetNom || 'Non assigné'}</p>
               </div>
             </div>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="medibook-card flex items-center gap-4">
-            <div className="flex items-center justify-center h-11 w-11 rounded-xl bg-blue-50 dark:bg-blue-500/10"><Mail size={18} className="text-blue-600 dark:text-blue-400" /></div>
-            <div className="min-w-0"><p className="text-xs text-muted-foreground mb-0.5">Email</p><p className="text-sm font-semibold truncate">{secretaire.email}</p></div>
-          </div>
-          <div className="medibook-card flex items-center gap-4">
-            <div className="flex items-center justify-center h-11 w-11 rounded-xl bg-green-50 dark:bg-green-500/10"><Phone size={18} className="text-green-600 dark:text-green-400" /></div>
-            <div className="min-w-0"><p className="text-xs text-muted-foreground mb-0.5">Téléphone</p><p className="text-sm font-semibold">{secretaire.telephone}</p></div>
-          </div>
-          {secretaire.cabinetNom && <div className="medibook-card flex items-center gap-4">
-            <div className="flex items-center justify-center h-11 w-11 rounded-xl bg-amber-50 dark:bg-amber-500/10"><Building2 size={18} className="text-amber-600 dark:text-amber-400" /></div>
-            <div className="min-w-0"><p className="text-xs text-muted-foreground mb-0.5">Cabinet</p><p className="text-sm font-semibold truncate">{secretaire.cabinetNom}</p></div>
-          </div>}
-        </div>
       </div>
 
-      <ConfirmDialog open={confirmDelete} title="Supprimer la secrétaire" message="Êtes-vous sûr de vouloir supprimer cette secrétaire ?" onConfirm={handleDelete} onCancel={() => setConfirmDelete(false)} confirmLabel="Supprimer" />
+      <ConfirmDialog
+        open={confirmDelete}
+        title="Supprimer la secrétaire"
+        message={`Êtes-vous sûr de vouloir supprimer la secrétaire ${secretaire.prenom} ${secretaire.nom} ? Cette action est irréversible.`}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDelete(false)}
+        confirmLabel="Supprimer définitivement"
+      />
     </DashboardLayout>
   );
 };
