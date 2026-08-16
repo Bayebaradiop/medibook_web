@@ -14,6 +14,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { DAYS_OF_WEEK } from '@/utils/constants';
+import { formatDateFR } from '@/utils/date';
 
 export interface AgendaMedecin {
   id: number;
@@ -122,6 +123,17 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
   });
 
   const [activeTab, setActiveTab] = useState<'agenda' | 'templates' | 'exceptions'>('agenda');
+
+  const activeExceptions = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return exceptions.filter((ex) => {
+      const dateEnd = new Date(ex.dateFin || ex.dateDebut);
+      dateEnd.setHours(23, 59, 59, 999);
+      return dateEnd.getTime() >= today.getTime();
+    });
+  }, [exceptions]);
 
   const handlePrevWeek = () => {
     const prev = new Date(currentWeekStart);
@@ -277,7 +289,7 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <List size={14} /> Absences ({exceptions.length})
+              <List size={14} /> Absences ({activeExceptions.length})
             </button>
           </div>
 
@@ -583,13 +595,13 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
             </div>
           </div>
 
-          {exceptions.length === 0 ? (
+          {activeExceptions.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground text-sm border border-dashed border-border rounded-2xl">
-              Aucune exception ou absence enregistrée
+              Aucune exception ou absence à venir enregistrée
             </div>
           ) : (
             <div className="space-y-3">
-              {exceptions.map((ex) => (
+              {activeExceptions.map((ex) => (
                 <div key={ex.id} className="flex items-center justify-between p-4 rounded-2xl bg-destructive/5 border border-destructive/15">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-destructive/10 text-destructive flex items-center justify-center font-bold text-lg">
@@ -598,7 +610,7 @@ export const GrandAgendaUnifie: React.FC<GrandAgendaUnifieProps> = ({
                     <div>
                       <div className="flex items-center gap-2">
                         <p className="text-sm font-bold text-foreground">
-                          {ex.dateDebut === ex.dateFin ? ex.dateDebut : `${ex.dateDebut} → ${ex.dateFin}`}
+                          {ex.dateDebut === ex.dateFin ? formatDateFR(ex.dateDebut) : `${formatDateFR(ex.dateDebut)} → ${formatDateFR(ex.dateFin)}`}
                         </p>
                         <span className="text-[10px] px-2 py-0.5 rounded-lg bg-destructive text-destructive-foreground font-extrabold">
                           {ex.type}

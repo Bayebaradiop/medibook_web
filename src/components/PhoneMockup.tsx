@@ -263,9 +263,9 @@ const ConfirmedScreen = () => (
     </motion.div>
     <p className="mt-3 text-[10px] font-bold text-gray-800">Rendez-vous confirmé !</p>
     <p className="mt-1 text-center text-[7px] text-gray-500">
-      Votre rendez-vous a été envoyé.
+      Votre rendez-vous a été pris en compte.
       <br />
-      En attente de validation par la secrétaire.
+      Confirmé instantanément sur votre espace.
     </p>
 
     <div className="mt-3 w-full rounded-2xl bg-white p-3 shadow-sm">
@@ -294,9 +294,9 @@ const ConfirmedScreen = () => (
       </div>
     </div>
 
-    <div className="mt-2 flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1">
-      <Clock size={8} className="text-amber-500" />
-      <span className="text-[6px] font-medium text-amber-600">En attente de validation</span>
+    <div className="mt-2 flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1">
+      <Check size={8} className="text-emerald-500" />
+      <span className="text-[6px] font-medium text-emerald-600">Confirmé instantanément</span>
     </div>
   </div>
 );

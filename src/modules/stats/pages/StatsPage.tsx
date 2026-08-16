@@ -64,7 +64,6 @@ const StatsPage = () => {
   }
 
   const statusData = [
-    { name: "En attente", value: stats.rdvEnAttente, fill: "hsl(33, 100%, 58%)" },
     { name: "Confirmés", value: stats.rdvConfirmes, fill: "hsl(var(--status-confirmed))" },
     { name: "Terminés", value: stats.rdvTermines, fill: "hsl(200, 10%, 55%)" },
     { name: "Annulés", value: stats.rdvAnnules, fill: "hsl(1, 84%, 63%)" },
@@ -75,10 +74,9 @@ const StatsPage = () => {
   return (
     <DashboardLayout title="Statistiques">
       <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatsCard icon={CalendarDays} value={stats.totalRdv} label="Total RDV" color="green" />
           <StatsCard icon={Users} value={stats.totalPatients} label="Patients" color="blue" />
-          <StatsCard icon={Clock} value={stats.rdvEnAttente} label="En attente" color="orange" />
           <StatsCard icon={CheckCircle} value={stats.rdvConfirmes} label="Confirmés" color="blue" />
           <StatsCard icon={XCircle} value={stats.rdvTermines} label="Terminés" color="grey" />
         </div>

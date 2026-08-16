@@ -20,12 +20,18 @@ export const exceptionSecretaireService = {
   list: (medecinId: number) =>
     apiClient.get<ExceptionPlanning[]>(EXCEPTION_API.SECRETAIRE_LIST(medecinId)),
 
+  listByMedecin: (medecinId: number) =>
+    apiClient.get<ExceptionPlanning[]>(EXCEPTION_API.SECRETAIRE_LIST(medecinId)),
+
   create: (medecinId: number, data: ExceptionForm) =>
+    apiClient.post<ExceptionPlanning>(EXCEPTION_API.SECRETAIRE_CREATE(medecinId), data),
+
+  createForMedecin: (medecinId: number, data: ExceptionForm) =>
     apiClient.post<ExceptionPlanning>(EXCEPTION_API.SECRETAIRE_CREATE(medecinId), data),
 
   update: (id: number, data: ExceptionForm) =>
     apiClient.put<ExceptionPlanning>(EXCEPTION_API.SECRETAIRE_UPDATE(id), data),
 
-  delete: (medecinId: number, id: number) =>
+  delete: (id: number, _medecinId?: number) =>
     apiClient.delete(EXCEPTION_API.SECRETAIRE_DELETE(id)),
 };

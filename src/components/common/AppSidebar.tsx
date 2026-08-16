@@ -35,7 +35,6 @@ const NAV_ITEMS: Record<UserRole, NavItem[]> = {
     { label: 'Médecins', icon: Users, path: '/secretaire/medecins' },
     { label: 'Grand Agenda', icon: Calendar, path: '/secretaire/plannings' },
     { label: 'Rendez-vous', icon: ClipboardList, path: '/secretaire/rendez-vous' },
-    { label: 'RDV en attente', icon: Clock, path: '/secretaire/rdv-en-attente' },
     { label: 'Exceptions', icon: CalendarX, path: '/secretaire/exceptions' },
   ],
 };

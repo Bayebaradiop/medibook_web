@@ -182,7 +182,7 @@ const SecretaireDashboard = () => {
                 {getSalutation()}, {user?.prenom} {user?.nom} <Sparkles className="h-6 w-6 text-amber-300" />
               </h1>
               <p className="text-sm text-white/90 max-w-xl">
-                Vous gérez l&apos;accueil de <span className="font-bold text-white underline decoration-amber-300">{stats.totalMedecins} médecins</span>. Il y a actuellement <span className="font-bold text-amber-300">{stats.rdvEnAttente} demandes en attente</span>.
+                Vous gérez l&apos;accueil de <span className="font-bold text-white underline decoration-amber-300">{stats.totalMedecins} médecins</span>. Les réservations sont <span className="font-bold text-emerald-300">automatiquement confirmées</span>.
               </p>
             </div>
 
@@ -204,14 +204,6 @@ const SecretaireDashboard = () => {
               >
                 <Calendar size={14} className="text-primary" />
                 <span>Grand Agenda</span>
-              </button>
-
-              <button
-                onClick={() => navigate('/secretaire/rdv-en-attente')}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold transition-all shadow-md active:scale-95"
-              >
-                <AlertCircle size={14} />
-                <span>Valider RDV ({stats.rdvEnAttente})</span>
               </button>
 
               <button
@@ -368,30 +360,22 @@ const SecretaireDashboard = () => {
             </div>
           </div>
 
-          <div className="medibook-card bg-card p-5 rounded-3xl border border-amber-500/30 bg-amber-500/5 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
+          <div className="medibook-card bg-card p-5 rounded-3xl border border-emerald-500/30 bg-emerald-500/5 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">RDV en Attente</span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-500/20 text-amber-500">
-                <Clock size={18} />
+              <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">RDV Confirmés</span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-emerald-500/20 text-emerald-500">
+                <CheckCircle2 size={18} />
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-2xl font-black text-foreground tracking-tight">{stats.rdvEnAttente}</p>
-              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">Validation prioritaire</span>
+              <p className="text-2xl font-black text-foreground tracking-tight">{stats.rdvConfirmes}</p>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Réservations validées</span>
             </div>
           </div>
         </div>
 
         {/* Status Breakdown Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="medibook-card p-4 rounded-2xl flex items-center gap-3.5 border border-amber-500/20 bg-amber-500/5">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold">⏳</div>
-            <div>
-              <p className="text-xl font-black text-foreground">{stats.rdvEnAttente}</p>
-              <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">En attente</p>
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="medibook-card p-4 rounded-2xl flex items-center gap-3.5 border border-emerald-500/20 bg-emerald-500/5">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold"><CheckCircle2 size={20} /></div>
             <div>

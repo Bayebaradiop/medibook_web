@@ -9,6 +9,7 @@ import type { RendezVous } from "../types/rdv.types";
 import { RDV_ERREURS } from "../messages/rdv.erreurs";
 import { RDV_SUCCES } from "../messages/rdv.succes";
 import { peutConfirmer, peutTerminer } from "../logique/rdv.regles";
+import { formatDateFR } from "@/utils/date";
 
 const hasDataProperty = (value: unknown): value is { data: unknown } =>
   typeof value === "object" && value !== null && "data" in value;
@@ -117,7 +118,7 @@ const RendezVousDetailPage = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-muted-foreground text-xs">Date</p>
-              <p className="font-medium">{rv.date}</p>
+              <p className="font-medium">{formatDateFR(rv.date)}</p>
             </div>
             <div>
               <p className="text-muted-foreground text-xs">Heure</p>

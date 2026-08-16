@@ -332,7 +332,6 @@ const MedecinDashboard = () => {
                 className="medibook-input text-xs w-full py-2"
               >
                 <option value="TOUS">Tous les statuts</option>
-                <option value="EN_ATTENTE">En attente</option>
                 <option value="CONFIRME">Confirmé</option>
                 <option value="TERMINE">Terminé</option>
                 <option value="ANNULE">Annulé</option>
@@ -342,7 +341,7 @@ const MedecinDashboard = () => {
         </div>
 
         {/* Dynamic KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="medibook-card bg-card p-5 rounded-3xl border border-border/80 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-muted-foreground">Total RDV</span>
@@ -358,19 +357,6 @@ const MedecinDashboard = () => {
             </div>
           </div>
 
-          <div className="medibook-card bg-card p-5 rounded-3xl border border-amber-500/20 bg-amber-500/5 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">En Attente</span>
-              <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-amber-500/15 text-amber-500">
-                <Clock size={18} />
-              </div>
-            </div>
-            <div className="mt-3">
-              <p className="text-2xl font-black text-foreground tracking-tight">{calculatedStats.enAttente}</p>
-              <span className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">À valider rapidement</span>
-            </div>
-          </div>
-
           <div className="medibook-card bg-card p-5 rounded-3xl border border-emerald-500/20 bg-emerald-500/5 shadow-sm flex flex-col justify-between hover:-translate-y-0.5 transition-all">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Confirmés</span>
@@ -380,7 +366,7 @@ const MedecinDashboard = () => {
             </div>
             <div className="mt-3">
               <p className="text-2xl font-black text-foreground tracking-tight">{calculatedStats.confirmes}</p>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Patient programmé</span>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">Créneaux réservés</span>
             </div>
           </div>
 

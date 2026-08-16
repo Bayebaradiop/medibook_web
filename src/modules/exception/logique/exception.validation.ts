@@ -25,8 +25,8 @@ export const validerExceptionForm = (data: ExceptionForm): Record<string, string
   if (data.heureDebut && data.heureFin && data.heureFin <= data.heureDebut) {
     erreurs.heureFin = EXCEPTION_ERREURS.HEURE_FIN_AVANT_DEBUT;
   }
-  if (!data.motif?.trim()) {
-    erreurs.motif = EXCEPTION_ERREURS.MOTIF_REQUIS;
+  if (data.motif && data.motif.length > 500) {
+    erreurs.motif = "Le motif ne peut pas dépasser 500 caractères";
   }
 
   return erreurs;

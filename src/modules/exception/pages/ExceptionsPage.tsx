@@ -24,6 +24,7 @@ import type { ExceptionForm, ExceptionPlanning } from "../types/exception.types"
 import { EXCEPTION_ERREURS } from "../messages/exception.erreurs";
 import { EXCEPTION_SUCCES } from "../messages/exception.succes";
 import { validerExceptionForm } from "../logique/exception.validation";
+import { formatDateFR } from "@/utils/date";
 
 const hasDataProperty = (value: unknown): value is { data: unknown } =>
   typeof value === "object" && value !== null && "data" in value;
@@ -256,7 +257,17 @@ const ExceptionsPage = () => {
   };
 
   const filteredExceptions = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return exceptions.filter((ex) => {
+      // Exclure les exceptions dont la date de fin est passée
+      const dateEnd = new Date(ex.dateFin || ex.dateDebut);
+      dateEnd.setHours(23, 59, 59, 999);
+      if (dateEnd.getTime() < today.getTime()) {
+        return false;
+      }
+
       const matchType = filterType === "TOUS" || ex.type === filterType;
       const matchSearch =
         !searchQuery ||
@@ -416,9 +427,9 @@ const ExceptionsPage = () => {
                             <CalendarIcon size={13} className="text-primary shrink-0" />
                             <p className="text-xs font-bold text-foreground">
                               {isSingleDay ? (
-                                `Le ${ex.dateDebut}`
+                                `Le ${formatDateFR(ex.dateDebut)}`
                               ) : (
-                                <span>Du {ex.dateDebut} au {ex.dateFin}</span>
+                                <span>Du {formatDateFR(ex.dateDebut)} au {formatDateFR(ex.dateFin)}</span>
                               )}
                             </p>
                           </div>
@@ -552,7 +563,7 @@ const ExceptionsPage = () => {
 
           <div>
             <label className="text-xs font-bold text-foreground mb-1 block">
-              Motif / Raison
+              Motif / Raison (Optionnel)
             </label>
             <input
               type="text"

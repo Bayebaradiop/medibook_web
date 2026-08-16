@@ -48,7 +48,6 @@ import PlanningFormPage from "@/modules/planning/pages/PlanningFormPage";
 import RendezVousPage from "@/modules/rdv/pages/RendezVousPage";
 import RendezVousDetailPage from "@/modules/rdv/pages/RendezVousDetailPage";
 import SecretaireRendezVousPage from "@/modules/rdv/pages/SecretaireRendezVousPage";
-import RendezVousEnAttentePage from "@/modules/rdv/pages/RendezVousEnAttentePage";
 
 // Exceptions
 import ExceptionsPage from "@/modules/exception/pages/ExceptionsPage";
@@ -109,7 +108,6 @@ const App = () => (
             <Route path="/secretaire/plannings/nouveau" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><PlanningFormPage /></RouteProtegee>} />
             <Route path="/secretaire/creneaux" element={<Navigate to="/secretaire/plannings" replace />} />
             <Route path="/secretaire/rendez-vous" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><SecretaireRendezVousPage /></RouteProtegee>} />
-            <Route path="/secretaire/rdv-en-attente" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><RendezVousEnAttentePage /></RouteProtegee>} />
             <Route path="/secretaire/exceptions" element={<RouteProtegee rolesAutorises={["SECRETAIRE"]}><SecretaireExceptionsPage /></RouteProtegee>} />
 
             <Route path="*" element={<Navigate to="/login" replace />} />
