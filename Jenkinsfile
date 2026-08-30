@@ -31,6 +31,23 @@ pipeline {
             }
         }
 
+        stage('Login Registries') {
+            steps {
+                echo '🔐 Connexion à Docker Hub...'
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
+            }
+        }
+
         stage('Docker Build') {
             steps {
                 echo '🐳 Build de l\'image Docker...'
@@ -47,19 +64,10 @@ pipeline {
         stage('Docker Push') {
             steps {
                 echo '🚀 Push de l\'image vers Docker Hub...'
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'dockerhub-credentials',
-                        usernameVariable: 'DOCKER_USER',
-                        passwordVariable: 'DOCKER_PASS'
-                    )
-                ]) {
-                    sh '''
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}:${COMMIT_TAG}
-                        docker push ${DOCKER_IMAGE}:latest
-                    '''
-                }
+                sh """
+                    docker push ${DOCKER_IMAGE}:${COMMIT_TAG}
+                    docker push ${DOCKER_IMAGE}:latest
+                """
             }
         }
 
@@ -117,6 +125,7 @@ pipeline {
         always {
             echo '🧹 Nettoyage des images locales...'
             sh '''
+                docker logout || true
                 docker rmi ${DOCKER_IMAGE}:${COMMIT_TAG} || true
                 docker image prune -f || true
             '''
