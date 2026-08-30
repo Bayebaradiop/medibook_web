@@ -7,6 +7,8 @@ pipeline {
 
     environment {
         DOCKER_IMAGE = 'abdoulayely777/medibook-web'
+        APP_NAME = 'medibook-web-front'
+        RESOURCE_GROUP = 'rg-medibook'
     }
 
     stages {
@@ -71,37 +73,9 @@ pipeline {
             }
         }
 
-        stage('Terraform Infrastructure & Deploy') {
+        stage('Deploy to Azure Web App') {
             steps {
-                echo '🏗️ Application de l\'infrastructure Terraform sur Azure...'
-                withCredentials([
-                    string(credentialsId: 'AZURE_CLIENT_ID', variable: 'ARM_CLIENT_ID'),
-                    string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'ARM_CLIENT_SECRET'),
-                    string(credentialsId: 'AZURE_TENANT_ID', variable: 'ARM_TENANT_ID'),
-                    string(credentialsId: 'AZURE_SUBSCRIPTION_ID', variable: 'ARM_SUBSCRIPTION_ID')
-                ]) {
-                    dir('terraform') {
-                        sh '''
-                            export PATH=$PATH:/usr/local/bin:/usr/bin
-
-                            terraform init -input=false
-
-                            # Importation si nécessaire
-                            terraform import -var="subscription_id=$ARM_SUBSCRIPTION_ID" azurerm_resource_group.rg /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/rg-medibook || true
-                            terraform import -var="subscription_id=$ARM_SUBSCRIPTION_ID" azurerm_service_plan.plan /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/serverFarms/plan-medibook || true
-                            terraform import -var="subscription_id=$ARM_SUBSCRIPTION_ID" azurerm_linux_web_app.app /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/sites/medibook-web-front || true
-
-                            terraform plan -out=tfplan -input=false -var="subscription_id=$ARM_SUBSCRIPTION_ID"
-                            terraform apply -auto-approve tfplan
-                        '''
-                    }
-                }
-            }
-        }
-
-        stage('Refresh Azure Web App') {
-            steps {
-                echo '🔄 Redémarrage du Web App Azure...'
+                echo '🚀 Déploiement et rafraîchissement sur Azure...'
                 withCredentials([
                     string(credentialsId: 'AZURE_CLIENT_ID', variable: 'CLIENT_ID'),
                     string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'CLIENT_SECRET'),
@@ -109,8 +83,22 @@ pipeline {
                     string(credentialsId: 'AZURE_SUBSCRIPTION_ID', variable: 'SUBSCRIPTION_ID')
                 ]) {
                     sh '''
-                        export PATH=$PATH:/usr/local/bin:/usr/bin
+                        # Si terraform est présent sur l'agent, on applique
+                        if command -v terraform >/dev/null 2>&1; then
+                            echo "Exécution de Terraform..."
+                            cd terraform
+                            export ARM_CLIENT_ID=$CLIENT_ID
+                            export ARM_CLIENT_SECRET=$CLIENT_SECRET
+                            export ARM_TENANT_ID=$TENANT_ID
+                            export ARM_SUBSCRIPTION_ID=$SUBSCRIPTION_ID
+                            terraform init -input=false
+                            terraform apply -auto-approve -var="subscription_id=$SUBSCRIPTION_ID"
+                            cd ..
+                        else
+                            echo "Terraform non binaire sur l'agent, bascule sur Azure CLI..."
+                        fi
 
+                        # Connexion Azure CLI et déploiement du conteneur
                         az login --service-principal \
                             -u $CLIENT_ID \
                             -p $CLIENT_SECRET \
@@ -118,7 +106,12 @@ pipeline {
 
                         az account set --subscription $SUBSCRIPTION_ID
 
-                        az webapp restart --name medibook-web-front --resource-group rg-medibook
+                        az webapp config container set \
+                            --name ${APP_NAME} \
+                            --resource-group ${RESOURCE_GROUP} \
+                            --docker-custom-image-name ${DOCKER_IMAGE}:${COMMIT_TAG}
+
+                        az webapp restart --name ${APP_NAME} --resource-group ${RESOURCE_GROUP}
                     '''
                 }
             }
