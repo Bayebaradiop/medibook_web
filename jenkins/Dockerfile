@@ -24,11 +24,7 @@ RUN apt-get update && \
     rm /tmp/terraform.zip && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Ansible
-RUN apt-get update && \
-    apt-get install -y python3 python3-pip && \
-    pip3 install --break-system-packages ansible && \
-    rm -rf /var/lib/apt/lists/*
+
 
 # Install Azure CLI
 RUN curl -sL https://aka.ms/InstallAzureCLIDeb | bash
