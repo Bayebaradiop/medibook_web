@@ -1,4 +1,5 @@
 terraform {
+  required_version = ">= 1.0.0"
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
@@ -15,30 +16,37 @@ provider "azurerm" {
 
 # 1. Resource Group
 resource "azurerm_resource_group" "rg" {
-  name     = "rg-medibook"
-  location = "Brazil South"
+  name     = var.resource_group_name
+  location = var.location
 }
 
-# 2. App Service Plan (gratuit F1)
+# 2. App Service Plan (Gratuit Linux F1)
 resource "azurerm_service_plan" "plan" {
-  name                = "plan-medibook"
+  name                = var.service_plan_name
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   os_type             = "Linux"
   sku_name            = "F1"
 }
 
-# 3. App Service (conteneur Docker depuis Docker Hub)
+# 3. App Service (Conteneur Docker depuis Docker Hub)
 resource "azurerm_linux_web_app" "app" {
-  name                = "medibook-web-odc"
+  name                = var.app_name
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   service_plan_id     = azurerm_service_plan.plan.id
 
   site_config {
     always_on = false
+
     application_stack {
-      docker_image_name = "bayebara01012000/medibook-web:latest"
+      docker_image_name = var.docker_image
     }
+  }
+
+  app_settings = {
+    "WEBSITES_PORT"                       = "80"
+    "DOCKER_ENABLE_CI"                    = "true"
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
   }
 }
