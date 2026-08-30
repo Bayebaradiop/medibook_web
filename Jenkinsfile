@@ -83,8 +83,9 @@ pipeline {
                     string(credentialsId: 'AZURE_SUBSCRIPTION_ID', variable: 'SUBSCRIPTION_ID')
                 ]) {
                     sh '''
-                        # Si terraform est présent sur l'agent, on applique
-                        if command -v terraform >/dev/null 2>&1; then
+                        export PATH=/usr/local/bin:$PATH
+
+                        if command -v terraform >/dev/null 2>&1 || [ -f /usr/local/bin/terraform ]; then
                             echo "Exécution de Terraform..."
                             cd terraform
                             export ARM_CLIENT_ID=$CLIENT_ID
@@ -98,7 +99,7 @@ pipeline {
                             echo "Terraform non binaire sur l'agent, bascule sur Azure CLI..."
                         fi
 
-                        # Connexion Azure CLI et déploiement du conteneur
+                        echo "Connexion Azure CLI et déploiement du conteneur..."
                         az login --service-principal \
                             -u $CLIENT_ID \
                             -p $CLIENT_SECRET \
@@ -109,7 +110,7 @@ pipeline {
                         az webapp config container set \
                             --name ${APP_NAME} \
                             --resource-group ${RESOURCE_GROUP} \
-                            --docker-custom-image-name ${DOCKER_IMAGE}:${COMMIT_TAG}
+                            --container-image-name ${DOCKER_IMAGE}:${COMMIT_TAG}
 
                         az webapp restart --name ${APP_NAME} --resource-group ${RESOURCE_GROUP}
                     '''
