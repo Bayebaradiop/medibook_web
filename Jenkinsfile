@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent { label 'docker-medibook' }
 
     tools {
         nodejs 'NodeJS-22'
@@ -82,6 +82,8 @@ pipeline {
                 ]) {
                     dir('terraform') {
                         sh '''
+                            export PATH=$PATH:/usr/local/bin:/usr/bin
+
                             terraform init -input=false
 
                             # Importation si nécessaire
@@ -107,6 +109,8 @@ pipeline {
                     string(credentialsId: 'AZURE_SUBSCRIPTION_ID', variable: 'SUBSCRIPTION_ID')
                 ]) {
                     sh '''
+                        export PATH=$PATH:/usr/local/bin:/usr/bin
+
                         az login --service-principal \
                             -u $CLIENT_ID \
                             -p $CLIENT_SECRET \
