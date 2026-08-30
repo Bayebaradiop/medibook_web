@@ -1,0 +1,18 @@
+export const AUTH_ERREURS = {
+  EMAIL_INVALIDE: "L'adresse email est invalide",
+  EMAIL_REQUIS: "L'adresse email est obligatoire",
+  MDP_REQUIS: "Le mot de passe est obligatoire",
+  MDP_TROP_COURT: "Le mot de passe doit contenir au moins 6 caractères",
+  PRENOM_REQUIS: "Le prénom est obligatoire",
+  NOM_REQUIS: "Le nom est obligatoire",
+  CODE_REQUIS: "Le code de réinitialisation est obligatoire",
+  CODE_INVALIDE: "Le code doit contenir 6 chiffres",
+  CONFIRMATION_MDP_REQUISE: "La confirmation du mot de passe est obligatoire",
+  MDP_DIFFERENTS: "Les mots de passe ne correspondent pas",
+  CONNEXION_ECHOUEE: "Email ou mot de passe incorrect",
+  ENVOI_CODE_ECHOUE: "Impossible d'envoyer le code de réinitialisation",
+  RESET_ECHOUE: "Impossible de réinitialiser le mot de passe",
+  PROFIL_MAJ_ECHOUEE: "Impossible de mettre à jour le profil",
+  SESSION_EXPIREE: "Votre session a expiré, veuillez vous reconnecter",
+  COMPTE_INACTIF: "Votre compte est désactivé",
+};

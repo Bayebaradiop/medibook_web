@@ -8,151 +8,162 @@
   :root {
     --font-poppins: 'Poppins', sans-serif;
 
-    /* Primary Green #2E7D32 → hsl(122, 46%, 33%) */
-    --primary: 122 46% 33%;
+    /* Primary Teal #2F7D79 → hsl(169, 45%, 34%) */
+    --primary: 169 45% 34%;
     --primary-foreground: 0 0% 100%;
 
-    /* Primary Light #66BB6A → hsl(123, 38%, 57%) */
-    --primary-light: 123 38% 57%;
+    /* Primary Light #4FA7A1 → hsl(170, 40%, 48%) */
+    --primary-light: 170 40% 48%;
 
-    /* Primary Dark #1B5E20 → hsl(122, 55%, 24%) */
-    --primary-dark: 122 55% 24%;
+    /* Primary Dark #1F5452 → hsl(169, 45%, 22%) */
+    --primary-dark: 169 45% 22%;
 
-    /* Background #F5F5F5 → hsl(0, 0%, 96%) */
-    --background: 0 0% 96%;
-    --foreground: 122 55% 24%;
+    /* Background #F0F7F6 */
+    --background: 174 30% 96%;
+    --foreground: 222 47% 11%;
 
     /* Card #FFFFFF */
     --card: 0 0% 100%;
-    --card-foreground: 122 55% 24%;
+    --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 122 55% 24%;
+    --popover-foreground: 222 47% 11%;
 
     /* Secondary */
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 38%;
+    --secondary: 174 25% 92%;
+    --secondary-foreground: 222 47% 15%;
 
     /* Muted */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 62%;
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 16% 47%;
 
     /* Accent */
-    --accent: 122 46% 33%;
+    --accent: 169 45% 34%;
     --accent-foreground: 0 0% 100%;
 
-    /* Destructive #E53935 → hsl(1, 76%, 56%) */
+    /* Destructive #E53935 */
     --destructive: 1 76% 56%;
     --destructive-foreground: 0 0% 100%;
 
     /* Status colors */
-    --status-pending: 33 100% 58%;
-    --status-confirmed: 123 38% 57%;
-    --status-completed: 200 10% 55%;
-    --status-cancelled: 1 84% 63%;
-    --status-active: 122 40% 45%;
-    --status-inactive: 0 0% 62%;
+    --status-pending: 38 92% 50%;
+    --status-confirmed: 160 84% 39%;
+    --status-completed: 169 45% 34%;
+    --status-cancelled: 0 84% 60%;
+    --status-active: 169 45% 34%;
+    --status-inactive: 215 16% 55%;
 
-    /* Success #43A047 */
-    --success: 122 41% 45%;
+    /* Success #4FA7A1 */
+    --success: 160 84% 39%;
     --success-foreground: 0 0% 100%;
 
     /* Warning #FFA726 */
-    --warning: 33 100% 58%;
+    --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    /* Info #78909C */
-    --info: 200 10% 55%;
+    /* Info */
+    --info: 199 89% 48%;
     --info-foreground: 0 0% 100%;
 
-    --border: 0 0% 88%;
-    --input: 0 0% 88%;
-    --ring: 122 46% 33%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 169 45% 34%;
     --radius: 1rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 38%;
-    --sidebar-primary: 122 46% 33%;
+    --sidebar-background: 169 45% 30%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 169 45% 34%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 122 46% 33%;
+    --sidebar-accent: 169 45% 34%;
     --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 0 0% 88%;
-    --sidebar-ring: 122 46% 33%;
+    --sidebar-border: 170 40% 40%;
+    --sidebar-ring: 169 45% 34%;
+
+    /* Topbar */
+    --topbar-background: 0 0% 100%;
 
     /* Shadows */
-    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.06);
-    --shadow-sidebar: 2px 0 10px rgba(0, 0, 0, 0.06);
+    --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+    --shadow-sidebar: 2px 0 15px rgba(0, 0, 0, 0.06);
 
-    /* Chart colors for dark mode compat */
-    --chart-1: 122 46% 33%;
-    --chart-2: 123 38% 57%;
-    --chart-3: 33 100% 58%;
-    --chart-4: 200 10% 55%;
-    --chart-5: 1 76% 56%;
+    /* Chart colors */
+    --chart-1: 169 45% 34%;
+    --chart-2: 160 84% 39%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 199 89% 48%;
+    --chart-5: 0 84% 60%;
   }
 
+  /* Sublimed High-End SaaS Dark Mode */
   .dark {
-    --background: 220 15% 10%;
-    --foreground: 0 0% 90%;
+    /* Deep Rich Slate Backdrop (#0B0F19) */
+    --background: 222 47% 7%;
+    --foreground: 210 40% 98%;
 
-    --card: 220 15% 14%;
-    --card-foreground: 0 0% 90%;
+    /* Elevated Dark Card Surface (#111827) */
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 220 15% 14%;
-    --popover-foreground: 0 0% 90%;
+    --popover: 222 47% 12%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 122 46% 40%;
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 123 38% 50%;
-    --primary-dark: 122 55% 30%;
+    /* Glowing Medical Teal in Dark Mode (#2DD4BF) */
+    --primary: 169 70% 45%;
+    --primary-foreground: 222 47% 7%;
+    --primary-light: 170 75% 60%;
+    --primary-dark: 169 75% 32%;
 
-    --secondary: 220 15% 18%;
-    --secondary-foreground: 0 0% 70%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 220 15% 18%;
-    --muted-foreground: 0 0% 55%;
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 122 46% 40%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 169 70% 45%;
+    --accent-foreground: 222 47% 7%;
 
-    --destructive: 1 76% 50%;
+    --destructive: 0 84% 63%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 122 41% 42%;
+    --success: 160 84% 45%;
     --success-foreground: 0 0% 100%;
-    --warning: 33 100% 55%;
+    --warning: 38 92% 55%;
     --warning-foreground: 0 0% 100%;
-    --info: 200 10% 50%;
+    --info: 199 89% 55%;
     --info-foreground: 0 0% 100%;
 
-    --status-pending: 33 100% 55%;
-    --status-confirmed: 123 38% 50%;
-    --status-completed: 200 10% 50%;
-    --status-cancelled: 1 84% 58%;
-    --status-active: 122 40% 42%;
-    --status-inactive: 0 0% 55%;
+    --status-pending: 38 92% 55%;
+    --status-confirmed: 160 84% 45%;
+    --status-completed: 169 70% 45%;
+    --status-cancelled: 0 84% 63%;
+    --status-active: 169 70% 45%;
+    --status-inactive: 215 20% 65%;
 
-    --border: 220 15% 22%;
-    --input: 220 15% 22%;
-    --ring: 122 46% 40%;
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 169 70% 45%;
 
-    --sidebar-background: 220 15% 12%;
-    --sidebar-foreground: 0 0% 70%;
-    --sidebar-primary: 122 46% 40%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 122 46% 40%;
-    --sidebar-accent-foreground: 0 0% 100%;
-    --sidebar-border: 220 15% 22%;
-    --sidebar-ring: 122 46% 40%;
+    /* Sleek Dark Sidebar (#0F172A) */
+    --sidebar-background: 222 47% 9%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 169 70% 45%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-accent: 217 33% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217 33% 16%;
+    --sidebar-ring: 169 70% 45%;
 
-    --shadow-card: 0 2px 10px rgba(0, 0, 0, 0.3);
-    --shadow-sidebar: 2px 0 10px rgba(0, 0, 0, 0.3);
+    /* Topbar in Dark Mode */
+    --topbar-background: 222 47% 9%;
 
-    --chart-1: 122 46% 40%;
-    --chart-2: 123 38% 50%;
-    --chart-3: 33 100% 55%;
-    --chart-4: 200 10% 50%;
-    --chart-5: 1 76% 50%;
+    --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --shadow-sidebar: 4px 0 25px rgba(0, 0, 0, 0.4);
+
+    --chart-1: 169 70% 45%;
+    --chart-2: 160 84% 45%;
+    --chart-3: 38 92% 55%;
+    --chart-4: 199 89% 55%;
+    --chart-5: 0 84% 63%;
   }
 }
 
@@ -161,7 +172,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-poppins;
+    @apply bg-background text-foreground font-poppins transition-colors duration-300 antialiased;
   }
   h1 {
     @apply text-[28px] font-bold text-foreground;
@@ -176,30 +187,30 @@
 
 @layer components {
   .medibook-card {
-    @apply bg-card rounded-2xl p-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)];
+    @apply bg-card text-card-foreground rounded-3xl p-5 border border-border/80 shadow-[var(--shadow-card)] transition-all duration-200;
   }
   .medibook-input {
-    @apply rounded-2xl border border-input bg-card px-4 py-3 text-sm transition-colors duration-200 focus:border-primary focus:border-2 focus:outline-none placeholder:text-muted-foreground;
+    @apply rounded-2xl border border-input bg-card px-4 py-3 text-sm text-foreground transition-all duration-200 focus:border-primary focus:ring-2 focus:ring-primary/20 focus:outline-none placeholder:text-muted-foreground;
   }
   .medibook-btn {
-    @apply h-12 rounded-2xl bg-primary px-6 font-semibold text-primary-foreground transition-all duration-200 hover:brightness-90 active:scale-[0.98];
+    @apply h-12 rounded-2xl bg-primary px-6 font-bold text-primary-foreground shadow-md transition-all duration-200 hover:brightness-110 active:scale-[0.98];
   }
   .medibook-btn-outline {
-    @apply h-12 rounded-2xl border-2 border-primary bg-transparent px-6 font-semibold text-primary transition-all duration-200 hover:bg-primary hover:text-primary-foreground active:scale-[0.98];
+    @apply h-12 rounded-2xl border-2 border-primary bg-transparent px-6 font-bold text-primary transition-all duration-200 hover:bg-primary hover:text-primary-foreground active:scale-[0.98];
   }
   .medibook-badge {
-    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold;
   }
   .medibook-table-header {
-    @apply bg-background text-muted-foreground text-xs font-semibold uppercase tracking-wider;
+    @apply bg-muted/80 dark:bg-slate-900/80 text-muted-foreground dark:text-slate-300 text-xs font-bold uppercase tracking-wider border-b border-border;
   }
   .medibook-table-row {
-    @apply border-b border-border transition-colors duration-200 hover:bg-primary/5;
+    @apply border-b border-border/60 transition-colors duration-150 text-foreground hover:bg-muted/40;
   }
   .sidebar-item {
-    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-secondary-foreground transition-all duration-200 hover:bg-primary/10 hover:text-primary;
+    @apply flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-semibold text-slate-200 dark:text-slate-300 transition-all duration-200 hover:bg-white/15 dark:hover:bg-slate-800/90 hover:text-white dark:hover:text-white;
   }
   .sidebar-item-active {
-    @apply bg-primary/10 text-primary border-l-[3px] border-primary font-semibold;
+    @apply bg-primary text-white dark:bg-primary dark:text-white font-bold shadow-md shadow-primary/25 transition-all duration-200;
   }
 }

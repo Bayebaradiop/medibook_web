@@ -1,0 +1,7 @@
+organization=bayebaradiop
+projectKey=medibook_web
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.84521
+dashboardUrl=https://sonarcloud.io/dashboard?id=medibook_web
+ceTaskId=AZ1IYq1HREsMA3gPzF4n
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZ1IYq1HREsMA3gPzF4n

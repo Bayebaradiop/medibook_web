@@ -1,0 +1,455 @@
+import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import DashboardLayout from '@/layouts/DashboardLayout';
+import { medecinService } from '../services/utilisateurService';
+import { specialiteService } from '@/modules/specialite/services/specialiteService';
+import { validerMedecinForm } from '../logique/utilisateur.validation';
+import { UTILISATEUR_ERREURS } from '../messages/utilisateur.erreurs';
+import { UTILISATEUR_SUCCES } from '../messages/utilisateur.succes';
+import type { Medecin } from '../types/utilisateur.types';
+import type { Specialite } from '@/modules/specialite/types/specialite.types';
+import {
+  ArrowLeft,
+  Upload,
+  Loader2,
+  User,
+  Mail,
+  Phone,
+  Stethoscope,
+  Lock,
+  Camera,
+  X,
+  CheckCircle2,
+  UserPlus
+} from 'lucide-react';
+import { toast } from 'sonner';
+
+type ErreursChamp = Record<string, string>;
+
+interface BackendErrorPayload {
+  message?: string;
+  error?: {
+    description?: string;
+    details?: unknown;
+  };
+}
+
+const ErreurChamp = ({ id, message }: { id: string; message?: string }) =>
+  message ? (
+    <p id={id} className="mt-1.5 text-xs font-medium text-destructive flex items-center gap-1">
+      <span className="inline-block w-1.5 h-1.5 rounded-full bg-destructive" />
+      {message}
+    </p>
+  ) : null;
+
+const estObjet = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null;
+
+const extraireErreursChamp = (payload?: BackendErrorPayload): ErreursChamp => {
+  const details = payload?.error?.details;
+  if (!estObjet(details)) return {};
+
+  return Object.entries(details).reduce<ErreursChamp>((acc, [champ, message]) => {
+    if (typeof message === 'string' && message.trim()) {
+      acc[champ] = message;
+    }
+    return acc;
+  }, {});
+};
+
+const mapperMessageVersErreursChamp = (message?: string): ErreursChamp => {
+  if (!message) return {};
+
+  const normalise = message.toLowerCase();
+  const erreurs: ErreursChamp = {};
+
+  if (normalise.includes('email')) {
+    erreurs.email = message;
+  }
+
+  if (normalise.includes('téléphone') || normalise.includes('telephone')) {
+    erreurs.telephone = message;
+  }
+
+  if (normalise.includes('spécialité') || normalise.includes('specialite')) {
+    erreurs.specialiteId = message;
+  }
+
+  if (normalise.includes('mot de passe') || normalise.includes('passe')) {
+    erreurs.motDePasse = message;
+  }
+
+  return erreurs;
+};
+
+const MedecinFormPage = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const isEdit = !!id && id !== 'nouveau';
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [specialites, setSpecialites] = useState<Specialite[]>([]);
+  const [loadingInit, setLoadingInit] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [erreurs, setErreurs] = useState<Record<string, string>>({});
+
+  const [form, setForm] = useState({
+    prenom: '', nom: '', email: '', telephone: '', specialiteId: '', motDePasse: '',
+  });
+
+  const afficherErreursChamps = (nouvellesErreurs: ErreursChamp) => {
+    setErreurs(nouvellesErreurs);
+
+    const premierChamp = Object.keys(nouvellesErreurs)[0];
+    if (!premierChamp) return;
+
+    requestAnimationFrame(() => {
+      const champ = document.querySelector<HTMLElement>(`[name="${premierChamp}"]`);
+      champ?.focus();
+    });
+  };
+
+  const update = (k: string, v: string) => {
+    setForm(f => ({ ...f, [k]: v }));
+    if (erreurs[k]) {
+      setErreurs(prev => {
+        const copy = { ...prev };
+        delete copy[k];
+        return copy;
+      });
+    }
+  };
+
+  const charger = useCallback(async () => {
+    try {
+      const specsRes = await specialiteService.list();
+      setSpecialites(specsRes.data);
+
+      if (isEdit) {
+        const res = await medecinService.detail(Number(id));
+        const m: Medecin = res.data;
+        setForm({
+          prenom: m.prenom, nom: m.nom, email: m.email,
+          telephone: m.telephone, specialiteId: String(m.specialiteId), motDePasse: '',
+        });
+        if (m.photo) setPhotoPreview(m.photo);
+      }
+    } catch (error: unknown) {
+      const data = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response && estObjet(error.response.data)
+        ? error.response.data
+        : undefined;
+
+      const message = typeof data?.message === 'string' ? data.message : undefined;
+      toast.error(message || "Erreur de chargement");
+      navigate('/admin/medecins');
+    } finally {
+      setLoadingInit(false);
+    }
+  }, [id, isEdit, navigate]);
+
+  useEffect(() => { charger(); }, [charger]);
+
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhoto(file);
+      setPhotoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removePhoto = () => {
+    setPhoto(null);
+    setPhotoPreview(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const data = {
+      prenom: form.prenom, nom: form.nom, email: form.email,
+      telephone: form.telephone, specialiteId: Number(form.specialiteId),
+      ...(form.motDePasse ? { motDePasse: form.motDePasse } : {}),
+    };
+
+    const validation = validerMedecinForm(data, !isEdit);
+    if (Object.keys(validation).length > 0) {
+      afficherErreursChamps(validation);
+      return;
+    }
+
+    setErreurs({});
+    setSaving(true);
+    try {
+      if (isEdit) {
+        await medecinService.update(Number(id), data, photo || undefined);
+        toast.success(UTILISATEUR_SUCCES.MEDECIN_MODIFIE);
+      } else {
+        await medecinService.create(data, photo || undefined);
+        toast.success(UTILISATEUR_SUCCES.MEDECIN_CREE);
+      }
+      navigate('/admin/medecins');
+    } catch (error: unknown) {
+      const resp = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response
+        ? error.response.data as BackendErrorPayload
+        : undefined;
+
+      const fieldErrors = extraireErreursChamp(resp);
+      if (Object.keys(fieldErrors).length > 0) {
+        afficherErreursChamps(fieldErrors);
+        return;
+      }
+
+      const messageErreur = resp?.error?.description || resp?.message;
+      const mappedErrors = mapperMessageVersErreursChamp(messageErreur);
+      if (Object.keys(mappedErrors).length > 0) {
+        afficherErreursChamps(mappedErrors);
+        return;
+      }
+
+      toast.error(messageErreur
+        || (isEdit ? UTILISATEUR_ERREURS.MODIFICATION_MEDECIN_ECHOUEE : UTILISATEUR_ERREURS.CREATION_MEDECIN_ECHOUEE));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const inputClass = (champ: string) =>
+    `medibook-input w-full pl-11 transition-all ${erreurs[champ] ? 'border-destructive ring-2 ring-destructive/20' : ''}`;
+
+  const inputProps = (champ: string) => ({
+    name: champ,
+    className: inputClass(champ),
+    'aria-invalid': Boolean(erreurs[champ]),
+    'aria-describedby': erreurs[champ] ? `${champ}-error` : undefined,
+  });
+
+  if (loadingInit) return (
+    <DashboardLayout title="Médecin">
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
+        <Loader2 className="animate-spin text-primary" size={36} />
+        <p className="text-sm font-medium text-muted-foreground">Chargement des données du médecin...</p>
+      </div>
+    </DashboardLayout>
+  );
+
+  return (
+    <DashboardLayout title={isEdit ? 'Modifier le médecin' : 'Nouveau médecin'}>
+      <div className="space-y-8 max-w-3xl mx-auto pb-12">
+        {/* Navigation retour */}
+        <button
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+          Retour
+        </button>
+
+        <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+          {/* SECTION PHOTO DE PROFIL */}
+          <div className="medibook-card flex flex-col items-center justify-center py-8 relative">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePhoto}
+              className="hidden"
+            />
+
+            <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+              {photoPreview ? (
+                <div className="relative">
+                  <img
+                    src={photoPreview}
+                    alt="Aperçu photo"
+                    className="w-28 h-28 rounded-full object-cover ring-4 ring-primary/20 shadow-md"
+                  />
+                  <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+                    <Camera size={24} />
+                  </div>
+                </div>
+              ) : (
+                <div className="w-28 h-28 rounded-full border-2 border-dashed border-border group-hover:border-primary bg-secondary/30 flex flex-col items-center justify-center text-muted-foreground group-hover:text-primary transition-colors shadow-inner">
+                  <Camera size={28} />
+                  <span className="text-[10px] font-semibold mt-1">Photo</span>
+                </div>
+              )}
+            </div>
+
+            <div className="text-center mt-3 space-y-1">
+              <p className="text-xs font-semibold text-foreground">Photo professionnelle du praticien</p>
+              <p className="text-[11px] text-muted-foreground">Cliquez sur le cercle pour importer une image (PNG, JPG)</p>
+              {photoPreview && (
+                <button
+                  type="button"
+                  onClick={removePhoto}
+                  className="text-xs font-semibold text-destructive hover:underline inline-flex items-center gap-1 pt-1"
+                >
+                  <X size={12} /> Supprimer la photo
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* SECTION INFORMATIONS DU MÉDECIN */}
+          <div className="medibook-card space-y-6">
+            <div className="flex items-center gap-3 pb-4 border-b border-border/60">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <Stethoscope size={20} />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-foreground">Identité & Informations Médicales</h3>
+                <p className="text-xs text-muted-foreground">Renseignez les coordonnées professionnelles du praticien</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Prénom */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Prénom <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={form.prenom}
+                    onChange={e => update('prenom', e.target.value)}
+                    placeholder="Prénom du médecin"
+                    {...inputProps('prenom')}
+                  />
+                </div>
+                <ErreurChamp id="prenom-error" message={erreurs.prenom} />
+              </div>
+
+              {/* Nom */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Nom <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <User size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={form.nom}
+                    onChange={e => update('nom', e.target.value)}
+                    placeholder="Nom du médecin"
+                    {...inputProps('nom')}
+                  />
+                </div>
+                <ErreurChamp id="nom-error" message={erreurs.nom} />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Email Professionnel <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <Mail size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={e => update('email', e.target.value)}
+                    placeholder="dr.prenom@medibook.sn"
+                    {...inputProps('email')}
+                  />
+                </div>
+                <ErreurChamp id="email-error" message={erreurs.email} />
+              </div>
+
+              {/* Téléphone */}
+              <div>
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Téléphone Portable <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <Phone size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <input
+                    value={form.telephone}
+                    onChange={e => update('telephone', e.target.value)}
+                    placeholder="+221 77 123 45 67"
+                    {...inputProps('telephone')}
+                  />
+                </div>
+                <ErreurChamp id="telephone-error" message={erreurs.telephone} />
+              </div>
+
+              {/* Spécialité */}
+              <div className="md:col-span-2">
+                <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                  Spécialité Médicale <span className="text-destructive">*</span>
+                </label>
+                <div className="relative">
+                  <Stethoscope size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <select
+                    value={form.specialiteId}
+                    onChange={e => update('specialiteId', e.target.value)}
+                    {...inputProps('specialiteId')}
+                  >
+                    <option value="">Sélectionner une spécialité...</option>
+                    {specialites.map(s => (
+                      <option key={s.id} value={s.id}>
+                        {s.nom}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <ErreurChamp id="specialiteId-error" message={erreurs.specialiteId} />
+              </div>
+
+              {/* Mot de passe initial (si création) */}
+              {!isEdit && (
+                <div className="md:col-span-2">
+                  <label className="text-xs font-semibold text-foreground uppercase tracking-wider mb-1.5 block">
+                    Mot de passe Initial <span className="text-destructive">*</span>
+                  </label>
+                  <div className="relative">
+                    <Lock size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="password"
+                      value={form.motDePasse}
+                      onChange={e => update('motDePasse', e.target.value)}
+                      placeholder="••••••••••••"
+                      {...inputProps('motDePasse')}
+                    />
+                  </div>
+                  <ErreurChamp id="motDePasse-error" message={erreurs.motDePasse} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* BARRE D'ACTIONS */}
+          <div className="flex items-center justify-end gap-4 pt-4 border-t border-border/80">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="medibook-btn-outline px-6"
+            >
+              Annuler
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="medibook-btn flex items-center gap-2 px-8 min-w-[180px] justify-center"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} />
+                  <span>Enregistrement...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 size={18} />
+                  <span>{isEdit ? 'Enregistrer les modifications' : 'Créer le praticien'}</span>
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default MedecinFormPage;

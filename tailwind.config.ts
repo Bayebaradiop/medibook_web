@@ -80,6 +80,9 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        topbar: {
+          DEFAULT: "hsl(var(--topbar-background))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

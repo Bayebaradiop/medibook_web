@@ -1,0 +1,36 @@
+{
+  "version": 4,
+  "terraform_version": "1.9.8",
+  "serial": 37,
+  "lineage": "f3c9e3ca-17df-3b4a-ab3d-3ad169b5bc08",
+  "outputs": {
+    "app_url": {
+      "value": "https://medibook-web.azurewebsites.net",
+      "type": "string"
+    }
+  },
+  "resources": [
+    {
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "rg",
+      "provider": "provider[\"registry.terraform.io/hashicorp/azurerm\"]",
+      "instances": [
+        {
+          "schema_version": 0,
+          "attributes": {
+            "id": "/subscriptions/df3f0b80-2c36-4465-88bc-2be09b93e14d/resourceGroups/rg-medibook",
+            "location": "swedencentral",
+            "managed_by": "",
+            "name": "rg-medibook",
+            "tags": {},
+            "timeouts": null
+          },
+          "sensitive_attributes": [],
+          "private": "eyJlMmJmYjczMC1lY2FhLTExZTYtOGY4OC0zNDM2M2JjN2M0YzAiOnsiY3JlYXRlIjo1NDAwMDAwMDAwMDAwLCJkZWxldGUiOjU0MDAwMDAwMDAwMDAsInJlYWQiOjMwMDAwMDAwMDAwMCwidXBkYXRlIjo1NDAwMDAwMDAwMDAwfX0="
+        }
+      ]
+    }
+  ],
+  "check_results": null
+}

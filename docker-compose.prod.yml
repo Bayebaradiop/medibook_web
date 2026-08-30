@@ -1,0 +1,18 @@
+services:
+  medibook-web:
+    image: bayebara01012000/medibook-web:latest
+    container_name: medibook-web
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - medibook-web
