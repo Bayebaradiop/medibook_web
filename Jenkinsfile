@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    // agent any
+    agent { label 'docker-medibook' }
+
 
     tools {
         nodejs 'NodeJS-22'
