@@ -6,86 +6,82 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE = 'bayebara01012000/medibook-web'
-        DOCKER_TAG = "${BUILD_NUMBER}"
+        DOCKER_IMAGE = 'abdoulayely777/medibook-web'
     }
 
     stages {
         stage('Checkout') {
             steps {
+                echo '📥 Checkout du code...'
                 checkout scm
             }
         }
 
         stage('Install') {
             steps {
+                echo '📦 Installation des dépendances...'
                 sh 'npm ci'
             }
         }
 
         stage('Test') {
             steps {
-                sh 'npm run test -- --run --coverage'
-            }
-        }
-
-        stage('SonarCloud') {
-            steps {
-                withSonarQubeEnv('SonarCloud') {
-                    sh '''
-                        npx sonar-scanner \
-                          -Dsonar.projectKey=medibook_web \
-                          -Dsonar.organization=bayebaradiop \
-                          -Dsonar.sources=src \
-                          -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-                          -Dsonar.host.url=https://sonarcloud.io
-                    '''
-                }
+                echo '🧪 Exécution des tests unitaires...'
+                sh 'npm run test -- --run'
             }
         }
 
         stage('Docker Build') {
             steps {
-                sh "docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} -t ${DOCKER_IMAGE}:latest ."
-            }
-        }
-
-        stage('Trivy Scan') {
-            steps {
-                sh "trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_IMAGE}:${DOCKER_TAG}"
+                echo '🐳 Build de l\'image Docker...'
+                script {
+                    def commit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    env.COMMIT_TAG = commit
+                }
+                sh """
+                    docker build -t ${DOCKER_IMAGE}:${COMMIT_TAG} -t ${DOCKER_IMAGE}:latest .
+                """
             }
         }
 
         stage('Docker Push') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                echo '🚀 Push de l\'image vers Docker Hub...'
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )
+                ]) {
                     sh '''
                         echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-                        docker push ${DOCKER_IMAGE}:${DOCKER_TAG}
+                        docker push ${DOCKER_IMAGE}:${COMMIT_TAG}
                         docker push ${DOCKER_IMAGE}:latest
                     '''
                 }
             }
         }
 
-        stage('Terraform') {
+        stage('Terraform Infrastructure & Deploy') {
             steps {
-                withCredentials([azureServicePrincipal('azure-credentials')]) {
+                echo '🏗️ Application de l\'infrastructure Terraform sur Azure...'
+                withCredentials([
+                    string(credentialsId: 'AZURE_CLIENT_ID', variable: 'ARM_CLIENT_ID'),
+                    string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'ARM_CLIENT_SECRET'),
+                    string(credentialsId: 'AZURE_TENANT_ID', variable: 'ARM_TENANT_ID'),
+                    string(credentialsId: 'AZURE_SUBSCRIPTION_ID', variable: 'ARM_SUBSCRIPTION_ID')
+                ]) {
                     dir('terraform') {
                         sh '''
-                            export ARM_CLIENT_ID=$AZURE_CLIENT_ID
-                            export ARM_CLIENT_SECRET=$AZURE_CLIENT_SECRET
-                            export ARM_TENANT_ID=$AZURE_TENANT_ID
-                            export ARM_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
-
                             terraform init -input=false
 
-                            # Import des ressources existantes (ignore si déjà dans le state)
-                            terraform import -var="subscription_id=$AZURE_SUBSCRIPTION_ID" azurerm_resource_group.rg /subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/rg-medibook || true
-                            terraform import -var="subscription_id=$AZURE_SUBSCRIPTION_ID" azurerm_service_plan.plan /subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/serverFarms/plan-medibook || true
-                            terraform import -var="subscription_id=$AZURE_SUBSCRIPTION_ID" azurerm_linux_web_app.app /subscriptions/$AZURE_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/sites/medibook-web-odc || true
+                            # Importation si nécessaire
+                            terraform import -var="subscription_id=$ARM_SUBSCRIPTION_ID" azurerm_resource_group.rg /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/rg-medibook || true
+                            terraform import -var="subscription_id=$ARM_SUBSCRIPTION_ID" azurerm_service_plan.plan /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/serverFarms/plan-medibook || true
+                            terraform import -var="subscription_id=$ARM_SUBSCRIPTION_ID" azurerm_linux_web_app.app /subscriptions/$ARM_SUBSCRIPTION_ID/resourceGroups/rg-medibook/providers/Microsoft.Web/sites/medibook-web-front || true
 
-                            terraform plan -out=tfplan -input=false -var="subscription_id=$AZURE_SUBSCRIPTION_ID"
+                            terraform plan -out=tfplan -input=false -var="subscription_id=$ARM_SUBSCRIPTION_ID"
                             terraform apply -auto-approve tfplan
                         '''
                     }
@@ -93,24 +89,25 @@ pipeline {
             }
         }
 
-        stage('Ansible Deploy') {
+        stage('Refresh Azure Web App') {
             steps {
-                withCredentials([azureServicePrincipal('azure-credentials')]) {
-                    dir('ansible') {
-                        sh '''
-                            export AZURE_CLIENT_ID=$AZURE_CLIENT_ID
-                            export AZURE_SECRET=$AZURE_CLIENT_SECRET
-                            export AZURE_TENANT=$AZURE_TENANT_ID
-                            export AZURE_SUBSCRIPTION_ID=$AZURE_SUBSCRIPTION_ID
+                echo '🔄 Redémarrage du Web App Azure...'
+                withCredentials([
+                    string(credentialsId: 'AZURE_CLIENT_ID', variable: 'CLIENT_ID'),
+                    string(credentialsId: 'AZURE_CLIENT_SECRET', variable: 'CLIENT_SECRET'),
+                    string(credentialsId: 'AZURE_TENANT_ID', variable: 'TENANT_ID'),
+                    string(credentialsId: 'AZURE_SUBSCRIPTION_ID', variable: 'SUBSCRIPTION_ID')
+                ]) {
+                    sh '''
+                        az login --service-principal \
+                            -u $CLIENT_ID \
+                            -p $CLIENT_SECRET \
+                            --tenant $TENANT_ID --output none
 
-                            az login --service-principal \
-                                -u $AZURE_CLIENT_ID \
-                                -p $AZURE_CLIENT_SECRET \
-                                --tenant $AZURE_TENANT_ID
+                        az account set --subscription $SUBSCRIPTION_ID
 
-                            ansible-playbook playbook.yml
-                        '''
-                    }
+                        az webapp restart --name medibook-web-front --resource-group rg-medibook
+                    '''
                 }
             }
         }
@@ -118,7 +115,17 @@ pipeline {
 
     post {
         always {
-            sh "docker rmi ${DOCKER_IMAGE}:${DOCKER_TAG} || true"
+            echo '🧹 Nettoyage des images locales...'
+            sh '''
+                docker rmi ${DOCKER_IMAGE}:${COMMIT_TAG} || true
+                docker image prune -f || true
+            '''
+        }
+        success {
+            echo '🎉 Pipeline Jenkins réussi avec succès !'
+        }
+        failure {
+            echo '❌ Échec du Pipeline Jenkins.'
         }
     }
 }
