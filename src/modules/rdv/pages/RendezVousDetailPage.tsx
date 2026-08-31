@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
+import { DetailSkeleton } from "@/components/common/SkeletonLoaders";
 import StatusBadge from "@/components/common/StatusBadge";
 import { ArrowLeft, User, Phone, FileText, CheckCircle, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
@@ -85,9 +86,7 @@ const RendezVousDetailPage = () => {
   if (loading) {
     return (
       <DashboardLayout title="RDV">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <DetailSkeleton />
       </DashboardLayout>
     );
   }

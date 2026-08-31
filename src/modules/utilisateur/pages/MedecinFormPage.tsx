@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   UserPlus
 } from 'lucide-react';
+import { FormSkeleton } from '@/components/common/SkeletonLoaders';
 import { toast } from 'sonner';
 
 type ErreursChamp = Record<string, string>;
@@ -227,10 +228,7 @@ const MedecinFormPage = () => {
 
   if (loadingInit) return (
     <DashboardLayout title="Médecin">
-      <div className="flex flex-col items-center justify-center py-24 gap-3">
-        <Loader2 className="animate-spin text-primary" size={36} />
-        <p className="text-sm font-medium text-muted-foreground">Chargement des données du médecin...</p>
-      </div>
+      <FormSkeleton />
     </DashboardLayout>
   );
 

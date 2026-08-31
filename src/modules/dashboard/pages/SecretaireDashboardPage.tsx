@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import { DashboardSkeleton } from '@/components/common/SkeletonLoaders';
 import { getSalutation } from '@/utils/salutation';
 import StatusBadge from '@/components/common/StatusBadge';
 import {
@@ -137,12 +138,7 @@ const SecretaireDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout title="Dashboard Secrétariat">
-        <div className="flex items-center justify-center py-24">
-          <div className="text-center space-y-3">
-            <Loader2 className="animate-spin text-primary mx-auto" size={40} />
-            <p className="text-sm font-medium text-muted-foreground">Chargement de votre espace secrétariat...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }

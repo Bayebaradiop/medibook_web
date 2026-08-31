@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import StatusBadge from '@/components/common/StatusBadge';
+import { TableSkeleton } from '@/components/common/SkeletonLoaders';
 import { rdvSecretaireService } from '@/modules/rdv/services/rdvService';
 import { secretaireMedecinsService } from '@/modules/utilisateur/services/utilisateurService';
 import type { RendezVous, RdvStatut } from '@/modules/rdv/types/rdv.types';
@@ -421,10 +422,7 @@ const SecretaireRendezVousPage = () => {
 
         {/* Chargement initial */}
         {loading && rdvs.length === 0 ? (
-          <div className="medibook-card bg-card p-16 rounded-3xl border border-border flex flex-col items-center justify-center space-y-3">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
-            <p className="text-sm font-semibold text-muted-foreground">Chargement du registre...</p>
-          </div>
+          <TableSkeleton rows={6} />
         ) : filteredRdvs.length === 0 ? (
           
           /* État vide */

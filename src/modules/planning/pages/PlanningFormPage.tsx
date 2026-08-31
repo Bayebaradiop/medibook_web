@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/layouts/DashboardLayout';
+import { FormSkeleton } from '@/components/common/SkeletonLoaders';
 import { DAYS_OF_WEEK } from '@/utils/constants';
 import { 
   ArrowLeft, 
@@ -150,9 +151,7 @@ const PlanningFormPage = () => {
   if (loading) {
     return (
       <DashboardLayout title="Nouveau Planning">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <FormSkeleton />
       </DashboardLayout>
     );
   }

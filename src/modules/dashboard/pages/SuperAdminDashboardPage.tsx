@@ -23,6 +23,7 @@ import {
 import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import StatsCard from "@/components/common/StatsCard";
+import { DashboardSkeleton } from "@/components/common/SkeletonLoaders";
 import { cabinetService } from "@/modules/cabinet/services/cabinetService";
 import { statsService } from "@/modules/stats/services/statsService";
 import type { Cabinet } from "@/modules/cabinet/types/cabinet.types";
@@ -237,10 +238,7 @@ const SuperAdminDashboard = () => {
   return (
     <DashboardLayout title="Dashboard Super Admin">
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-32 space-y-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-sm font-medium text-slate-500">Chargement de la console Super Admin...</p>
-        </div>
+        <DashboardSkeleton />
       ) : (
         <div className="space-y-6">
           {/* Header Action Banner */}

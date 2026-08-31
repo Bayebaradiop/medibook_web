@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
-import { Loader2 } from "lucide-react";
+import { DashboardSkeleton } from "@/components/common/SkeletonLoaders";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { planningService } from "../services/planningService";
@@ -66,9 +66,7 @@ const PlanningsPage = () => {
   if (loading) {
     return (
       <DashboardLayout title="Grand Agenda Médical">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import StatusBadge from '@/components/common/StatusBadge';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { DetailSkeleton } from '@/components/common/SkeletonLoaders';
 import { medecinService } from '../services/utilisateurService';
 import type { Medecin } from '../types/utilisateur.types';
 import {
@@ -67,10 +68,7 @@ const MedecinDetailPage = () => {
   if (loading) {
     return (
       <DashboardLayout title="Détails du médecin">
-        <div className="flex flex-col items-center justify-center py-24 gap-3">
-          <Loader2 className="animate-spin text-teal-600" size={32} />
-          <p className="text-xs font-semibold text-muted-foreground">Chargement des détails du médecin...</p>
-        </div>
+        <DetailSkeleton />
       </DashboardLayout>
     );
   }

@@ -1,45 +1,37 @@
 import Navbar from '@/components/landing/Navbar';
-import HeroSearch from '@/components/landing/HeroSearch';
-import SpecialtiesGrid from '@/components/landing/SpecialtiesGrid';
-import DoctorsShowcase from '@/components/landing/DoctorsShowcase';
-import WorkflowSection from '@/components/landing/WorkflowSection';
-import FeaturesSection from '@/components/landing/FeaturesSection';
-import TestimonialsSection from '@/components/landing/TestimonialsSection';
-import FaqSection from '@/components/landing/FaqSection';
-import EmergencyBanner from '@/components/landing/EmergencyBanner';
+import ProHero from '@/components/landing/ProHero';
+import PatientMobileNotice from '@/components/landing/PatientMobileNotice';
+import ProStats from '@/components/landing/ProStats';
+import ProRolesSection from '@/components/landing/ProRolesSection';
+import ProFeaturesSection from '@/components/landing/ProFeaturesSection';
+import ProFaqSection from '@/components/landing/ProFaqSection';
 import Footer from '@/components/landing/Footer';
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-slate-50 font-poppins selection:bg-primary selection:text-white">
-      {/* Sticky Top Navigation */}
+    <div className="min-h-screen bg-slate-900 font-poppins selection:bg-emerald-500 selection:text-slate-950">
+      {/* Sticky B2B Navigation */}
       <Navbar />
 
-      {/* Hero Section with Interactive Doctor Search */}
-      <HeroSearch />
+      {/* Hero Section B2B Pro */}
+      <ProHero />
 
-      {/* Popular Medical Specialties Grid */}
-      <SpecialtiesGrid />
+      {/* Notification Espace Patient - Application Mobile */}
+      <PatientMobileNotice />
 
-      {/* Verified Doctors & Time Slots Showcase */}
-      <DoctorsShowcase />
+      {/* Impact Stats & Metrics */}
+      <ProStats />
 
-      {/* Interactive Workflow & Mobile App Simulation */}
-      <WorkflowSection />
+      {/* 4 Professional Roles Overview */}
+      <ProRolesSection />
 
-      {/* Key Platform Features (Patients vs Practitioners) */}
-      <FeaturesSection />
+      {/* Key SaaS Features */}
+      <ProFeaturesSection />
 
-      {/* Patient Testimonials & HDS Security Badges */}
-      <TestimonialsSection />
+      {/* Professional FAQ */}
+      <ProFaqSection />
 
-      {/* Frequently Asked Questions */}
-      <FaqSection />
-
-      {/* Emergency Medical Callout Banner */}
-      <EmergencyBanner />
-
-      {/* Professional Footer */}
+      {/* B2B Footer */}
       <Footer />
     </div>
   );

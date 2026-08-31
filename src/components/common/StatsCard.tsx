@@ -10,11 +10,11 @@ interface StatsCardProps {
 }
 
 const colorMap: Record<string, string> = {
-  green: 'border-l-primary bg-primary/5',
-  blue: 'border-l-info bg-info/5',
-  orange: 'border-l-warning bg-warning/5',
-  red: 'border-l-destructive bg-destructive/5',
-  grey: 'border-l-info bg-info/5',
+  green: 'bg-primary/5',
+  blue: 'bg-info/5',
+  orange: 'bg-warning/5',
+  red: 'bg-destructive/5',
+  grey: 'bg-info/5',
 };
 
 const iconColorMap: Record<string, string> = {
@@ -31,7 +31,7 @@ const StatsCard = ({ icon: Icon, value, label, color, variation }: StatsCardProp
       whileHover={{ scale: 1.03, y: -2 }}
       whileTap={{ scale: 0.98 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
-      className={`medibook-card border-l-4 ${colorMap[color] || colorMap.green} flex items-center gap-4 cursor-default`}
+      className={`medibook-card ${colorMap[color] || colorMap.green} flex items-center gap-4 cursor-default`}
     >
       <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${iconColorMap[color] || ''} bg-card`}>
         <Icon size={24} />

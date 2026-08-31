@@ -7,6 +7,7 @@ import { UTILISATEUR_ERREURS } from '../messages/utilisateur.erreurs';
 import { UTILISATEUR_SUCCES } from '../messages/utilisateur.succes';
 import type { Secretaire } from '../types/utilisateur.types';
 import { ArrowLeft, Upload, Loader2 } from 'lucide-react';
+import { FormSkeleton } from '@/components/common/SkeletonLoaders';
 import { toast } from 'sonner';
 
 type ErreursChamp = Record<string, string>;
@@ -184,7 +185,7 @@ const SecretaireFormPage = () => {
     'aria-describedby': erreurs[champ] ? `${champ}-error` : undefined,
   });
 
-  if (loadingInit) return <DashboardLayout title="Secrétaire"><div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div></DashboardLayout>;
+  if (loadingInit) return <DashboardLayout title="Secrétaire"><FormSkeleton /></DashboardLayout>;
 
   return (
     <DashboardLayout title={isEdit ? 'Modifier la secrétaire' : 'Nouvelle secrétaire'}>

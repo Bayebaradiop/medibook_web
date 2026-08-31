@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import StatusBadge from '@/components/common/StatusBadge';
 import ConfirmDialog from '@/components/common/ConfirmDialog';
+import { TableSkeleton } from '@/components/common/SkeletonLoaders';
 import { cabinetService } from '../services/cabinetService';
 import { CABINET_ERREURS } from '../messages/cabinet.erreurs';
 import { CABINET_SUCCES } from '../messages/cabinet.succes';
@@ -90,10 +91,7 @@ const CabinetsPage = () => {
 
   if (loading) return (
     <DashboardLayout title="Gestion des Cabinets">
-      <div className="flex flex-col items-center justify-center py-24 gap-3">
-        <Loader2 className="animate-spin text-primary" size={36} />
-        <p className="text-sm font-medium text-muted-foreground">Chargement de la liste des cabinets...</p>
-      </div>
+      <TableSkeleton rows={6} />
     </DashboardLayout>
   );
 

@@ -4,7 +4,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import { secretaireMedecinsService } from '@/modules/utilisateur/services/utilisateurService';
 import type { Medecin } from '@/modules/utilisateur/types/utilisateur.types';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { CardGridSkeleton } from '@/components/common/SkeletonLoaders';
 
 const SecretaireMedecinsPage = () => {
   const [medecins, setMedecins] = useState<Medecin[]>([]);
@@ -26,9 +26,7 @@ const SecretaireMedecinsPage = () => {
   if (loading) {
     return (
       <DashboardLayout title="Médecins">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <CardGridSkeleton count={6} />
       </DashboardLayout>
     );
   }

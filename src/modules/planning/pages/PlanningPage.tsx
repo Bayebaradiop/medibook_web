@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import DashboardLayout from '@/layouts/DashboardLayout';
-import { Loader2 } from 'lucide-react';
+import { DashboardSkeleton } from '@/components/common/SkeletonLoaders';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { creneauService } from '@/modules/creneau/services/creneauService';
@@ -89,9 +89,7 @@ const SecretairePlanningPage = () => {
   if (loading) {
     return (
       <DashboardLayout title="Grand Agenda & Plannings">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }

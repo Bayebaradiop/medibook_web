@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import StatusBadge from '@/components/common/StatusBadge';
+import { DetailSkeleton } from '@/components/common/SkeletonLoaders';
 import { cabinetService } from '../services/cabinetService';
 import { CABINET_ERREURS } from '../messages/cabinet.erreurs';
 import type { Cabinet } from '../types/cabinet.types';
@@ -31,9 +32,7 @@ const CabinetDetailPage = () => {
 
   if (loading) return (
     <DashboardLayout title="Détails du cabinet">
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-primary" size={32} />
-      </div>
+      <DetailSkeleton />
     </DashboardLayout>
   );
 

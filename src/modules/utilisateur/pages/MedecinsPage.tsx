@@ -8,6 +8,7 @@ import { specialiteService } from '@/modules/specialite/services/specialiteServi
 import { UTILISATEUR_ERREURS } from '../messages/utilisateur.erreurs';
 import type { Medecin } from '../types/utilisateur.types';
 import type { Specialite } from '@/modules/specialite/types/specialite.types';
+import { CardGridSkeleton } from '@/components/common/SkeletonLoaders';
 import { Plus, LayoutGrid, List, Loader2, Stethoscope, Mail, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -85,7 +86,7 @@ const MedecinsPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div>
+          <CardGridSkeleton count={6} />
         ) : filtered.length === 0 ? (
           <div className="medibook-card p-12 text-center"><p className="text-muted-foreground">Aucun médecin trouvé</p></div>
         ) : viewMode === 'grid' ? (

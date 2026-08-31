@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
+import { DashboardSkeleton } from "@/components/common/SkeletonLoaders";
 import StatsCard from "@/components/common/StatsCard";
 import { CalendarDays, Clock, CheckCircle, XCircle, Users, Loader2 } from "lucide-react";
 import {
@@ -46,9 +47,7 @@ const StatsPage = () => {
   if (loading) {
     return (
       <DashboardLayout title="Statistiques">
-        <div className="flex justify-center py-12">
-          <Loader2 className="animate-spin text-primary" size={32} />
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }

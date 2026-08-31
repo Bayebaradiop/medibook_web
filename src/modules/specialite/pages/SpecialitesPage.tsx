@@ -7,6 +7,7 @@ import { validerSpecialiteForm } from '../logique/specialite.validation';
 import { SPECIALITE_ERREURS } from '../messages/specialite.erreurs';
 import { SPECIALITE_SUCCES } from '../messages/specialite.succes';
 import type { Specialite } from '../types/specialite.types';
+import { TableSkeleton } from '@/components/common/SkeletonLoaders';
 import { Plus, Pencil, Trash2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -168,9 +169,7 @@ const SpecialitesPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12">
-            <Loader2 className="animate-spin text-primary" size={32} />
-          </div>
+          <TableSkeleton rows={5} />
         ) : specialites.length === 0 ? (
           <div className="medibook-card p-8 text-center text-muted-foreground">
             Aucune spécialité pour le moment

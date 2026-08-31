@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import DashboardLayout from '@/layouts/DashboardLayout';
 import StatsCard from '@/components/common/StatsCard';
 import StatusBadge from '@/components/common/StatusBadge';
+import { DashboardSkeleton } from '@/components/common/SkeletonLoaders';
 import { useAuth } from '@/contexts/AuthContext';
 import { getSalutation } from '@/utils/salutation';
 import { 
@@ -221,10 +222,7 @@ const AdminDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout title="Dashboard Administrateur">
-        <div className="flex flex-col items-center justify-center py-32 space-y-4">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-          <p className="text-sm font-medium text-muted-foreground">Chargement du tableau de bord du cabinet...</p>
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }

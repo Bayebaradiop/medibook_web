@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/layouts/DashboardLayout";
 import StatusBadge from "@/components/common/StatusBadge";
+import { TableSkeleton } from "@/components/common/SkeletonLoaders";
 import { CheckCircle, Check, Loader2, Calendar, Clock, Filter, X, User } from "lucide-react";
 import { toast } from "sonner";
 import type { RdvStatut, RendezVous } from "../types/rdv.types";
@@ -101,9 +102,7 @@ const RendezVousPage = () => {
   if (loading && rdvs.length === 0) {
     return (
       <DashboardLayout title="Mes Rendez-vous">
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <TableSkeleton rows={6} />
       </DashboardLayout>
     );
   }

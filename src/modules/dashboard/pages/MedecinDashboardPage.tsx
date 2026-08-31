@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "@/layouts/DashboardLayout";
+import { DashboardSkeleton } from "@/components/common/SkeletonLoaders";
 import { getSalutation } from "@/utils/salutation";
 import StatusBadge from "@/components/common/StatusBadge";
 import {
@@ -172,12 +173,7 @@ const MedecinDashboard = () => {
   if (loading) {
     return (
       <DashboardLayout title="Dashboard Praticien">
-        <div className="flex items-center justify-center py-24">
-          <div className="text-center space-y-3">
-            <Loader2 className="animate-spin text-primary mx-auto" size={40} />
-            <p className="text-sm font-medium text-muted-foreground">Chargement de votre espace médical...</p>
-          </div>
-        </div>
+        <DashboardSkeleton />
       </DashboardLayout>
     );
   }

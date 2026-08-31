@@ -23,6 +23,7 @@ import { CABINET_ERREURS } from '../messages/cabinet.erreurs';
 import { CABINET_SUCCES } from '../messages/cabinet.succes';
 import { validerCabinetForm } from '../logique/cabinet.validation';
 import type { CabinetCreateDTO } from '../types/cabinet.types';
+import { FormSkeleton } from '@/components/common/SkeletonLoaders';
 import { toast } from 'sonner';
 
 type ErreursChamp = Record<string, string>;
@@ -235,10 +236,7 @@ const CabinetFormPage = () => {
 
   if (loading) return (
     <DashboardLayout title={isEdit ? 'Modifier le cabinet' : 'Nouveau cabinet'}>
-      <div className="flex flex-col items-center justify-center py-24 gap-3">
-        <Loader2 className="animate-spin text-primary" size={36} />
-        <p className="text-sm font-medium text-muted-foreground">Chargement des données du cabinet...</p>
-      </div>
+      <FormSkeleton />
     </DashboardLayout>
   );
 

@@ -25,6 +25,7 @@ import { EXCEPTION_ERREURS } from "../messages/exception.erreurs";
 import { EXCEPTION_SUCCES } from "../messages/exception.succes";
 import { validerExceptionForm } from "../logique/exception.validation";
 import { formatDateFR } from "@/utils/date";
+import { CardGridSkeleton } from "@/components/common/SkeletonLoaders";
 
 const hasDataProperty = (value: unknown): value is { data: unknown } =>
   typeof value === "object" && value !== null && "data" in value;
@@ -390,9 +391,7 @@ const ExceptionsPage = () => {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            </div>
+            <CardGridSkeleton count={4} />
           ) : filteredExceptions.length === 0 ? (
             <div className="text-center py-12 border border-dashed border-border rounded-2xl space-y-2">
               <p className="text-xs font-bold text-foreground">Aucune absence enregistrée</p>

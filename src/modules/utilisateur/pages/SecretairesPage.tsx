@@ -6,6 +6,7 @@ import StatusBadge from '@/components/common/StatusBadge';
 import { secretaireService } from '../services/utilisateurService';
 import { UTILISATEUR_ERREURS } from '../messages/utilisateur.erreurs';
 import type { Secretaire } from '../types/utilisateur.types';
+import { CardGridSkeleton } from '@/components/common/SkeletonLoaders';
 import { Plus, LayoutGrid, List, Loader2, Mail, Phone } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -70,7 +71,7 @@ const SecretairesPage = () => {
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="animate-spin text-primary" size={32} /></div>
+          <CardGridSkeleton count={6} />
         ) : filtered.length === 0 ? (
           <div className="medibook-card p-12 text-center"><p className="text-muted-foreground">Aucune secrétaire trouvée</p></div>
         ) : viewMode === 'grid' ? (
