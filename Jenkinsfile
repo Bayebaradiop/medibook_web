@@ -100,19 +100,29 @@ pipeline {
                         fi
 
                         echo "Connexion Azure CLI et déploiement du conteneur..."
-                        az login --service-principal \
-                            -u $CLIENT_ID \
-                            -p $CLIENT_SECRET \
-                            --tenant $TENANT_ID --output none
+                        
+                        run_with_retry() {
+                            n=1
+                            max=5
+                            delay=5
+                            while true; do
+                                "$@" && break || {
+                                    if [ $n -lt $max ]; then
+                                        n=$((n+1))
+                                        echo "⚠️ Micro-coupure réseau Azure subie. Retentative $n/$max dans $delay secondes..."
+                                        sleep $delay
+                                    else
+                                        echo "❌ Échec de la connexion après $max tentatives."
+                                        return 1
+                                    fi
+                                }
+                            done
+                        }
 
-                        az account set --subscription $SUBSCRIPTION_ID
-
-                        az webapp config container set \
-                            --name ${APP_NAME} \
-                            --resource-group ${RESOURCE_GROUP} \
-                            --container-image-name ${DOCKER_IMAGE}:${COMMIT_TAG}
-
-                        az webapp restart --name ${APP_NAME} --resource-group ${RESOURCE_GROUP}
+                        run_with_retry az login --service-principal -u $CLIENT_ID -p $CLIENT_SECRET --tenant $TENANT_ID --output none
+                        run_with_retry az account set --subscription $SUBSCRIPTION_ID
+                        run_with_retry az webapp config container set --name ${APP_NAME} --resource-group ${RESOURCE_GROUP} --container-image-name ${DOCKER_IMAGE}:${COMMIT_TAG}
+                        run_with_retry az webapp restart --name ${APP_NAME} --resource-group ${RESOURCE_GROUP}
                     '''
                 }
             }
