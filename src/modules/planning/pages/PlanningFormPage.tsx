@@ -9,7 +9,8 @@ import {
   Clock, 
   Stethoscope, 
   Sparkles, 
-  CheckCircle2
+  CheckCircle2,
+  CalendarDays
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { planningService } from '@/modules/planning/services/planningService';
@@ -132,7 +133,7 @@ const PlanningFormPage = () => {
     setSubmitting(true);
     try {
       await planningService.create(payload);
-      toast.success('Planning créé avec succès');
+      toast.success('Template de semaine créé avec succès');
       navigate('/secretaire/plannings');
     } catch (error: unknown) {
       const resp = estObjet(error) && 'response' in error && estObjet(error.response) && 'data' in error.response
@@ -150,83 +151,95 @@ const PlanningFormPage = () => {
 
   if (loading) {
     return (
-      <DashboardLayout title="Nouveau Planning">
+      <DashboardLayout title="Template Semaine Médecin">
         <FormSkeleton />
       </DashboardLayout>
     );
   }
 
   return (
-    <DashboardLayout title="Nouveau Planning">
-      <div className="max-w-5xl mx-auto space-y-4">
+    <DashboardLayout title="Template Semaine Médecin">
+      <div className="max-w-5xl mx-auto space-y-6 pb-12">
         
-        {/* Barre de Commandes Supérieure Compacte */}
-        <div className="flex items-center justify-between">
+        {/* En-tête et navigation retour */}
+        <div className="flex items-center justify-between flex-wrap gap-4">
           <button 
             onClick={() => navigate(-1)} 
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-bold text-muted-foreground hover:text-foreground transition-all"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card hover:bg-muted text-sm font-semibold text-muted-foreground hover:text-foreground transition-all shadow-xs"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={18} />
             <span>Retour</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button 
               type="button" 
               onClick={() => navigate(-1)} 
-              className="px-3.5 py-1.5 rounded-xl border border-border bg-card hover:bg-muted text-xs font-bold text-muted-foreground transition-all"
+              className="px-5 py-2.5 rounded-xl border border-border bg-card hover:bg-muted text-sm font-bold text-muted-foreground transition-all"
             >
               Annuler
             </button>
             <button 
               onClick={handleSubmit}
               disabled={submitting || preview.length === 0} 
-              className="medibook-btn px-4 py-1.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
+              className="medibook-btn px-6 py-2.5 text-sm font-bold flex items-center gap-2 shadow-md disabled:opacity-50"
             >
-              {submitting ? <Loader2 className="animate-spin" size={14} /> : <Sparkles size={14} />}
-              <span>Générer le Planning</span>
+              {submitting ? <Loader2 className="animate-spin" size={18} /> : <CheckCircle2 size={18} />}
+              <span>Enregistrer le Template</span>
             </button>
           </div>
         </div>
 
-        {/* Grille 2 Colonnes Compacte Sans Scroll */}
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-4">
+        {/* Grille Principale Formulaire + Aperçu */}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* Colonne Gauche : Paramètres (7 cols) */}
-          <div className="md:col-span-7 medibook-card bg-card p-5 rounded-2xl border border-border space-y-4">
+          {/* Colonne Gauche : Configuration (7 cols) */}
+          <div className="lg:col-span-7 medibook-card bg-card p-6 md:p-8 rounded-2xl border border-border space-y-6 shadow-sm">
             
-            {/* Médecin */}
+            <div className="flex items-center gap-3 pb-4 border-b border-border/60">
+              <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <CalendarDays size={20} />
+              </div>
+              <div>
+                <h3 className="font-bold text-base md:text-lg text-foreground">Horaires Hebdomadaires</h3>
+                <p className="text-xs md:text-sm text-muted-foreground">Définissez les créneaux récurrents de consultation</p>
+              </div>
+            </div>
+
+            {/* Médecin Praticien */}
             <div>
-              <label className="text-xs font-bold text-foreground mb-1 block flex items-center gap-1.5">
-                <Stethoscope size={14} className="text-primary" />
-                Médecin Praticien
+              <label className="text-sm font-bold text-foreground mb-2 block flex items-center gap-2">
+                <Stethoscope size={18} className="text-primary" />
+                Médecin Praticien <span className="text-destructive">*</span>
               </label>
               <select 
                 value={medecinId} 
                 onChange={e => updateField('medecinId', e.target.value)}
-                className="medibook-input w-full text-xs font-bold bg-card text-foreground border-border hover:bg-muted focus:ring-2 focus:ring-primary rounded-xl cursor-pointer"
+                className="medibook-input w-full text-sm md:text-base py-3 px-4 font-semibold bg-card text-foreground border-border hover:bg-muted/50 focus:ring-2 focus:ring-primary rounded-xl cursor-pointer"
               >
                 {medecins.map(m => (
-                  <option key={m.id} value={m.id} className="bg-card text-foreground">
+                  <option key={m.id} value={m.id} className="bg-card text-foreground py-1">
                     Dr. {m.prenom} {m.nom} {m.specialiteNom ? `(${m.specialiteNom})` : ''}
                   </option>
                 ))}
               </select>
-              {erreurs.medecinId && <p className="text-[11px] text-rose-500 mt-0.5 font-semibold">{erreurs.medecinId}</p>}
+              {erreurs.medecinId && <p className="text-xs text-destructive mt-1 font-semibold">{erreurs.medecinId}</p>}
             </div>
 
             {/* Jour de la Semaine */}
             <div>
-              <label className="text-xs font-bold text-foreground mb-1.5 block">Jour d&apos;ouverture</label>
-              <div className="grid grid-cols-7 gap-1">
+              <label className="text-sm font-bold text-foreground mb-2 block">
+                Jour de la semaine <span className="text-destructive">*</span>
+              </label>
+              <div className="grid grid-cols-7 gap-1.5">
                 {DAYS_OF_WEEK.map((day) => (
                   <button
                     key={day}
                     type="button"
                     onClick={() => updateField('jourSemaine', day)}
-                    className={`py-1.5 text-[11px] font-bold rounded-lg border transition-all ${
+                    className={`py-2.5 text-xs md:text-sm font-bold rounded-xl border transition-all ${
                       jourSemaine === day
-                        ? 'border-primary bg-primary text-primary-foreground shadow-2xs'
+                        ? 'border-primary bg-primary text-primary-foreground shadow-sm scale-[1.02]'
                         : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                   >
@@ -237,79 +250,79 @@ const PlanningFormPage = () => {
             </div>
 
             {/* Horaires et Durée */}
-            <div className="grid grid-cols-3 gap-3 pt-1">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
               <div>
-                <label className="text-xs font-bold text-foreground mb-1 block flex items-center gap-1">
-                  <Clock size={12} className="text-primary" /> Heure début
+                <label className="text-sm font-bold text-foreground mb-2 block flex items-center gap-1.5">
+                  <Clock size={16} className="text-primary" /> Heure Début
                 </label>
                 <input 
                   type="time" 
                   value={heureDebut} 
                   onChange={e => updateField('heureDebut', e.target.value)} 
-                  className="medibook-input w-full text-xs font-bold rounded-xl"
+                  className="medibook-input w-full text-sm md:text-base py-2.5 px-3.5 font-semibold rounded-xl"
                 />
-                {erreurs.heureDebut && <p className="text-[10px] text-rose-500 mt-0.5 font-semibold">{erreurs.heureDebut}</p>}
+                {erreurs.heureDebut && <p className="text-xs text-destructive mt-1 font-semibold">{erreurs.heureDebut}</p>}
               </div>
 
               <div>
-                <label className="text-xs font-bold text-foreground mb-1 block flex items-center gap-1">
-                  <Clock size={12} className="text-primary" /> Heure fin
+                <label className="text-sm font-bold text-foreground mb-2 block flex items-center gap-1.5">
+                  <Clock size={16} className="text-primary" /> Heure Fin
                 </label>
                 <input 
                   type="time" 
                   value={heureFin} 
                   onChange={e => updateField('heureFin', e.target.value)} 
-                  className="medibook-input w-full text-xs font-bold rounded-xl"
+                  className="medibook-input w-full text-sm md:text-base py-2.5 px-3.5 font-semibold rounded-xl"
                 />
-                {erreurs.heureFin && <p className="text-[10px] text-rose-500 mt-0.5 font-semibold">{erreurs.heureFin}</p>}
+                {erreurs.heureFin && <p className="text-xs text-destructive mt-1 font-semibold">{erreurs.heureFin}</p>}
               </div>
 
               <div>
-                <label className="text-xs font-bold text-foreground mb-1 block">Durée créneau</label>
+                <label className="text-sm font-bold text-foreground mb-2 block">Durée Consultation</label>
                 <select 
                   value={duree} 
                   onChange={e => updateField('dureeCreneau', e.target.value)} 
-                  className="medibook-input w-full text-xs font-bold rounded-xl bg-card text-foreground cursor-pointer"
+                  className="medibook-input w-full text-sm md:text-base py-2.5 px-3.5 font-semibold rounded-xl bg-card text-foreground cursor-pointer"
                 >
-                  {durations.map(d => <option key={d} value={d} className="bg-card text-foreground">{d} min</option>)}
+                  {durations.map(d => <option key={d} value={d} className="bg-card text-foreground">{d} minutes</option>)}
                 </select>
               </div>
             </div>
 
           </div>
 
-          {/* Colonne Droite : Aperçu Compact (5 cols) */}
-          <div className="md:col-span-5 medibook-card bg-card p-5 rounded-2xl border border-border flex flex-col justify-between space-y-3">
+          {/* Colonne Droite : Aperçu des Créneaux Générés (5 cols) */}
+          <div className="lg:col-span-5 medibook-card bg-card p-6 md:p-8 rounded-2xl border border-border flex flex-col justify-between space-y-5 shadow-sm">
             <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xs font-bold text-foreground flex items-center gap-1.5 uppercase tracking-wider">
-                  <Sparkles size={14} className="text-amber-500" />
-                  <span>Aperçu Généré</span>
+              <div className="flex items-center justify-between mb-3 border-b border-border/60 pb-3">
+                <h3 className="text-sm md:text-base font-bold text-foreground flex items-center gap-2 uppercase tracking-wider">
+                  <Sparkles size={18} className="text-amber-500" />
+                  <span>Aperçu des Créneaux</span>
                 </h3>
-                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-lg border border-primary/20">
+                <span className="text-xs md:text-sm font-bold text-primary bg-primary/10 px-3 py-1 rounded-xl border border-primary/20">
                   {preview.length} créneaux
                 </span>
               </div>
 
-              <p className="text-[11px] text-muted-foreground font-medium mb-3">
-                Chaque <span className="font-bold text-foreground">{jourSemaine}</span> de <span className="font-bold text-foreground">{heureDebut}</span> à <span className="font-bold text-foreground">{heureFin}</span> ({duree} min / RDV).
+              <p className="text-xs md:text-sm text-muted-foreground font-medium mb-4 leading-relaxed">
+                Plage horaire configurée pour chaque <span className="font-bold text-foreground uppercase">{jourSemaine}</span> de <span className="font-bold text-foreground">{heureDebut}</span> à <span className="font-bold text-foreground">{heureFin}</span> ({duree} min par RDV).
               </p>
 
-              <div className="grid grid-cols-2 gap-1.5 max-h-56 overflow-y-auto pr-1">
+              <div className="grid grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
                 {preview.map((slot, i) => (
                   <div 
                     key={i} 
-                    className="bg-muted/40 text-foreground text-[11px] font-bold rounded-lg py-1 px-2 text-center border border-border/50 flex items-center justify-center gap-1"
+                    className="bg-muted/50 text-foreground text-xs md:text-sm font-bold rounded-xl py-2 px-3 text-center border border-border/60 flex items-center justify-center gap-1.5 shadow-2xs hover:border-primary/40 transition-colors"
                   >
-                    <CheckCircle2 size={11} className="text-emerald-500" />
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
                     <span>{slot}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div className="pt-2 border-t border-border/60 text-[11px] text-muted-foreground italic">
-              * Les créneaux générés seront réservables immédiatement.
+            <div className="pt-3 border-t border-border/60 text-xs md:text-sm text-muted-foreground italic">
+              * Les créneaux générés à partir de ce template seront automatiquement mis à disposition des patients pour la prise de rendez-vous.
             </div>
           </div>
 
