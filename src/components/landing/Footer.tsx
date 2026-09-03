@@ -105,11 +105,15 @@ const Footer = () => {
             <ul className="space-y-2.5 text-xs">
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>support-pro@medibook.sn</span>
+                <a href="mailto:lydevtech@gmail.com" className="hover:text-emerald-400 transition-colors">
+                  lydevtech@gmail.com
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-emerald-400 shrink-0" />
-                <span>+221 33 800 00 00</span>
+                <a href="tel:+221773795383" className="hover:text-emerald-400 transition-colors">
+                  +221 77 379 53 83
+                </a>
               </li>
               <li className="text-[11px] text-slate-500 pt-1">
                 Dakar, Sénégal • Assistance 7j/7
